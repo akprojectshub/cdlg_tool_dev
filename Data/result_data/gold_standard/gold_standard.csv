@@ -1,0 +1,101 @@
+Event Log,Drift Perspective,Drift Type,Drift Specific Information,Drift Start Timestamp,Drift End Timestamp,Noise Proportion,Activities Added,Activities Deleted,Activities Moved
+event_log_0,control-flow,recurring,3 seasonal changes,2020-03-16 10:25:39,2020-03-24 11:27:08,0,[Random activity 1],[d],[]
+event_log_1,control-flow,incremental,2 evolving versions,2020-03-12 01:03:12,2020-03-16 02:17:25,0,[],[],"[b, i, h, j]"
+event_log_2,control-flow,recurring,5 seasonal changes,2020-03-16 17:35:00,2020-03-21 21:38:29,0,"[Random activity 1, Random activity 2]",[j],[]
+event_log_3,control-flow,incremental,4 evolving versions,2020-03-16 01:22:37,2020-03-20 12:28:26,0,"[Random activity 1, Random activity 2, Random activity 3]",[a],[]
+event_log_4,control-flow,incremental,5 evolving versions,2020-03-16 02:35:40,2020-03-21 03:27:32,0,"[Random activity 1, Random activity 2, Random activity 1]","[h, Random activity 1]",[]
+event_log_5,control-flow,gradual,exponential distribution,2020-03-18 03:35:37,2020-03-23 02:58:31,0,[],"[g, k]",[]
+event_log_6,control-flow,sudden,N/A,2020-03-11 11:17:24,N/A,0,[Random activity 1],[f],[]
+event_log_7,control-flow,gradual,linear distribution,2020-03-19 15:01:40,2020-03-24 00:44:05,0,[Random activity 1],"[k, h]",[]
+event_log_8,control-flow,sudden,N/A,2020-03-14 13:53:24,N/A,0,[],[j],"[g, k]"
+event_log_9,control-flow,gradual,linear distribution,2020-03-18 17:33:35,2020-03-21 13:00:45,0,"[Random activity 1, Random activity 2, Random activity 3]",[],[]
+event_log_10,control-flow,gradual,linear distribution,2020-03-16 15:02:17,2020-03-18 18:00:15,0,[],[i],"[f, k]"
+event_log_11,control-flow,sudden,N/A,2020-03-16 09:55:23,N/A,0,"[Random activity 1, Random activity 2]",[j],[]
+event_log_12,control-flow,incremental,4 evolving versions,2020-03-21 13:49:23,2020-03-26 01:59:23,0,"[Random activity 1, Random activity 2]","[d, Random activity 2]",[]
+event_log_13,control-flow,gradual,exponential distribution,2020-03-21 04:49:03,2020-03-23 11:22:33,0,[Random activity 1],[c],[]
+event_log_14,control-flow,gradual,exponential distribution,2020-03-17 14:28:55,2020-03-20 22:18:43,0,[Random activity 1],[],"[c, e]"
+event_log_15,control-flow,sudden,N/A,2020-03-18 08:27:15,N/A,0,[Random activity 1],"[j, k]",[]
+event_log_16,control-flow,recurring,1 seasonal changes,2020-03-14 19:56:45,2020-03-20 21:10:34,0,[Random activity 1],[],"[d, c, e]"
+event_log_17,control-flow,gradual,exponential distribution,2020-03-16 13:02:43,2020-03-20 03:33:42,0,[],[d],"[h, j]"
+event_log_18,control-flow,gradual,exponential distribution,2020-03-17 17:47:59,2020-03-22 18:59:27,0,[],[i],"[d, j]"
+event_log_19,control-flow,incremental,5 evolving versions,2020-03-19 21:04:43,2020-03-24 12:15:28,0,"[Random activity 1, Random activity 2, Random activity 3, Random activity 4]",[j],[]
+event_log_20,control-flow,incremental,5 evolving versions,2020-03-13 23:38:17,2020-03-20 00:48:15,0,"[Random activity 1, Random activity 2, Random activity 3, Random activity 4]",[f],[]
+event_log_21,control-flow,gradual,exponential distribution,2020-03-14 01:55:20,2020-03-27 16:30:24,0,[],[],"[h, j]"
+event_log_22,control-flow,sudden,N/A,2020-03-15 17:54:14,N/A,0,"[Random activity 1, Random activity 2]","[h, d]",[]
+event_log_23,control-flow,gradual,exponential distribution,2020-03-16 23:55:17,2020-03-18 19:03:37,0,[],[i],"[c, e]"
+event_log_24,control-flow,sudden,N/A,2020-03-13 02:26:41,N/A,0,[],[],"[f, k, g, j]"
+event_log_25,control-flow,sudden,N/A,2020-03-20 20:24:35,N/A,0,[],[],"[c, e]"
+event_log_26,control-flow,recurring,3 seasonal changes,2020-03-19 18:32:56,2020-03-23 20:36:26,0,[],[k],[]
+event_log_27,control-flow,recurring,1 seasonal changes,2020-03-13 10:45:05,2020-03-19 21:57:42,0,"[Random activity 1, Random activity 2]","[k, d]",[]
+event_log_28,control-flow,recurring,3 seasonal changes,2020-03-21 09:49:04,2020-03-24 07:31:25,0,[],[i],"[d, f, k]"
+event_log_29,control-flow,incremental,3 evolving versions,2020-03-14 05:03:58,2020-03-17 17:14:16,0,"[Random activity 1, Random activity 2]",[],"[Random activity 1, b]"
+event_log_30,control-flow,gradual,exponential distribution,2020-03-11 18:15:33,2020-03-13 12:16:48,0,[Random activity 1],[e],[]
+event_log_31,control-flow,incremental,5 evolving versions,2020-03-17 05:02:05,2020-03-21 04:18:57,0,"[Random activity 1, Random activity 2, Random activity 3, Random activity 4]",[h],[]
+event_log_32,control-flow,gradual,exponential distribution,2020-03-16 18:22:04,2020-03-23 03:04:12,0,[Random activity 1],[i],[]
+event_log_33,control-flow,incremental,2 evolving versions,2020-03-13 09:12:13,2020-03-17 21:37:07,0,"[Random activity 1, Random activity 2]",[],[]
+event_log_34,control-flow,sudden,N/A,2020-03-17 10:20:24,N/A,0,[Random activity 1],[],[]
+event_log_35,control-flow,recurring,1 seasonal changes,2020-03-18 11:50:40,2020-03-20 17:56:56,0,[],[],"[c, f, k]"
+event_log_36,control-flow,recurring,1 seasonal changes,2020-03-11 13:27:57,2020-03-16 18:40:00,0,"[Random activity 1, Random activity 2]",[],"[h, j]"
+event_log_37,control-flow,gradual,exponential distribution,2020-03-15 05:09:42,2020-03-23 11:59:28,0,"[Random activity 1, Random activity 2]",[],"[h, j]"
+event_log_38,control-flow,incremental,2 evolving versions,2020-03-17 07:30:05,2020-03-21 17:41:37,0,[Random activity 1],[j],[]
+event_log_39,control-flow,recurring,1 seasonal changes,2020-03-15 14:32:08,2020-03-19 22:07:17,0,[Random activity 1],[b],[]
+event_log_40,control-flow,gradual,exponential distribution,2020-03-16 17:16:54,2020-03-18 21:28:12,0,[],"[i, d]",[]
+event_log_41,control-flow,sudden,N/A,2020-03-18 17:09:38,N/A,0,[],[],"[b, i, f, k]"
+event_log_42,control-flow,incremental,5 evolving versions,2020-03-14 14:16:14,2020-03-23 19:47:15,0,"[Random activity 1, Random activity 2, Random activity 3]","[i, a]",[]
+event_log_43,control-flow,sudden,N/A,2020-03-13 07:35:53,N/A,0,[Random activity 1],[],"[b, g]"
+event_log_44,control-flow,sudden,N/A,2020-03-20 01:27:04,N/A,0,[Random activity 1],[d],[]
+event_log_45,control-flow,recurring,3 seasonal changes,2020-03-12 13:05:44,2020-03-16 20:44:22,0,[],[b],"[a, h, j]"
+event_log_46,control-flow,recurring,3 seasonal changes,2020-03-15 06:23:22,2020-03-21 19:22:34,0,[],[],"[f, k]"
+event_log_47,control-flow,incremental,5 evolving versions,2020-03-17 05:43:31,2020-03-19 14:50:54,0,[Random activity 1],"[a, j, b, f]",[]
+event_log_48,control-flow,recurring,5 seasonal changes,2020-03-18 19:28:11,2020-03-23 00:12:52,0,[],[g],[]
+event_log_49,control-flow,recurring,1 seasonal changes,2020-03-19 20:29:43,2020-03-21 23:34:30,0,[],"[k, a]",[]
+event_log_50,control-flow,sudden,N/A,2020-03-17 22:24:18,N/A,0,[Random activity 1],[f],[]
+event_log_51,control-flow,gradual,exponential distribution,2020-03-21 15:57:31,2020-03-25 00:17:10,0,[],[g],[]
+event_log_52,control-flow,sudden,N/A,2020-03-15 13:23:23,N/A,0,[Random activity 1],[h],[]
+event_log_53,control-flow,sudden,N/A,2020-03-14 20:58:41,N/A,0,"[Random activity 1, Random activity 2, Random activity 3]",[],[]
+event_log_54,control-flow,incremental,2 evolving versions,2020-03-17 20:27:30,2020-03-20 09:53:09,0,[Random activity 1],[k],"[h, j]"
+event_log_55,control-flow,recurring,1 seasonal changes,2020-03-16 04:43:20,2020-03-20 12:18:26,0,[],[],"[g, d, c, e]"
+event_log_56,control-flow,gradual,linear distribution,2020-03-13 15:31:44,2020-03-25 10:03:14,0,"[Random activity 1, Random activity 2]","[i, a]",[]
+event_log_57,control-flow,recurring,5 seasonal changes,2020-03-13 02:01:21,2020-03-20 12:23:51,0,[Random activity 1],[a],[]
+event_log_58,control-flow,recurring,3 seasonal changes,2020-03-18 10:26:39,2020-03-21 13:33:47,0,[],"[h, f]",[]
+event_log_59,control-flow,sudden,N/A,2020-03-23 10:57:18,N/A,0,[],[],"[b, i]"
+event_log_60,control-flow,incremental,4 evolving versions,2020-03-17 08:04:20,2020-03-20 05:47:38,0,"[Random activity 1, Random activity 2]","[g, j]",[]
+event_log_61,control-flow,incremental,5 evolving versions,2020-03-13 05:34:52,2020-03-16 23:22:09,0,"[Random activity 1, Random activity 2, Random activity 3, Random activity 4]",[f],[]
+event_log_62,control-flow,recurring,3 seasonal changes,2020-03-19 17:49:44,2020-03-26 08:55:10,0,[Random activity 1],[],"[a, h, j]"
+event_log_63,control-flow,sudden,N/A,2020-03-19 13:10:04,N/A,0,[],[],"[a, h, j]"
+event_log_64,control-flow,recurring,3 seasonal changes,2020-03-12 02:43:23,2020-03-19 14:43:35,0,"[Random activity 1, Random activity 2, Random activity 3]",[a],[]
+event_log_65,control-flow,incremental,5 evolving versions,2020-03-18 00:19:19,2020-03-20 01:19:32,0,[Random activity 1],"[f, i, d, h]",[]
+event_log_66,control-flow,incremental,3 evolving versions,2020-03-23 04:54:23,2020-03-25 21:55:47,0,[],"[f, h, d]",[]
+event_log_67,control-flow,sudden,N/A,2020-03-10 17:01:52,N/A,0,[Random activity 1],"[j, a]",[]
+event_log_68,control-flow,sudden,N/A,2020-03-15 14:57:03,N/A,0,"[Random activity 1, Random activity 2]",[k],[]
+event_log_69,control-flow,gradual,exponential distribution,2020-03-16 13:52:54,2020-03-20 07:35:17,0,[Random activity 1],[],"[b, i]"
+event_log_70,control-flow,recurring,1 seasonal changes,2020-03-15 19:49:07,2020-03-24 14:00:27,0,[],[],"[h, j]"
+event_log_71,control-flow,incremental,2 evolving versions,2020-03-20 20:50:29,2020-03-24 03:38:32,0,"[Random activity 1, Random activity 2]",[],[]
+event_log_72,control-flow,gradual,exponential distribution,2020-03-18 04:20:16,2020-03-20 00:41:18,0,[Random activity 1],[],[]
+event_log_73,control-flow,incremental,2 evolving versions,2020-03-15 01:37:49,2020-03-21 15:04:00,0,"[Random activity 1, Random activity 2]",[],[]
+event_log_74,control-flow,incremental,2 evolving versions,2020-03-17 11:07:38,2020-03-21 07:22:57,0,[Random activity 1],[a],[]
+event_log_75,control-flow,sudden,N/A,2020-03-21 02:48:32,N/A,0,[],[g],"[i, d]"
+event_log_76,control-flow,sudden,N/A,2020-03-20 18:51:29,N/A,0,[],"[f, h]",[]
+event_log_77,control-flow,recurring,1 seasonal changes,2020-03-18 00:53:55,2020-03-23 04:10:27,0,"[Random activity 1, Random activity 2]",[k],[]
+event_log_78,control-flow,recurring,3 seasonal changes,2020-03-16 03:01:45,2020-03-21 03:53:19,0,[],[],"[f, k]"
+event_log_79,control-flow,sudden,N/A,2020-03-18 21:23:45,N/A,0,"[Random activity 1, Random activity 2]",[],"[h, j]"
+event_log_80,control-flow,recurring,3 seasonal changes,2020-03-13 08:54:34,2020-03-18 01:57:07,0,[],[],"[c, e, a, f]"
+event_log_81,control-flow,gradual,linear distribution,2020-03-10 20:29:49,2020-03-16 01:37:08,0,"[Random activity 1, Random activity 2]",[],[]
+event_log_82,control-flow,gradual,linear distribution,2020-03-15 01:07:46,2020-03-17 15:32:09,0,[],[],"[h, j]"
+event_log_83,control-flow,gradual,exponential distribution,2020-03-12 04:14:48,2020-03-14 02:46:26,0,[Random activity 1],[],"[g, a]"
+event_log_84,control-flow,incremental,2 evolving versions,2020-03-15 06:47:03,2020-03-20 08:35:02,0,[],"[d, h]",[]
+event_log_85,control-flow,sudden,N/A,2020-03-22 19:33:17,N/A,0,[Random activity 1],[b],"[e, d]"
+event_log_86,control-flow,sudden,N/A,2020-03-15 16:26:48,N/A,0,[Random activity 1],"[d, j]",[]
+event_log_87,control-flow,incremental,3 evolving versions,2020-03-15 08:39:14,2020-03-22 13:00:01,0,"[Random activity 1, Random activity 2]",[Random activity 2],[]
+event_log_88,control-flow,gradual,exponential distribution,2020-03-22 10:31:37,2020-03-24 23:52:42,0,[],[],"[a, h, j]"
+event_log_89,control-flow,recurring,3 seasonal changes,2020-03-19 12:59:41,2020-03-24 13:02:24,0,[],[a],[]
+event_log_90,control-flow,recurring,1 seasonal changes,2020-03-15 18:44:18,2020-03-19 11:01:30,0,"[Random activity 1, Random activity 2]",[c],[]
+event_log_91,control-flow,incremental,4 evolving versions,2020-03-13 16:51:35,2020-03-19 08:03:18,0,[Random activity 1],"[g, d, i]",[]
+event_log_92,control-flow,sudden,N/A,2020-03-21 03:27:59,N/A,0,[Random activity 1],[i],[]
+event_log_93,control-flow,incremental,4 evolving versions,2020-03-14 00:09:13,2020-03-16 12:47:56,0,"[Random activity 1, Random activity 2, Random activity 3]",[h],[]
+event_log_94,control-flow,gradual,exponential distribution,2020-03-14 17:48:30,2020-03-17 19:56:30,0,[],[g],"[c, e]"
+event_log_95,control-flow,recurring,5 seasonal changes,2020-03-16 06:44:58,2020-03-20 10:01:38,0,[Random activity 1],"[i, k]",[]
+event_log_96,control-flow,sudden,N/A,2020-03-16 04:56:15,N/A,0,"[Random activity 1, Random activity 2]",[f],[]
+event_log_97,control-flow,gradual,linear distribution,2020-03-14 18:17:23,2020-03-17 23:56:31,0,[],"[g, f]",[]
+event_log_98,control-flow,gradual,exponential distribution,2020-03-13 23:23:24,2020-03-17 18:42:27,0,[],[],"[b, i, f, k]"
+event_log_99,control-flow,sudden,N/A,2020-03-14 07:09:13,N/A,0,[Random activity 1],[b],[]

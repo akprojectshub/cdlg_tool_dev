@@ -1,0 +1,5 @@
+--- USED PARAMETERS ---
+number of traces: 1000; drift: recurring; start point: 0.4; end point: 0.68; seasonal changes: 1; proportion initial version: 0.53; random evolution: 0.2
+
+--- DRIFT INFORMATION ---
+Event Log: event_log_39; Drift Perspective: control-flow; Drift Type: recurring; Drift Specific Information: 1 seasonal changes; Drift Start Timestamp: 2020-03-15 14:32:08; Drift End Timestamp: 2020-03-19 22:07:17; Noise Proportion: 0; Activities Added: [Random activity 1]; Activities Deleted: [b]; Activities Moved: []
