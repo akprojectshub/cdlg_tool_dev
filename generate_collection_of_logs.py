@@ -26,7 +26,6 @@ def generate_logs(file_path_one=None):
     tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec = get_parameters()
     if file_path_one is None:
         tree_one = generate_specific_trees(tree_complexity.strip())
-        visualise_tree(tree_one)
     else:
         tree_one = generate_tree_from_file(file_path_one)
     with open('Data/result_data/gold_standard/gold_standard.csv', 'w', newline='') as log_file:
@@ -95,6 +94,7 @@ def generate_logs(file_path_one=None):
             else:
                 end_drift = get_timestamp_log(event_log, num_traces, drift_area_two)
             data = "Event Log: "+"event_log_"+str(i)+"; Drift Perspective: control-flow; Drift Type: "+drift+"; Drift Specific Information: "+dr_s+"; Drift Start Timestamp: "+str(start_drift)+"; Drift End Timestamp: "+str(end_drift)+"; Noise Proportion: "+str(noise_prop)+"; Activities Added: "+str(added_acs)+"; Activities Deleted: "+str(deleted_acs)+"; Activities Moved: "+str(moved_acs)
+            event_log.attributes['drift info'] = data
             xes_exporter.apply(event_log, "Data/result_data/gold_standard/event_log_"+str(i)+".xes")
             writer.writerow(["event_log_"+str(i), "control-flow", drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])
             file_object = open("Data/result_data/gold_standard/event_log_"+str(i)+".txt", 'w')

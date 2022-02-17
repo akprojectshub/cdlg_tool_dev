@@ -34,7 +34,7 @@ The following six Python files allow the generation of event logs with concept d
 3. <code>generate_log_gradual_drift_from_doc.py</code> generates an event log with a gradual drift (Parameters in _parameters_gradual_drift_)
 4. <code>generate_log_recurring_drift_from_doc.py</code> generates an event log with a recurring drift (Parameters in _parameters_recurring_drift_)
 5. <code>generate_log_incremental_drift_from_doc.py</code> generates an event log with an incremental drift (Parameters in _parameters_incremental_drift_)
-6. <code>generate_logs_gold_standard.py</code> generates a set of event logs with all drift types (Parameters in _parameters_logs_)
+6. <code>generate_collection_of_logs.py</code> generates a set of event logs with all drift types (Parameters in _parameters_logs_)
 
 ### Run ###
 1. Specify the parameters in the corresponding text files placed in _Data/parameters_ for the execution files 2 - 6, if needed.

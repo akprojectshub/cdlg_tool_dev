@@ -1,6 +1,7 @@
 import datetime
 import itertools
 from random import randint
+import numpy
 
 from pm4py.objects.log.obj import EventLog
 
@@ -86,11 +87,14 @@ def add_duration_to_log(log, datestamp, min_duration, max_duration):
                 first = trace.__getitem__(0)
             else:
                 first = trace.__getitem__(0)
-                time_one = randint(min_duration, duration_last_trace)
+                if duration_last_trace > min_duration:
+                    time_one = randint(min_duration, duration_last_trace)
+                else:
+                    time_one = randint(duration_last_trace, min_duration)
                 first['time:timestamp'] = time_first + datetime.timedelta(0, time_one)
                 time_first = first['time:timestamp']
             if first['concept:name'] in duration.keys():
-                first['duration:seconds'] = randint(duration[first['concept:name']], duration[first['concept:name']]+int(round(0.01 * duration[first['concept:name']])))
+                first['duration:seconds'] = int(numpy.random.exponential(duration[first['concept:name']]))
                 time = duration[first['concept:name']]
             else:
                 i = randint(min_duration, max_duration)
@@ -100,7 +104,7 @@ def add_duration_to_log(log, datestamp, min_duration, max_duration):
         while j < trace.__len__():
             a = trace.__getitem__(j)
             if a['concept:name'] in duration.keys():
-                a['duration:seconds'] = randint(duration[a['concept:name']], duration[a['concept:name']]+int(round(0.01 * duration[a['concept:name']])))
+                a['duration:seconds'] = int(numpy.random.exponential(duration[a['concept:name']]))
                 a['time:timestamp'] = time_first + datetime.timedelta(0, time)
                 time = time + duration[a['concept:name']]
             else:
