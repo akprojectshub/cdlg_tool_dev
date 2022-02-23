@@ -4,10 +4,10 @@ import os
 import sys
 
 from ConceptDrifts.sudden_drift import sudden_drift
-from Source.control_flow_controller import evolve_tree_randomly
-from Source.event_log_controller import add_duration_to_log
+from Source.control_flow_controller import evolve_tree_randomly_gs
+from Source.event_log_controller import add_duration_to_log, get_timestamp_log
 from Source.noise_controller import add_noise_doc
-from Source.process_tree_controller import generate_specific_trees, visualise_tree, generate_tree_from_file
+from Source.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
 
@@ -16,32 +16,42 @@ def generate_log_with_sudden_drift(file_path_one=None, file_path_two=None):
     """ Generation of an event log with a sudden drift
 
     :param file_path_one: file path to own process model, if desired to be used
-    :param file_path_two: file path to second own process model, if it is to be used
+    :param file_path_two: file path to second own process model, if desired to be used
     :return: event log with sudden drift saved in 'Data/result_data/doc'
     """
-    tree_complexity, date, min_sec, max_sec, nu_traces, change_point, proportion_random_evolution, start_sector_noise, end_sector_noise, proportion_noise_in_sector, type_noise = get_parameters()
+    tree_complexity, date, min_sec, max_sec, num_traces, change_point, proportion_random_evolution, start_sector_noise, end_sector_noise, proportion_noise_in_sector, type_noise = get_parameters()
+    deleted_acs = []
+    added_acs = []
+    moved_acs = []
     if file_path_one is None:
         tree_one = generate_specific_trees(tree_complexity.strip())
-        visualise_tree(tree_one)
         drift_tree = copy.deepcopy(tree_one)
-        tree_two = evolve_tree_randomly(drift_tree, proportion_random_evolution)
+        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
     elif file_path_one is not None and file_path_two is None:
         tree_one = generate_tree_from_file(file_path_one)
-        visualise_tree(tree_one)
         drift_tree = copy.deepcopy(tree_one)
-        tree_two = evolve_tree_randomly(drift_tree, proportion_random_evolution)
+        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
     else:
         tree_one = generate_tree_from_file(file_path_one)
         tree_two = generate_tree_from_file(file_path_two)
-        visualise_tree(tree_one)
-        visualise_tree(tree_two)
-    event_log = sudden_drift(tree_one, tree_two, nu_traces, change_point)
+    event_log = sudden_drift(tree_one, tree_two, num_traces, change_point)
     if start_sector_noise is None:
         add_duration_to_log(event_log, date, min_sec, max_sec)
     else:
         event_log = add_noise_doc(event_log, tree_one, proportion_noise_in_sector, type_noise, start_sector_noise,
                                   end_sector_noise)
         add_duration_to_log(event_log, date, min_sec, max_sec)
+    start_drift = get_timestamp_log(event_log, num_traces, change_point)
+    if file_path_two is None:
+        drift_data = "drift perspective: control-flow; drift type: sudden; drift timestamp: "+str(start_drift)+" (" + str(change_point) + "); activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs)+"; activities moved: "+str(moved_acs)
+    else:
+        drift_data = "drift perspective: control-flow; drift type: sudden; drift timestamp: "+str(start_drift)+" (" + str(change_point) + ")"
+    event_log.attributes['drift info:'] = drift_data
+    if start_sector_noise is not None:
+        start_noise = get_timestamp_log(event_log, num_traces, start_sector_noise)
+        end_noise = get_timestamp_log(event_log, num_traces, end_sector_noise)
+        noise_data = "noise proportion: "+str(proportion_noise_in_sector) + "; start point: " + str(start_noise) + " (" + str(start_sector_noise) + "); end point: " + str(end_noise) + " (" + str(end_sector_noise) + "); noise type: "+type_noise
+        event_log.attributes['noise info:'] = noise_data
     ptml_exporter.apply(tree_one,
                         "Data/result_data/doc/initial_version_sudden_drift.ptml")
     ptml_exporter.apply(tree_two,

@@ -112,8 +112,11 @@ def add_noise_gs(event_log, tree, pro_noise, type_noise, start_noise, end_noise)
         return event_log, False
     if type_noise == 'changed_model':
         drift_tree = copy.deepcopy(tree)
-        drift_tree, a, b, c = evolve_tree_randomly_gs(drift_tree, 0.4)
-        log_noise = semantics.generate_log(drift_tree, nu_traces)
+        tree_ev, a, b, c = evolve_tree_randomly_gs(drift_tree, 0.4)
+        from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
+        ptml_exporter.apply(tree_ev,
+                                    "Data/result_data/gold_standard/random_evolved_model.ptml")
+        log_noise = semantics.generate_log(tree_ev, nu_traces)
     else:
         tree = generate_tree(
             {'mode': 8, 'min': 6, 'max': 10, 'sequence': 0.25, 'choice': 0.25, 'parallel': 0.25, 'loop': 0.2, 'or': 0,

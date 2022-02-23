@@ -11,7 +11,7 @@ from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
 
 
 def incremental_drift_doc(tree_one, nu_traces_initial, nu_traces_int, nu_traces_evl, nu_models,
-                          proportion_random_evolution, tree_two=None):
+                          proportion_random_evolution):
     """ Generation of an event log with an incremental drift from the parameters saved in the textfile 'parameters_incremental_drift'
 
     :param proportion_random_evolution: proportion of the process model version to be evolved
@@ -20,21 +20,29 @@ def incremental_drift_doc(tree_one, nu_traces_initial, nu_traces_int, nu_traces_
     :param nu_traces_int: number traces for the evolutionary models
     :param nu_traces_evl: number traces for the final model
     :param nu_models: number of intermediate models
-    :param tree_two: final model
     :return: event log with incremental drift
     """
     result = semantics.generate_log(tree_one, nu_traces_initial)
     i = 0
     trees = [tree_one]
+    deleted_acs = []
+    added_acs = []
+    moved_acs = []
     while i < nu_models:
         drift_tree = copy.deepcopy(trees[i])
-        trees.append(evolve_tree_randomly(drift_tree, proportion_random_evolution))
+        tree_ev, deleted_ac, added_ac, moved_ac = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
+        deleted_acs.extend(deleted_ac)
+        added_acs.extend(added_ac)
+        moved_acs.extend(moved_ac)
+        trees.append(tree_ev)
         log = semantics.generate_log(trees[i + 1], nu_traces_int)
         result = combine_two_logs(result, log)
         i = i + 1
-    if tree_two is None:
-        drift_tree = copy.deepcopy(trees[len(trees) - 1])
-        tree_two = evolve_tree_randomly(drift_tree, proportion_random_evolution)
+    drift_tree = copy.deepcopy(trees[len(trees) - 1])
+    tree_two, deleted_ac, added_ac, moved_ac = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
+    deleted_acs.extend(deleted_ac)
+    added_acs.extend(added_ac)
+    moved_acs.extend(moved_ac)
     log_final = semantics.generate_log(tree_two, nu_traces_evl)
     result = combine_two_logs(result, log_final)
     l = 0
@@ -43,7 +51,7 @@ def incremental_drift_doc(tree_one, nu_traces_initial, nu_traces_int, nu_traces_
             ptml_exporter.apply(x, "Data/result_data/doc/"+str(l)+"_version_incremental_drift.ptml")
         l = l + 1
     ptml_exporter.apply(tree_two, "Data/result_data/doc/"+str(l)+"_version_incremental_drift.ptml")
-    return result
+    return result, deleted_acs, added_acs, moved_acs
 
 
 def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models, proportion_random_evolution):

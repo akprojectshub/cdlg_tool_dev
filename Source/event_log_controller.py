@@ -133,7 +133,12 @@ def get_timestamp_log(log, nu_traces, part):
     :param part: place of trace as a proportion of the total traces
     :return: timestamp of specific trace
     """
-    nu_trace = int(round(nu_traces * part + 0.0001))
+    if part == 0:
+        nu_trace = 0
+    elif part == 1:
+        nu_trace = nu_traces -1
+    else:
+        nu_trace = int(round(nu_traces * part + 0.0001))
     trace = log[nu_trace]
     if trace.__len__() == 0:
         return "empty trace"

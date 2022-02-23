@@ -351,7 +351,7 @@ def check_condition_empty_trace_one(tree, tree_part):
 
 
 def check_condition_empty_trace_two(tree, tree_part, operator):
-    first_check=  ((tree._get_operator() != get_type_operator('xor') and tree._get_operator() != get_type_operator(
+    first_check = ((tree._get_operator() != get_type_operator('xor') and tree._get_operator() != get_type_operator(
         'xor loop') and tree._get_operator() != get_type_operator('or')) or (
                     operator != get_type_operator(
                 'xor') and operator != get_type_operator(
@@ -1031,7 +1031,7 @@ def change_random_operator_num(tree, wish_operator, length, changed_acs):
         i = randint(0, len(operators_list) - 1)
         while not check_tree_part(all_tree_operator_list[i], length, changed_acs, wish_operator):
             i = randint(0, len(operators_list) - 1)
-        if check_condition_empty_trace_two(tree, all_tree_operator_list[i], wish_operator) and wish_operator != all_tree_operator_list[i]._get_operator():
+        if check_condition_empty_trace_two(tree, all_tree_operator_list[i], wish_operator) and wish_operator != all_tree_operator_list[i]._get_operator() and (wish_operator != get_type_operator('xor loop') or (wish_operator == get_type_operator('xor loop') and 1 < len(all_tree_operator_list[i].children) < 4)):
             leaves = get_leaves_of_part_tree(all_tree_operator_list[i])
             for leaf in leaves:
                 if leaf._get_label() is None:
@@ -1215,9 +1215,9 @@ def swap_random_ops(tree, length, changed_acs):
         while not check_tree_part(all_tree_operator_list[i_two], j, changed_acs):
             i_two = randint(0, len(operators_list) - 1)
         if all_tree_operator_list[i_one]._get_operator() == all_tree_operator_list[i_two]._get_operator() or ((all_tree_operator_list[i_one]._get_operator() == get_type_operator('xor loop')
-                                                                                                               and len(all_tree_operator_list[i_two].children) > 3)
+                                                                                                               and 2 > len(all_tree_operator_list[i_two].children) > 3)
                                                                                                               or (all_tree_operator_list[i_two]._get_operator() == get_type_operator(
-                                                                                                                  'xor loop') and len(
+                                                                                                                  'xor loop') and 2 > len(
                                                                                                                   all_tree_operator_list[i_one].children) > 3)) \
                 or not check_condition_empty_trace_two(tree, all_tree_operator_list[i_one], all_tree_operator_list[i_two]._get_operator()) \
                 or not check_condition_empty_trace_two(tree, all_tree_operator_list[i_two], all_tree_operator_list[i_one]._get_operator()):

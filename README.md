@@ -1,5 +1,9 @@
-CDLG: Generation of event logs with concept drifts
+CDLG: Concept Drift Log Generator
 ====
+___
+
+Generation of event logs with concept drifts
+---
 
 This approach supports the generation of event logs with following features:
 * Import of block-structured models (BPMN, Petri nets, Process trees)

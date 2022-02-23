@@ -5,10 +5,10 @@ Max_Time_Activity_Sec: 1200
 Number_Traces: 1000
 Change_Point_Sudden_Drift: 0.4
 Proportion_Random_Evolution: 0.3
-Start_Sector_Noise: 0.3
+Start_Sector_Noise: None
 End_Sector_Noise: 0.5
 Proportion_Noise_In_Sector: 0.05
-Type_Noise: changed_model
+Type_Noise: random_model
 
 
 
