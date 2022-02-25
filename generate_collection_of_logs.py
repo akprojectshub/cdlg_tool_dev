@@ -9,7 +9,7 @@ from ConceptDrifts.gradual_drift import gradual_drift
 from ConceptDrifts.incremental_drift import incremental_drift_gs
 from ConceptDrifts.recurring_drift import recurring_drift
 from ConceptDrifts.sudden_drift import sudden_drift
-from Source.control_flow_controller import evolve_tree_randomly_gs
+from Source.control_flow_controller import evolve_tree_randomly
 from Source.event_log_controller import add_duration_to_log, get_timestamp_log
 from Source.noise_controller import add_noise_gs
 from Source.process_tree_controller import generate_tree_from_file, generate_specific_trees
@@ -42,7 +42,7 @@ def generate_logs(file_path_one=None):
                 ran_evolve = round(uniform(float(proportion_random_evolution[0].strip()), float(proportion_random_evolution[1].strip())), 2)
             drift_tree = copy.deepcopy(tree_one)
             if drift != 'incremental':
-                tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly_gs(drift_tree, ran_evolve)
+                tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
             if drift == 'sudden':
                 event_log = sudden_drift(tree_one, tree_two, num_traces, drift_area_one)
                 parameters += "; drift: sudden; change point: "+str(drift_area_one) + "; random evolution: "+str(ran_evolve)

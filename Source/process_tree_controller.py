@@ -232,6 +232,17 @@ def check_tree_part(x, length, changed_acs, operator=None):
     return correct
 
 
+def get_unique_list(leaf_list):
+    acs = []
+    result = []
+    for x in leaf_list:
+        if x._get_label() not in acs and x._get_label() is not None:
+            acs.append(x._get_label())
+            result.append(x)
+    return result
+
+
+
 def get_right_rand_ac(count, tree):
     leaves = tree._get_leaves()
     leaves_la = []
@@ -410,9 +421,11 @@ def search_operator(tree, operator, depth, ac_tree=None):
 def delete_activity(tree, activity):
     leaves = tree._get_leaves()
     count = count_leaf(leaves, activity)
+    ch_acs = None
     if count <= 1:
         for leaf in leaves:
             if leaf._get_label() == activity:
+                ch_acs = copy.deepcopy(leaf)
                 leaf._set_label(None)
     else:
         print("\nAttention! " + str(count) + " identical activities " + activity + " exist in the process tree.\n"
@@ -424,15 +437,20 @@ def delete_activity(tree, activity):
         for child in children:
             if child.children == list() and child._get_label() == activity:
                 child._set_label(None)
+                ch_acs = copy.deepcopy(child)
+    return tree, ch_acs
 
 
 def replace_activity(tree, activity_old, activity_new):
     leaves = tree._get_leaves()
+    ch_acs = []
     count = count_leaf(leaves, activity_old)
     if count <= 1:
         for leaf in leaves:
             if leaf._get_label() == activity_old or (leaf._get_label() is None and activity_old == '*tau*'):
+                ch_acs.append(copy.deepcopy(leaf))
                 leaf._set_label(activity_new)
+                ch_acs.append(copy.deepcopy(leaf))
     else:
         print("\nAttention! " + str(count) + " identical activities " + activity_old + " exist in the process tree.\n"
                                                                                        "The following parameters are required for correct identification.\n")
@@ -443,7 +461,10 @@ def replace_activity(tree, activity_old, activity_new):
         for child in children:
             if child.children == list() and (
                     child._get_label() == activity_old or (child._get_label() is None and activity_old == '*tau*')):
+                ch_acs.append(copy.deepcopy(child))
                 child._set_label(activity_new)
+                ch_acs.append(copy.deepcopy(child))
+    return tree, ch_acs
 
 
 def swap_two_existing_activities_ran(tree, activity_one, activity_two):
@@ -463,16 +484,20 @@ def swap_two_existing_activities(tree, activity_one, activity_two):
     leaves = tree._get_leaves()
     count_one = count_leaf(leaves, activity_one)
     count_two = count_leaf(leaves, activity_two)
+    moved_acs = []
     if count_one <= 1 >= count_two:
         for leaf in leaves:
             if leaf._get_label() == activity_one or (leaf._get_label() is None and activity_one == '*tau*'):
                 leaf._set_label(activity_two)
+                moved_acs.append(copy.deepcopy(leaf))
             elif leaf._get_label() == activity_two or (leaf._get_label() is None and activity_two == '*tau*'):
                 leaf._set_label(activity_one)
+                moved_acs.append(copy.deepcopy(leaf))
     elif count_one > 1 >= count_two:
         for leaf in leaves:
             if leaf._get_label() == activity_two or (leaf._get_label() is None and activity_two == '*tau*'):
                 leaf._set_label(activity_one)
+                moved_acs.append(copy.deepcopy(leaf))
         print(
             "\nAttention! " + str(count_one) + " identical activities " + activity_one + " exist in the process tree.\n"
                                                                                          "The following parameters are required for correct identification.\n")
@@ -486,6 +511,7 @@ def swap_two_existing_activities(tree, activity_one, activity_two):
             if child.children == list() and (
                     child._get_label() == activity_one or (child._get_label() is None and activity_one == '*tau*')):
                 child._set_label(activity_two)
+                moved_acs.append(copy.deepcopy(child))
 
     elif count_two > 1 >= count_one:
         for leaf in leaves:
@@ -504,6 +530,7 @@ def swap_two_existing_activities(tree, activity_one, activity_two):
             if child.children == list() and (
                     child._get_label() == activity_two or (child._get_label() is None and activity_two == '*tau*')):
                 child._set_label(activity_one)
+                moved_acs.append(copy.deepcopy(child))
     else:
         print(
             "\nAttention! Serveral identical activities of " + activity_two + " and " + activity_one + " exist in the process tree.\n"
@@ -518,6 +545,7 @@ def swap_two_existing_activities(tree, activity_one, activity_two):
             if child.children == list() and (
                     child._get_label() == activity_one or (child._get_label() is None and activity_one == '*tau*')):
                 child._set_label(activity_two)
+                moved_acs.append(copy.deepcopy(child))
 
         operator_one = input_ops(
             "Operator node, where the activity " + activity_one + " will be swapped to [xor, seq, xor loop, or, and]: ")
@@ -529,6 +557,8 @@ def swap_two_existing_activities(tree, activity_one, activity_two):
             if child.children == list() and (
                     child._get_label() == activity_two or (child._get_label() is None and activity_two == '*tau*')):
                 child._set_label(activity_one)
+                moved_acs.append(copy.deepcopy(child))
+    return tree, moved_acs
 
 
 def add_activity(tree, act, depth):
@@ -588,7 +618,7 @@ def add_activity(tree, act, depth):
                             children.append(tree_ac)
                             tree_ac._set_parent(x)
                             x._set_children(children)
-    return tree
+    return tree, copy.deepcopy(tree_ac)
 
 
 def delete_silents(tree, operator, depth):
@@ -606,8 +636,11 @@ def delete_silents(tree, operator, depth):
 
 
 def add_activity_with_operator(tree, activity_added, operator_added, depth, direction):
+    ch_acs = []
+    ac = ProcessTree(None, None, None, activity_added)
     if depth == 0:
-        return add_activity_as_parent(tree, activity_added, get_type_operator(operator_added))
+        tree = add_activity_as_parent(tree, activity_added, get_type_operator(operator_added))
+        ch_acs.extend(copy.deepcopy(tree)._get_leaves())
     else:
         on_ac_or_op = input(
             "To be added before activity or operator ([xor, seq, or, xor loop, and] or " + str(
@@ -635,8 +668,8 @@ def add_activity_with_operator(tree, activity_added, operator_added, depth, dire
                     tree_bet._set_parent(parent)
                     children[position] = tree_bet
                     parent._set_children(children)
+                    ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                     break
-            return tree
         else:
             loc = check_operator_multiple(trees, on_ac_or_op)
             if len(loc) > 1:
@@ -663,6 +696,7 @@ def add_activity_with_operator(tree, activity_added, operator_added, depth, dire
                                     tree_op._set_parent(parent)
                                     children[position] = tree_op
                                     parent._set_children(children)
+                                    ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                                     breaker = True
                                     break
                         if breaker:
@@ -685,13 +719,15 @@ def add_activity_with_operator(tree, activity_added, operator_added, depth, dire
                             tree_op._set_parent(parent)
                             children[position] = tree_op
                             parent._set_children(children)
+                            ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                             break
-            return tree
+    return tree, ac, ch_acs
 
 
 def delete_part_tree(tree, depth, del_operator):
     trees = get_part_tree_depth(tree, depth)
     loc = check_operator_multiple(trees, del_operator)
+    ch_acs = []
     if len(loc) > 1:
         acs = get_subtree_acs(trees, loc)
         ac_in_part_tree = input_ac("One activity present in the subtree to be deleted " + str(acs) + ": ", acs)
@@ -706,6 +742,7 @@ def delete_part_tree(tree, depth, del_operator):
                 for leaf in leaves:
                     if leaf._get_label() == ac_in_part_tree and get_type_operator(del_operator) == x._get_operator():
                         emp_tree = ProcessTree(None, None, None, None)
+                        ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                         position = get_position_in_child_list(x, ac_in_part_tree, del_operator)
                         emp_tree._set_parent(parent)
                         children[position] = emp_tree
@@ -723,17 +760,19 @@ def delete_part_tree(tree, depth, del_operator):
                 children = parent.children
                 if get_type_operator(del_operator) == x._get_operator():
                     emp_tree = ProcessTree(None, None, None, None)
+                    ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                     position = get_position_in_child_list(x, None, del_operator)
                     emp_tree._set_parent(parent)
                     children[position] = emp_tree
                     parent._set_children(children)
                     break
-    return tree
+    return tree, ch_acs
 
 
 def swap_tree_fragments(tree):
     part_one = ProcessTree()
     part_two = ProcessTree()
+    ch_acs = []
     position_one = 0
     position_two = 0
     right_input = True
@@ -847,6 +886,14 @@ def swap_tree_fragments(tree):
                 continue
             else:
                 break
+    if part_one.children == list():
+        ch_acs.append(part_one)
+    else:
+        ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(part_one)))
+    if part_two.children == list():
+        ch_acs.append(part_two)
+    else:
+        ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(part_two)))
     parent_one = part_one._get_parent()
     parent_two = part_two._get_parent()
     children_one = parent_one.children
@@ -857,12 +904,13 @@ def swap_tree_fragments(tree):
     part_two._set_parent(parent_one)
     children_one[position_one] = part_two
     parent_one._set_children(children_one)
-    return tree
+    return tree, ch_acs
 
 
 def move_tree_fragment(tree, operator_moved, operator_moved_depth):
     part_one = ProcessTree()
     part_two = ProcessTree()
+    ch_acs = []
     position_one = 0
     trees = get_part_tree_depth(tree, operator_moved_depth)
     loc = check_operator_multiple(trees, operator_moved)
@@ -926,6 +974,7 @@ def move_tree_fragment(tree, operator_moved, operator_moved_depth):
                         part_two = x
                         break
     parent_one = part_one.parent
+    ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(part_one)))
     children_one = parent_one.children
     emp_tree = ProcessTree(None, None, None, None)
     children_one[position_one] = emp_tree
@@ -940,13 +989,15 @@ def move_tree_fragment(tree, operator_moved, operator_moved_depth):
     else:
         children_two.append(part_one)
         part_two._set_children(children_two)
-    return tree
+    return tree, ch_acs
 
 
 def replace_operator(tree, depth, old_operator):
+    ch_acs = []
     if depth == 0:
         new_operator = input_ops("New operator [xor, seq, or, xor loop, and]: ")
         tree._set_operator(get_type_operator(new_operator))
+        ch_acs.extend(copy.deepcopy(tree)._get_leaves())
     else:
         trees = get_part_tree_depth(tree, depth)
         loc = check_operator_multiple(trees, old_operator)
@@ -964,6 +1015,7 @@ def replace_operator(tree, depth, old_operator):
                         if leaf._get_label() == ac_in_part_tree and get_type_operator(
                                 old_operator) == x._get_operator():
                             x._set_operator(get_type_operator(new_operator))
+                            ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                             breaker = True
                             break
                     if breaker:
@@ -976,12 +1028,16 @@ def replace_operator(tree, depth, old_operator):
                 else:
                     if get_type_operator(old_operator) == x._get_operator():
                         x._set_operator(get_type_operator(new_operator))
+                        ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                         break
+    return tree, ch_acs
 
 
 def swap_operator(tree, depth, new_operator, old_operator, ac_in_part_tree):
+    ch_acs = []
     if depth == 0:
         tree._set_operator(get_type_operator(new_operator))
+        ch_acs.extend(copy.deepcopy(tree)._get_leaves())
     else:
         trees = get_part_tree_depth(tree, depth)
         loc = check_operator_multiple(trees, old_operator)
@@ -996,6 +1052,7 @@ def swap_operator(tree, depth, new_operator, old_operator, ac_in_part_tree):
                         if leaf._get_label() == ac_in_part_tree and get_type_operator(
                                 old_operator) == x._get_operator():
                             x._set_operator(get_type_operator(new_operator))
+                            ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                             breaker = True
                             break
                     if breaker:
@@ -1007,7 +1064,9 @@ def swap_operator(tree, depth, new_operator, old_operator, ac_in_part_tree):
                 else:
                     if get_type_operator(old_operator) == x._get_operator():
                         x._set_operator(get_type_operator(new_operator))
+                        ch_acs.extend(get_leaves_of_part_tree(copy.deepcopy(x)))
                         break
+    return tree, ch_acs
 
 
 def get_required_ac(tree, depth, old_operator, str_nu):

@@ -27,15 +27,20 @@ def additional_sudden_drift_in_log(log, tree_two):
     :param tree_two: evolved tree version
     :return:  event log with an additional sudden drift
     """
+    dr_s = "drift perspective: control-flow; drift type: sudden;"
+    start_trace = 0
     add_end = input_end("Adding the additional recurring drift at the end of the log or into the log [end, into]? ")
     if add_end == 'into':
         drift_time = input_percentage("Starting point of the drift (0 < x < 1): ")
-        log_two_traces = (length_of_log(log) - int(round(length_of_log(log) * drift_time + 0.0001)))
+        start_trace = get_num_trace(len(log), drift_time)
+        log_two_traces = (length_of_log(log) - start_trace)
         log_two = semantics.generate_log(tree_two, log_two_traces)
         result_log = replace_traces_of_log(log, log_two, drift_time)
-        return result_log
     else:
         nu_add_traces = input_int(
             "Number of additional traces from the new model to be added at the end of the event log (int): ")
         log_two = semantics.generate_log(tree_two, nu_add_traces)
-        return combine_two_logs(log, log_two)
+        start_trace = len(log)
+        result_log = combine_two_logs(log, log_two)
+    drift_data = {'d': dr_s, 't': [start_trace, 0]}
+    return result_log, drift_data

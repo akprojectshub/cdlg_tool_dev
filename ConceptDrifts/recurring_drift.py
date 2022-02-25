@@ -70,32 +70,36 @@ def additional_recurring_drift_in_log(log, tree_one, tree_two):
     :return: log with an additional drift
     """
     add_end = input_end("Adding the additional recurring drift at the end of the log or into the log [end, into]? ")
+    dr_s = "drift perspective: control-flow; drift type: recurring; drift specific information: "
     if add_end == 'into':
         sector_log = input_yes_no("Do you want the recurring drift to persist throughout the event log [yes, no]? ")
         if sector_log == 'yes':
             start_point = 0
             end_point = 1
-            number_of_seasonal_changes = input_int("Number of seasonal changes of the models (int): ")
+            num_seasonal_changes = input_int("Number of seasonal changes of the models (int): ")
         else:
             start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
             end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
-            number_of_seasonal_changes = input_season(start_point, end_point)
+            num_seasonal_changes = input_season(start_point, end_point)
         proportion = input_percentage(
             "Proportion of the previously generated log in the drift sector of the new log (0 < x < 1): ")
-        nu_traces = length_of_log(log)
+        num_traces = length_of_log(log)
+        dr_s += str(num_seasonal_changes)+" seasonal changes; "
+        start_trace = get_num_trace(num_traces, start_point)
+        end_trace = get_num_trace(num_traces, end_point)
         if start_point == 0:
-            nu_occur_one = int(round((number_of_seasonal_changes + 1.1) / 2))
-            nu_occur_two = (number_of_seasonal_changes + 1) - nu_occur_one
+            nu_occur_one = int(round((num_seasonal_changes + 1.1) / 2))
+            nu_occur_two = (num_seasonal_changes + 1) - nu_occur_one
         else:
-            nu_occur_two = int(round((number_of_seasonal_changes + 1.1) / 2))
-            nu_occur_one = (number_of_seasonal_changes + 1) - nu_occur_two
+            nu_occur_two = int(round((num_seasonal_changes + 1.1) / 2))
+            nu_occur_one = (num_seasonal_changes + 1) - nu_occur_two
         nu_traces_sec_drift = int(
-            round((((nu_traces * end_point) - (nu_traces * start_point)) * (1 - proportion)) + 0.0001))
+            round((((num_traces * end_point) - (num_traces * start_point)) * (1 - proportion)) + 0.0001))
         log_two = semantics.generate_log(tree_two, nu_traces_sec_drift)
         parts_log_two = generate_several_parts_of_event_log(log_two, nu_occur_two)
         proportion_part_of_first_log = (end_point - start_point) * (proportion / nu_occur_one)
         proportion_part_of_second_log = (end_point - start_point) * ((1 - proportion) / nu_occur_two)
-        log_two_end = semantics.generate_log(tree_two, int(round(nu_traces*(1-end_point))))
+        log_two_end = semantics.generate_log(tree_two, int(round(num_traces*(1-end_point))))
         if start_point == 0:
             start = proportion_part_of_first_log
             end = start + proportion_part_of_second_log
@@ -117,11 +121,15 @@ def additional_recurring_drift_in_log(log, tree_one, tree_two):
                 result = replace_traces_of_log(result, parts_log_two[i], start)
                 i = i + 1
         result = replace_traces_of_log(result, log_two_end, end_point)
-        return result
     else:
         nu_add_traces = input_int("Number of additional traces to be added at the end of the event log (int): ")
-        number_of_seasonal_changes = input_int("Number of seasonal changes of the models (int): ")
+        num_seasonal_changes = input_int("Number of seasonal changes of the models (int): ")
+        dr_s += str(num_seasonal_changes)+" seasonal changes; "
+        start_trace = len(log)
+        end_trace = start_trace + nu_add_traces
         proportion_first = input_percentage(
             "Proportion of the traces from the previously model in the drift (0 < x < 1): ")
-        log_rec = recurring_drift(tree_two, tree_one, nu_add_traces, number_of_seasonal_changes, 1-proportion_first, 0, 1)
-        return combine_two_logs(log, log_rec)
+        log_rec = recurring_drift(tree_two, tree_one, nu_add_traces, num_seasonal_changes, 1-proportion_first, 0, 1)
+        result = combine_two_logs(log, log_rec)
+    drift_data = {'d': dr_s, 't': [start_trace, end_trace]}
+    return result, drift_data

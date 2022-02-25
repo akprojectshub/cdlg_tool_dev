@@ -4,12 +4,11 @@ import os
 import sys
 
 from ConceptDrifts.gradual_drift import gradual_drift
-from Source.control_flow_controller import evolve_tree_randomly_gs
+from Source.control_flow_controller import evolve_tree_randomly
 from Source.event_log_controller import add_duration_to_log, get_timestamp_log
 from Source.noise_controller import add_noise_doc
 from Source.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
-from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
 
 
 def generate_log_with_gradual_drift(file_path_one=None, file_path_two=None):
@@ -26,11 +25,11 @@ def generate_log_with_gradual_drift(file_path_one=None, file_path_two=None):
     if file_path_one is None:
         tree_one = generate_specific_trees(tree_complexity)
         drift_tree = copy.deepcopy(tree_one)
-        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
+        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, proportion_random_evolution)
     elif file_path_one is not None and file_path_two is None:
         tree_one = generate_tree_from_file(file_path_one)
         drift_tree = copy.deepcopy(tree_one)
-        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly_gs(drift_tree, proportion_random_evolution)
+        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, proportion_random_evolution)
     else:
         tree_one = generate_tree_from_file(file_path_one)
         tree_two = generate_tree_from_file(file_path_two)
@@ -53,10 +52,6 @@ def generate_log_with_gradual_drift(file_path_one=None, file_path_two=None):
         end_noise = get_timestamp_log(event_log, num_traces, end_sector_noise)
         noise_data = "noise proportion: "+str(proportion_noise_in_sector) + "; start point: " + str(start_noise) + " (" + str(start_sector_noise) + "); end point: " + str(end_noise) + " (" + str(end_sector_noise) + "); noise type: "+type_noise
         event_log.attributes['noise info:'] = noise_data
-    ptml_exporter.apply(tree_one,
-                        "Data/result_data/doc/initial_version_gradual_drift.ptml")
-    ptml_exporter.apply(tree_two,
-                        "Data/result_data/doc/evolved_version_gradual_drift.ptml")
     xes_exporter.apply(event_log, "Data/result_data/doc/event_log_with_gradual_drift.xes")
 
 

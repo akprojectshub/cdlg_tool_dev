@@ -1,7 +1,5 @@
 import math
 
-import numpy
-
 from Source.event_log_controller import *
 from pm4py.objects.process_tree import semantics
 
@@ -96,17 +94,19 @@ def additional_gradual_drift_in_log(log, tree_one, tree_two):
     :return: event log with an additional gradual drift
     """
     add_end = input_end("Adding the additional gradual drift at the end of the log or into the log [end, into]? ")
+    dr_s = "drift perspective: control-flow; drift type: gradual; drift specific information: "
     if add_end == 'into':
-        drift_time_start = input_percentage("Starting point of the drift (0 < x < 1): ")
-        drift_time_end = input_percentage("Ending point of the drift (0 < x < 1): ")
-        gradual_type = input_typ_gradual("Method for distributing the traces during the gradual drift [linear, exponential]: ")
+        start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
+        end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
+        num_traces = length_of_log(log)
+        distribution_type = input_typ_gradual("Method for distributing the traces during the gradual drift [linear, exponential]: ")
+        dr_s += distribution_type+" distribution; "
         result = EventLog()
-        nu_traces = length_of_log(log)
-        start = int(round((nu_traces * drift_time_start + 0.0001)))
-        end = int(round((nu_traces * drift_time_end + 0.0001)))
-        nu_traces_for_drift = int(round(nu_traces * (drift_time_end - drift_time_start) + 0.0001))
-        proportion = (drift_time_end - drift_time_start) / 2
-        log_two_traces = nu_traces - int(round((drift_time_start + proportion) * nu_traces + 0.0001))
+        start = int(round((num_traces * start_point + 0.0001)))
+        end = int(round((num_traces * end_point + 0.0001)))
+        nu_traces_for_drift = int(round(num_traces * (end_point - start_point) + 0.0001))
+        proportion = (end_point - start_point) / 2
+        log_two_traces = num_traces - int(round((start_point + proportion) * num_traces + 0.0001))
         log_two = semantics.generate_log(tree_two, log_two_traces)
         p = 0
         z = 0
@@ -118,7 +118,7 @@ def additional_gradual_drift_in_log(log, tree_one, tree_two):
             else:
                 break
         i = 0
-        if gradual_type == 'linear':
+        if distribution_type == 'linear':
             rest, rest_un, rounds, b = get_rest_parameter(nu_traces_for_drift, 'linear')
             most_one = rest + b * rounds
             most_two = rest_un + b * rounds
@@ -184,24 +184,28 @@ def additional_gradual_drift_in_log(log, tree_one, tree_two):
                 x = x + 1
         o = 0
         for trace in log_two:
-            if o == i and z < nu_traces:
+            if o == i and z < num_traces:
                 result.append(trace)
                 z = z + 1
                 o = o + 1
                 i = i + 1
             else:
                 o = o + 1
-        return result
     else:
         nu_add_traces = input_int(
             "Number of additional traces of the gradual drift to be added at the end of the event log (int): ")
         nu_new_model_traces = input_int(
             "Number of additional traces of the new model to be added after the drift occurred (int): ")
-        gradual_type = input_typ_gradual("Method for distributing the traces during the gradual drift [linear, exponential]: ")
-        log_drift = distribute_traces(tree_one, tree_two, gradual_type, nu_add_traces)
+        distribution_type = input_typ_gradual("Method for distributing the traces during the gradual drift [linear, exponential]: ")
+        dr_s = "drift perspective: control-flow; drift type: gradual; drift specific information: "+distribution_type+" distribution; "
+        start = length_of_log(log)
+        end = start + nu_add_traces
+        log_drift = distribute_traces(tree_one, tree_two, distribution_type, nu_add_traces)
         log_with_drift = combine_two_logs(log, log_drift)
         log_new = semantics.generate_log(tree_two, nu_new_model_traces)
-        return combine_two_logs(log_with_drift, log_new)
+        result = combine_two_logs(log_with_drift, log_new)
+    drift_data = {'d': dr_s, 't': [start, end]}
+    return result, drift_data
 
 
 def get_rest_parameter(nu_traces, distribute_type):

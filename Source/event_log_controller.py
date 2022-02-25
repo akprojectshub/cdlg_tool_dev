@@ -136,7 +136,7 @@ def get_timestamp_log(log, nu_traces, part):
     if part == 0:
         nu_trace = 0
     elif part == 1:
-        nu_trace = nu_traces -1
+        nu_trace = nu_traces - 1
     else:
         nu_trace = int(round(nu_traces * part + 0.0001))
     trace = log[nu_trace]
@@ -144,6 +144,16 @@ def get_timestamp_log(log, nu_traces, part):
         return "empty trace"
     else:
         return trace.__getitem__(0)['time:timestamp']
+
+
+def get_num_trace(traces, part):
+    if part == 0:
+        num_trace = 0
+    elif part == 1:
+        num_trace = traces
+    else:
+        num_trace = int(round(traces * part + 0.0001))
+    return num_trace
 
 
 def replace_traces_of_log(main_log, log_two, start_point):
@@ -314,4 +324,3 @@ def include_noise_in_log(log_total, log_noise, start_noise, end_noise):
 
 def length_of_log(log):
     return len(log)
-

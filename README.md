@@ -13,7 +13,13 @@ This approach supports the generation of event logs with following features:
 * Random control-flow changes
 * Controlled control-flow changes
 
- 
+About
+---
+This repository contains the prototype of our approach and the evaluation as described in 
+</br>_HERE PAPER_
+
+**If you want to use parts of the approach in your project we refer to our [python package](https://gitlab.uni-mannheim.de/processanalytics/cdlg-package).**
+
 Installation
 ---
 **The project requires python >= 3.9 and graphviz**
@@ -45,7 +51,7 @@ The following six Python files allow the generation of event logs with concept d
 2. Run one project using <code>python _filename_ _[path_to_own_model_1]_ _[path_to_own_model_2]_</code>
 
 **Note:** for the execution files 2 - 6 own models can be imported by specifying their file path after the execution file.
-For 2 - 5 a maximum of two models are allowed and for 6 only one model is possible. 
+For 2 - 4 a maximum of two models are allowed and for 5 & 6 only one model is possible. 
 
 ### Input ###
 It is optional to use your own models (BPMN model, Petri net, Process tree) in BPMN, PNML, or PTML format, which have to be block-structured.
@@ -53,7 +59,7 @@ It is optional to use your own models (BPMN model, Petri net, Process tree) in B
 **Note:** all models will be converted to process trees during execution.
 
 ### Output ###
-All generated event logs in XES format and all process trees in PTML format are saved with a corresponding sub-folder in _Data/result_data_.
+All generated event logs in XES format are saved with a corresponding sub-folder in _Data/result_data_.
 With the execution of 6 a CSV file so-called _gold_standard.csv_ is saved as well as a text file for each event log containing the drift configurations.
 
 **Note:** after executing a particular project file, you should save the generated data in a different location, otherwise it will be overwritten when you execute it again.

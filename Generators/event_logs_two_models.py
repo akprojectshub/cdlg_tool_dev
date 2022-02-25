@@ -1,4 +1,3 @@
-from mpmath.libmp.backend import xrange
 from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree.obj import ProcessTree
 
@@ -12,94 +11,103 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree import semantics
 
 from Source.control_flow_controller import change_tree_on_control_flow
+from Source.event_log_controller import get_num_trace, get_timestamp_log
 from Source.input_controller import input_int, input_drift, input_percentage, input_date, input_typ_gradual, \
-    generate_tree_out_of_file, input_int_hun, input_int_max, input_yes_no, input_im, input_tree_one, input_comp, input_season
+    generate_tree_out_of_file, input_int_hun, input_int_max, input_yes_no, input_im, input_tree_one, input_comp, \
+    input_season
 from Source.noise_controller import add_noise_to_log
-from Source.process_tree_controller import visualise_tree, generate_specific_trees
+from Source.process_tree_controller import generate_specific_trees
 
 
-def generate_logs_with_models(tree_one, tree_two, nu_logs, incremental_ran, parameters=None):
+def generate_logs_with_models(tree_one, tree_two, incremental_ran, parameters=None):
     """ Generation of event logs with different concept drifts from two models
 
-    :param nu_logs: number of event logs to be generated
     :param parameters: the possible changed parameters for the generation of random process trees
     :param incremental_ran: boolean if incremental drift with random process trees
     :param tree_one: first process tree
     :param tree_two: second process tree
     """
-    for i in xrange(1, nu_logs + 1):
-        print("\n--- INPUT " + str(i) + ". EVENT LOG ---")
-        datestamp = input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
-        min_duration = input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
-        max_duration = input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
-                                     min_duration)
-        drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")
-        log = EventLog()
+    datestamp = input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
+    min_duration = input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
+    max_duration = input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
+                                 min_duration)
 
-        if drift_type == 'sudden':
-            nu_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
-            time_of_drift_perc = input_percentage("starting point of the drift (0 < x < 1): ")
-            log = sudden_drift(tree_one, tree_two, nu_traces, time_of_drift_perc)
+    print("\n--- INPUT DRIFT ---")
+    drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")
+    log = EventLog()
+    dr_s = "drift perspective: control-flow; "
+    start_trace = 0
+    end_trace = 0
+    drift_info = {}
 
-        elif drift_type == 'gradual':
-            nu_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
-            time_of_drift_start_perc = input_percentage("Starting point of the drift (0 < x < 1): ")
-            time_of_drift_end_perc = input_percentage("Ending point of the drift (0 < x < 1): ")
-            gradual_type = input_typ_gradual("Method for distributing the traces during the gradual drift [linear, exponential]: ")
-            log = gradual_drift(tree_one, tree_two, nu_traces, time_of_drift_start_perc, time_of_drift_end_perc, gradual_type)
+    if drift_type == 'sudden':
+        num_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
+        drift_time = input_percentage("starting point of the drift (0 < x < 1): ")
+        dr_s += "drift type: sudden; "
+        start_trace = get_num_trace(num_traces, drift_time)
+        log = sudden_drift(tree_one, tree_two, num_traces, drift_time)
 
-        elif drift_type == 'recurring':
-            nu_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
-            sector_log = input_yes_no("Do you want the recurring drift to persist throughout the event log [yes, no]? ")
-            if sector_log == 'yes':
-                start_point = 0
-                end_point = 1
-                number_of_seasonal_changes = input_int("Number of seasonal changes of the model versions (int): ")
-            else:
-                start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
-                end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
-                number_of_seasonal_changes = input_season(start_point, end_point)
-            proportion_first = input_percentage("Proportion of the initial version of the model in the final log (0 < x < 1): ")
-            log = recurring_drift(tree_one, tree_two, nu_traces, number_of_seasonal_changes, proportion_first, start_point, end_point)
+    elif drift_type == 'gradual':
+        num_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
+        start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
+        end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
+        distribution_type = input_typ_gradual(
+            "Method for distributing the traces during the gradual drift [linear, exponential]: ")
+        dr_s += "drift type: gradual; drift specific information: " + distribution_type + " distribution; "
+        start_trace = get_num_trace(num_traces, start_point)
+        end_trace = get_num_trace(num_traces, end_point)
+        log = gradual_drift(tree_one, tree_two, num_traces, start_point, end_point,
+                            distribution_type)
 
-        elif drift_type == 'incremental':
-            if incremental_ran:
-                nu_models = input_int("Number of evolving model versions in the event log (int): ")
-                log = log_with_incremental_drift_two_models_random(tree_one, tree_two, nu_models,
-                                                                   parameters)
-
-            else:
-                nu_models = input_int("Number of evolving model versions in the event log (int): ")
-                j = 1
-                trees = []
-                while j <= nu_models:
-                    tree_ev = generate_tree_out_of_file(
-                        "File path of the " + str(
-                            j) + ". evolved model version, which has to be 'pnml', 'bpmn' or 'ptml' (e.g. 'Data/test_data/bpmn/model_00.bpmn'): ")
-                    trees.append(tree_ev)
-                    j = j + 1
-                nu_old_model = input_int_hun("Number of traces from the initial model version in the event log (x >= 100): ")
-                log_old = semantics.generate_log(tree_one, nu_old_model)
-                log = log_with_incremental_drift_two_models_imported(log_old, tree_two, trees, nu_models)
-
-        result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration,
-                                                       max_duration,
-                                                       drift_type, i)
-        xes_exporter.apply(result,
-                           "Data/result_data/terminal/event_logs/event_log_" + str(i) + "_with_" + drift_type + "_drift.xes")
-        print("Event log 'event_log_" + str(
-            i) + "_with_" + drift_type + "_drift' is saved in the folder 'Data/result_data/event_logs'.")
-        if drift_type == 'incremental':
-            print(
-                "Evolved process model versions are saved in the folder 'Data/result_data/terminal/generated_models/evolved_versions_incremental_for_log_" + str(
-                    i) + "'.")
+    elif drift_type == 'recurring':
+        num_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
+        sector_log = input_yes_no("Do you want the recurring drift to persist throughout the event log [yes, no]? ")
+        if sector_log == 'yes':
+            start_point = 0
+            end_point = 1
+            num_seasonal_changes = input_int("Number of seasonal changes of the model versions (int): ")
         else:
-            print("Evolved model versions 'evolved_model_for_log_" + str(
-                i) + "' is saved in the folder 'Data/result_data/terminal/generated_models'.")
+            start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
+            end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
+            num_seasonal_changes = input_season(start_point, end_point)
+        proportion_first = input_percentage(
+            "Proportion of the initial version of the model in the final log (0 < x < 1): ")
+        dr_s += "drift type: recurring; drift specific information: " + str(
+            num_seasonal_changes) + " seasonal changes; "
+        start_trace = get_num_trace(num_traces, start_point)
+        end_trace = get_num_trace(num_traces, end_point)
+        log = recurring_drift(tree_one, tree_two, num_traces, num_seasonal_changes, proportion_first, start_point,
+                              end_point)
+
+    elif drift_type == 'incremental':
+        if incremental_ran:
+            num_models = input_int("Number of evolving model versions in the event log (int): ")
+            log, drift_info = log_with_incremental_drift_two_models_random(tree_one, tree_two, num_models, parameters)
+        else:
+            num_models = input_int("Number of evolving model versions in the event log (int): ")
+            j = 1
+            trees = []
+            while j <= num_models:
+                tree_ev = generate_tree_out_of_file(
+                    "File path of the " + str(
+                        j) + ". evolved model version, which has to be 'pnml', 'bpmn' or 'ptml' (e.g. 'Data/test_data/bpmn/model_00.bpmn'): ")
+                trees.append(tree_ev)
+                j = j + 1
+            nu_old_model = input_int_hun(
+                "Number of traces from the initial model version in the event log (x >= 100): ")
+            log_old = semantics.generate_log(tree_one, nu_old_model)
+            log, drift_info = log_with_incremental_drift_two_models_imported(log_old, tree_two, trees, num_models)
+
+    if drift_type != 'incremental':
+        drift_info = {'d': dr_s, 't': [start_trace, end_trace]}
+    result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration,
+                                                   drift_info)
+    xes_exporter.apply(result,
+                       "Data/result_data/terminal/event_log_with_drift.xes")
+    print("Event log 'event_log_with_drift' is saved in the folder 'Data/result_data/terminal'.")
 
 
-def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration,
-                                          drift_type_one, step):
+def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration, drift_info):
     """ Introduction of additional drift and noise into an event log
 
     :param log: event log
@@ -108,16 +116,16 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
     :param datestamp: Starting date of the event log
     :param min_duration: minimum duration of activities
     :param max_duration: maximum duration of activities
-    :param drift_type_one: additional drift type
-    :param step: number of event log
-    :return: event log
+    :param drift_info: drift info of first drift
     """
     addi_drift = input_yes_no("Do you want to add an additional drift to the event log [yes, no]? ")
+    drifts = [drift_info]
     drift_step = 2
     trees = [tree_two]
     tree_ev = ProcessTree()
     tree = ProcessTree()
     while addi_drift == 'yes':
+        drift_data = {}
 
         print("\n--- INFORMATION FOR ADDITIONAL DRIFT IN THE EVENT LOG ---\n"
               "Please note that by incautiously setting parameters the previously created drift can be destroyed.\n"
@@ -141,23 +149,21 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
             str_tree_kind = input_tree_one(
                 "Process model version for the evolution of the additional " + drift_type + " drift [first_version, last_version]: ")
             if str_tree_kind == 'first_version':
-                visualise_tree(tree_one)
                 tree = tree_one
             else:
                 length = len(trees)
-                visualise_tree(trees[length - 1])
                 tree = trees[length - 1]
             if drift_type != 'incremental':
-                tree_ev = change_tree_on_control_flow(tree)
+                tree_ev, deleted_acs, added_acs, moved_acs = change_tree_on_control_flow(tree)
 
         if drift_type == 'sudden':
-            log = additional_sudden_drift_in_log(log, tree_ev)
+            log, drift_data = additional_sudden_drift_in_log(log, tree_ev)
 
         elif drift_type == 'gradual':
-            log = additional_gradual_drift_in_log(log, tree, tree_ev)
+            log, drift_data = additional_gradual_drift_in_log(log, tree, tree_ev)
 
         elif drift_type == 'recurring':
-            log = additional_recurring_drift_in_log(log, tree, tree_ev)
+            log, drift_data = additional_recurring_drift_in_log(log, tree, tree_ev)
 
         elif drift_type == 'incremental':
             nu_models = input_int("Number of evolving versions (int): ")
@@ -171,7 +177,7 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
                     trees_one.append(tree_evo)
                     j = j + 1
                 tree_ev = trees_one[len(trees_one) - 1]
-                log = additional_incremental_drift_in_log_imported(log, tree_ev, trees_one, nu_models-1)
+                log, drift_data = additional_incremental_drift_in_log_imported(log, tree_ev, trees_one, nu_models - 1)
             elif str_imp == "random":
                 str_clp = input_comp("Complexity of the process tree to be generated [simple, middle, complex]: ")
                 j = 1
@@ -181,11 +187,27 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
                     trees_one.append(tree_evo)
                     j = j + 1
                 tree_ev = trees_one[len(trees_one) - 1]
-                log = additional_incremental_drift_in_log_imported(log, tree_ev, trees_one, nu_models-1)
+                log, drift_data = additional_incremental_drift_in_log_imported(log, tree_ev, trees_one, nu_models - 1)
             else:
-                log, tree_ev = additional_incremental_drift_in_log(log, tree, nu_models, step, drift_type_one, drift_step)
+                log, tree_ev, drift_data = additional_incremental_drift_in_log(log, tree, nu_models)
+        drifts.append(drift_data)
         trees.append(tree_ev)
         drift_step = drift_step + 1
         addi_drift = input_yes_no("Do you want to add an additional drift to the event log [yes, no]? ")
-
-    return add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
+    result, noise_data = add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
+    i = 1
+    for x in drifts:
+        start = int(x['t'][0])/len(result)
+        end = int(x['t'][1])/len(result)
+        start_drift = get_timestamp_log(result, len(result), start)
+        if end == 0:
+            end_drift = 'N/A'
+        else:
+            end_drift = str(get_timestamp_log(result, len(result), end))+" (" + str(round(end, 2)) + ")"
+        result.attributes['drift info '+str(i)+':'] = str(x['d']) + "drift start timestamp: "+str(start_drift)+" (" + str(round(start, 2)) + "); drift end timestamp: " + end_drift
+        i += 1
+    if noise_data is not None:
+        start_noise = get_timestamp_log(result, len(result), noise_data['t'][0])
+        end_noise = get_timestamp_log(result, len(result), noise_data['t'][1])
+        result.attributes['noise info:'] = "noise proportion: "+str(noise_data['p']) + "; start point: " + str(start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(round(noise_data['t'][1], 2)) + "); noise type: "+noise_data['ty']
+    return result
