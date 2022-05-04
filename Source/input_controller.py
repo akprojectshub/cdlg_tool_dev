@@ -75,6 +75,8 @@ def input_drift(str_in):
 
 def input_percentage(str_in):
     per_one = input(str_in)
+    if per_one == "":
+        return 0.5
     while re.fullmatch('0|0\.[0-9]+|1', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 1.')
         per_one = input(str_in)
@@ -91,6 +93,8 @@ def input_percentage_end_noise(str_in, start):
 
 def input_per_half(str_in):
     per_one = input(str_in)
+    if per_one == "":
+        return 0.25
     while re.fullmatch('0\.[0-4][0-9]*', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 0.5.')
         per_one = input(str_in)
@@ -99,6 +103,8 @@ def input_per_half(str_in):
 
 def input_per_not_null(str_in):
     per_one = input(str_in)
+    if per_one == "":
+        return 0.5
     while re.fullmatch('0\.[0-9]*', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 1.')
         per_one = input(str_in)

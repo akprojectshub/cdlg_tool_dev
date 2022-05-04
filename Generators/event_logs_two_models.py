@@ -17,7 +17,7 @@ from Source.input_controller import input_int, input_drift, input_percentage, in
     input_season
 from Source.noise_controller import add_noise_to_log
 from Source.process_tree_controller import generate_specific_trees
-
+import datetime
 
 def generate_logs_with_models(tree_one, tree_two, incremental_ran, parameters=None):
     """ Generation of event logs with different concept drifts from two models
@@ -27,10 +27,10 @@ def generate_logs_with_models(tree_one, tree_two, incremental_ran, parameters=No
     :param tree_one: first process tree
     :param tree_two: second process tree
     """
-    datestamp = input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
-    min_duration = input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
-    max_duration = input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
-                                 min_duration)
+    datestamp = datetime.datetime.strptime('20/23/8 8:0:0', '%y/%d/%m %H:%M:%S')  # input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
+    min_duration = 10 #input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
+    max_duration = 100 #input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
+                                 #min_duration)
 
     print("\n--- INPUT DRIFT ---")
     drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")

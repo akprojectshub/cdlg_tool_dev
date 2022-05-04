@@ -3,7 +3,7 @@ import copy
 from Source.control_flow_controller import evolve_tree_randomly
 from Source.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from Source.input_controller import input_percentage, input_no, input_per_not_null, input_yes_no, input_per_half, \
+from Source.input_controller import input_percentage, input_no, input_no_yes, input_per_not_null, input_yes_no, input_per_half, \
     input_percentage_end_noise
 from Source.process_tree_controller import generate_tree
 
@@ -56,7 +56,7 @@ def add_noise_to_log(log, tree, datestamp, min_duration, max_duration):
     :param max_duration: maximum duration of activities
     :return: event log with time configurations and noise, if desired
     """
-    str_noise = input_yes_no("Do you want to add noise to the event log [yes, no]? ")
+    str_noise = input_no_yes("Do you want to add noise to the event log [yes, no]? ")
     if str_noise == 'yes':
         log_with_no, noise_data = add_noise_randomized_tree(log, tree)
         add_duration_to_log(log_with_no, datestamp, min_duration, max_duration)

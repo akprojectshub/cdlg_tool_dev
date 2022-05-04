@@ -20,7 +20,9 @@ def main():
           '\t - random generated models: one or two process trees can be generated randomly.\n'
           'When using one model, it can evolve randomly or in a controlled manner.\n'
           'When using two models, the second model is/should be the already evolved version of the first model.\n'
-          'Several event logs can be generated with one run of the application, and the parameters can be changed for each event log.\n')
+          'Several event logs can be generated with one run of the application, and the parameters can be changed for each event log.\n'
+          'Most dialogues also provide a default'
+          )
 
     two_one_rand = input_start(
         'Import models or use randomly generated models [import, random]: ')
