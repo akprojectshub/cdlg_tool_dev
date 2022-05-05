@@ -17,7 +17,7 @@ def main():
     print('The tool offers different paths to generate event logs with drifts.\n'
           '\t - import models: one or two own models can be imported,\n '
           '\t   whereby the BPMN models and Petri nets need to be block-structured.\n'
-          '\t - random generated models: one or two process trees can be generated randomly.\n'
+          '\t - randomly generated models: one or two process trees can be generated randomly.\n'
           'When using one model, it can evolve randomly or in a controlled manner.\n'
           'When using two models, the second model is/should be the already evolved version of the first model.\n'
           'Several event logs can be generated with one run of the application, and the parameters can be changed for each event log.\n\n'

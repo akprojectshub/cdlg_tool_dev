@@ -52,7 +52,7 @@ def generate_log_with_sudden_drift(file_path_one=None, file_path_two=None):
         noise_data = "noise proportion: "+str(proportion_noise_in_sector) + "; start point: " + str(start_noise) + " (" + str(start_sector_noise) + "); end point: " + str(end_noise) + " (" + str(end_sector_noise) + "); noise type: "+type_noise
         event_log.attributes['noise info:'] = noise_data
     xes_exporter.apply(event_log, "Data/result_data/doc/event_log_with_sudden_drift.xes")
-
+    print('exported log to', "Data/result_data/doc/event_log_with_sudden_drift.xes")
 
 def get_parameters():
     """ Getting parameters from the text file 'parameters_sudden_drift' placed in the folder 'Data/parameters'
