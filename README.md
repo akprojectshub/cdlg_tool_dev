@@ -15,8 +15,8 @@ This approach supports the generation of event logs with following features:
 
 About
 ---
-This repository contains the prototype of our approach and the evaluation as described in 
-</br>_HERE PAPER_
+This repository contains the prototype of the CDLG tool described in the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022.
+The primary contact for questions or comments regarding CDLG is Alexander Kraus: alexander[dot]kraus[at]uni-mannheim[dot]de 
 
 **If you want to use parts of the approach in your project we refer to our [python package](https://gitlab.uni-mannheim.de/processanalytics/cdlg-package).**
 
