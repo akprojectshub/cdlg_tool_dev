@@ -21,7 +21,7 @@ def generate_logs(file_path_one=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
 
     :param file_path_one: file path to own process model, if desired to be used
-    :return: collection of event logs with drifts saved in 'Data/result_data/gold_standard'
+    :return: collection of event logs with drifts saved in out_folder
     """
     out_folder = 'data/generated_collections/' + str(int(time.time()))
     if not os.path.exists(out_folder):
@@ -98,7 +98,7 @@ def generate_logs(file_path_one=None):
                 end_drift = "N/A"
             else:
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(drift_area_two) + ")"
-            data = "event log: "+"event_log_"+str(i)+"; drift perspective: control-flow; drift type: "+drift+"; drift specific information: "+dr_s+"; drift start timestamp: "+str(start_drift) + " (" + str(drift_area_one) + "); drift end timestamp: " + end_drift + "; noise proportion: " + str(noise_prop) + "; activities added: " + str(added_acs) + "; activities deleted: " + str(deleted_acs) + "; activities moved: " + str(moved_acs)
+            data = "event log: "+"event_log_"+str(i)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
             event_log.attributes['drift info'] = data
             xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
             writer.writerow(["event_log_"+str(i), "control-flow", drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])

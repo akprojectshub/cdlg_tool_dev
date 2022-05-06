@@ -9,15 +9,19 @@ from controllers.event_log_controller import add_duration_to_log, get_timestamp_
 from controllers.noise_controller import add_noise_doc
 from controllers.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
+import time
 
+out_folder = 'data/generated_logs'
 
 def generate_log_with_sudden_drift(file_path_one=None, file_path_two=None):
     """ Generation of an event log with a sudden drift
 
     :param file_path_one: file path to own process model, if desired to be used
     :param file_path_two: file path to second own process model, if desired to be used
-    :return: event log with sudden drift saved in 'Data/result_data/doc'
+    :return: event log with sudden drift saved in out_file
     """
+    out_file = os.path.join(out_folder, 'param_log_sudden_' + str(int(time.time())) + '.xes')
+
     tree_complexity, date, min_sec, max_sec, num_traces, change_point, proportion_random_evolution, start_sector_noise, end_sector_noise, proportion_noise_in_sector, type_noise = get_parameters()
     deleted_acs = []
     added_acs = []
@@ -42,17 +46,17 @@ def generate_log_with_sudden_drift(file_path_one=None, file_path_two=None):
         add_duration_to_log(event_log, date, min_sec, max_sec)
     start_drift = get_timestamp_log(event_log, num_traces, change_point)
     if file_path_two is None:
-        drift_data = "drift perspective: control-flow; drift type: sudden; drift timestamp: "+str(start_drift)+" (" + str(change_point) + "); activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs)+"; activities moved: "+str(moved_acs)
+        drift_data = "perspective: control-flow; type: sudden; drift_moment: "+str(start_drift)+" (" + str(change_point) + "); activities_added: "+str(added_acs)+"; activities_deleted: "+str(deleted_acs)+"; activities_moved: "+str(moved_acs)
     else:
-        drift_data = "drift perspective: control-flow; drift type: sudden; drift timestamp: "+str(start_drift)+" (" + str(change_point) + ")"
-    event_log.attributes['drift info:'] = drift_data
+        drift_data = "perspective: control-flow; type: sudden; drift_moment: "+str(start_drift)+" (" + str(change_point) + ")"
+    event_log.attributes['drift_info:'] = drift_data
     if start_sector_noise is not None:
         start_noise = get_timestamp_log(event_log, num_traces, start_sector_noise)
         end_noise = get_timestamp_log(event_log, num_traces, end_sector_noise)
         noise_data = "noise proportion: "+str(proportion_noise_in_sector) + "; start point: " + str(start_noise) + " (" + str(start_sector_noise) + "); end point: " + str(end_noise) + " (" + str(end_sector_noise) + "); noise type: "+type_noise
         event_log.attributes['noise info:'] = noise_data
-    xes_exporter.apply(event_log, "Data/result_data/doc/event_log_with_sudden_drift.xes")
-    print('exported log to', "Data/result_data/doc/event_log_with_sudden_drift.xes")
+    xes_exporter.apply(event_log, out_file)
+    print('exported log to', out_file)
 
 def get_parameters():
     """ Getting parameters from the text file 'parameters_sudden_drift' placed in the folder 'Data/parameters'
@@ -87,11 +91,8 @@ def get_parameters():
 
 
 def main():
-    if not os.path.exists('Data/result_data'):
-        os.makedirs('Data/result_data')
-        os.makedirs('Data/result_data/doc')
-    elif not os.path.exists('Data/result_data/doc'):
-        os.makedirs('Data/result_data/doc')
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
     if len(sys.argv) == 1:
         generate_log_with_sudden_drift()
     elif len(sys.argv) == 2:
