@@ -1,9 +1,9 @@
-from Source.input_controller import input_date, input_int_hun, input_int, input_int_max
+from controllers.input_controller import input_date, input_int_hun, input_int, input_int_max
 from pm4py.objects.process_tree import semantics
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.conversion.log import converter as log_converter
 
-from Source.noise_controller import add_noise_to_log
+from controllers.noise_controller import add_noise_to_log
 
 
 def generate_log_without_drift(tree, nu_logs):

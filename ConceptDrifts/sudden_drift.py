@@ -1,6 +1,6 @@
-from Source.event_log_controller import *
+from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from Source.input_controller import input_percentage, input_int, input_end
+from controllers.input_controller import input_percentage, input_int, input_end
 
 
 def sudden_drift(tree_one, tree_two, nu_traces, change_point):

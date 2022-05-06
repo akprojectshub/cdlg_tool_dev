@@ -1,20 +1,20 @@
 from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree.obj import ProcessTree
 
-from ConceptDrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
-from ConceptDrifts.incremental_drift import log_with_incremental_drift_one_model, additional_incremental_drift_in_log
-from ConceptDrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
-from ConceptDrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
+from conceptdrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
+from conceptdrifts.incremental_drift import log_with_incremental_drift_one_model, additional_incremental_drift_in_log
+from conceptdrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
+from conceptdrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 
-from Source.control_flow_controller import change_tree_on_control_flow
-from Source.event_log_controller import get_num_trace, get_timestamp_log
-from Source.input_controller import input_drift, input_int, input_date, input_percentage, \
+from controllers.control_flow_controller import change_tree_on_control_flow
+from controllers.event_log_controller import get_num_trace, get_timestamp_log
+from controllers.input_controller import input_drift, input_int, input_date, input_percentage, \
     input_typ_gradual, input_int_hun, input_yes_no, input_no_yes, input_tree, input_int_max, input_season
-from Source.noise_controller import add_noise_to_log
+from controllers.noise_controller import add_noise_to_log
 import datetime
 
-def generate_logs_with_model(tree_one):
+def generate_logs_with_model(tree_one, out_file):
     """ Generation of event logs with different concept drifts from one model
 
     :param tree_one: the initial model version
@@ -83,10 +83,8 @@ def generate_logs_with_model(tree_one):
         acs_data = "activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs)+"; activities moved: "+str(moved_acs)
         drift_info = {'d': dr_s, 't': [start_trace, end_trace], 'a': acs_data}
     result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration, drift_info)
-    xes_exporter.apply(result,
-                       "Data/result_data/terminal/event_log_with_drift.xes")
-    print(
-        "Event log 'event_log_with_drift' is saved in the folder 'Data/result_data/terminal'.")
+    xes_exporter.apply(result, out_file)
+    print("Resulting event log stored as", out_file)
 
 
 def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration, drift_info):

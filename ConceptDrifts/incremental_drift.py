@@ -1,11 +1,11 @@
 import copy
 
-from Source.control_flow_controller import change_tree_on_control_flow_incremental, \
+from controllers.control_flow_controller import change_tree_on_control_flow_incremental, \
     change_tree_on_control_flow_incremental_random, evolve_tree_randomly
-from Source.input_controller import input_int, input_ra_ch, input_int_hun, input_percentage, input_end
-from Source.event_log_controller import *
+from controllers.input_controller import input_int, input_ra_ch, input_int_hun, input_percentage, input_end
+from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from Source.process_tree_controller import generate_tree, visualise_tree
+from controllers.process_tree_controller import generate_tree, visualise_tree
 
 
 def incremental_drift_doc(tree_one, nu_traces_initial, nu_traces_int, nu_traces_evl, nu_models,

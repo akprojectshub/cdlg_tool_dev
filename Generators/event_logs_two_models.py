@@ -1,25 +1,25 @@
 from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree.obj import ProcessTree
 
-from ConceptDrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
-from ConceptDrifts.incremental_drift import log_with_incremental_drift_two_models_random, \
+from conceptdrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
+from conceptdrifts.incremental_drift import log_with_incremental_drift_two_models_random, \
     log_with_incremental_drift_two_models_imported, additional_incremental_drift_in_log, \
     additional_incremental_drift_in_log_imported
-from ConceptDrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
-from ConceptDrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
+from conceptdrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
+from conceptdrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree import semantics
 
-from Source.control_flow_controller import change_tree_on_control_flow
-from Source.event_log_controller import get_num_trace, get_timestamp_log
-from Source.input_controller import input_int, input_drift, input_percentage, input_date, input_typ_gradual, \
+from controllers.control_flow_controller import change_tree_on_control_flow
+from controllers.event_log_controller import get_num_trace, get_timestamp_log
+from controllers.input_controller import input_int, input_drift, input_percentage, input_date, input_typ_gradual, \
     generate_tree_out_of_file, input_int_hun, input_int_max, input_yes_no, input_im, input_tree_one, input_comp, \
     input_season
-from Source.noise_controller import add_noise_to_log
-from Source.process_tree_controller import generate_specific_trees
+from controllers.noise_controller import add_noise_to_log
+from controllers.process_tree_controller import generate_specific_trees
 import datetime
 
-def generate_logs_with_models(tree_one, tree_two, incremental_ran, parameters=None):
+def generate_logs_with_models(tree_one, tree_two, incremental_ran, out_file, parameters=None):
     """ Generation of event logs with different concept drifts from two models
 
     :param parameters: the possible changed parameters for the generation of random process trees
@@ -102,9 +102,8 @@ def generate_logs_with_models(tree_one, tree_two, incremental_ran, parameters=No
         drift_info = {'d': dr_s, 't': [start_trace, end_trace]}
     result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration,
                                                    drift_info)
-    xes_exporter.apply(result,
-                       "Data/result_data/terminal/event_log_with_drift.xes")
-    print("Event log 'event_log_with_drift' is saved in the folder 'Data/result_data/terminal'.")
+    xes_exporter.apply(result, out_file)
+    print("Resulting event log stored as", out_file)
 
 
 def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration, drift_info):

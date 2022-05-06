@@ -1,6 +1,6 @@
-from Source.event_log_controller import *
+from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from Source.input_controller import input_int, input_percentage, input_end, input_yes_no, input_season
+from controllers.input_controller import input_int, input_percentage, input_end, input_yes_no, input_season
 
 
 def recurring_drift(tree_one, tree_two, nu_traces, number_of_seasonal_changes, proportion_first, start_point,

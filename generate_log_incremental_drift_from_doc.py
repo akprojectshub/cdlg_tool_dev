@@ -2,10 +2,10 @@ import datetime
 import os
 import sys
 
-from ConceptDrifts.incremental_drift import incremental_drift_doc
-from Source.event_log_controller import add_duration_to_log, get_timestamp_log
-from Source.noise_controller import add_noise_doc
-from Source.process_tree_controller import generate_specific_trees, generate_tree_from_file
+from conceptdrifts.incremental_drift import incremental_drift_doc
+from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
+from controllers.noise_controller import add_noise_doc
+from controllers.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 
 

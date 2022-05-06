@@ -5,17 +5,17 @@ import os
 import sys
 from random import randint, uniform
 
-from ConceptDrifts.gradual_drift import gradual_drift
-from ConceptDrifts.incremental_drift import incremental_drift_gs
-from ConceptDrifts.recurring_drift import recurring_drift
-from ConceptDrifts.sudden_drift import sudden_drift
-from Source.control_flow_controller import evolve_tree_randomly
-from Source.event_log_controller import add_duration_to_log, get_timestamp_log
-from Source.noise_controller import add_noise_gs
-from Source.process_tree_controller import generate_tree_from_file, generate_specific_trees
+from conceptdrifts.gradual_drift import gradual_drift
+from conceptdrifts.incremental_drift import incremental_drift_gs
+from conceptdrifts.recurring_drift import recurring_drift
+from conceptdrifts.sudden_drift import sudden_drift
+from controllers.control_flow_controller import evolve_tree_randomly
+from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
+from controllers.noise_controller import add_noise_gs
+from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
-
+import time
 
 def generate_logs(file_path_one=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
@@ -23,12 +23,17 @@ def generate_logs(file_path_one=None):
     :param file_path_one: file path to own process model, if desired to be used
     :return: collection of event logs with drifts saved in 'Data/result_data/gold_standard'
     """
+    out_folder = 'data/generated_collections/' + str(int(time.time()))
+    if not os.path.exists(out_folder):
+        os.makedirs(out_folder)
+
     tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec = get_parameters()
     if file_path_one is None:
         tree_one = generate_specific_trees(tree_complexity.strip())
     else:
         tree_one = generate_tree_from_file(file_path_one)
-    with open('Data/result_data/gold_standard/gold_standard.csv', 'w', newline='') as log_file:
+    print('Generating', num_logs, 'logs')
+    with open(os.path.join(out_folder, "collection_info.csv"), 'w', newline='') as log_file:
         writer = csv.writer(log_file)
         writer.writerow(["Event Log", "Drift Perspective", "Drift Type", "Drift Specific Information", "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added", "Activities Deleted", "Activities Moved"])
         for i in range(num_logs):
@@ -95,15 +100,16 @@ def generate_logs(file_path_one=None):
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(drift_area_two) + ")"
             data = "event log: "+"event_log_"+str(i)+"; drift perspective: control-flow; drift type: "+drift+"; drift specific information: "+dr_s+"; drift start timestamp: "+str(start_drift) + " (" + str(drift_area_one) + "); drift end timestamp: " + end_drift + "; noise proportion: " + str(noise_prop) + "; activities added: " + str(added_acs) + "; activities deleted: " + str(deleted_acs) + "; activities moved: " + str(moved_acs)
             event_log.attributes['drift info'] = data
-            xes_exporter.apply(event_log, "Data/result_data/gold_standard/event_log_"+str(i)+".xes")
+            xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
             writer.writerow(["event_log_"+str(i), "control-flow", drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])
-            file_object = open("Data/result_data/gold_standard/event_log_"+str(i)+".txt", 'w')
+            file_object = open(os.path.join(out_folder, "log_"+str(i)+".txt"), 'w')
             file_object.write("--- USED PARAMETERS ---\n")
             file_object.write(parameters+"\n\n")
             file_object.write("--- DRIFT INFORMATION ---\n")
             file_object.write(data)
             file_object.close()
-    ptml_exporter.apply(tree_one, "Data/result_data/gold_standard/initial_version.ptml")
+    ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
+    print('Finished generating collection of', num_logs, 'logs in', out_folder)
 
 
 def get_parameters():
@@ -111,7 +117,7 @@ def get_parameters():
 
     :return: parameters for the generation of a set of event logs
     """
-    doc = open('Data/parameters/parameters_logs', 'r')
+    doc = open('data/parameters/parameters_log_collection', 'r')
     one = doc.readline().split(' ')[1]
     tree_complexity = one[0:len(one) - 1]
     num_logs = int(doc.readline().split(' ')[1])
@@ -133,11 +139,6 @@ def get_parameters():
 
 
 def main():
-    if not os.path.exists('Data/result_data'):
-        os.makedirs('Data/result_data')
-        os.makedirs('Data/result_data/gold_standard')
-    elif not os.path.exists('Data/result_data/gold_standard'):
-        os.makedirs('Data/result_data/gold_standard')
     if len(sys.argv) == 1:
         generate_logs()
     elif len(sys.argv) == 2:
