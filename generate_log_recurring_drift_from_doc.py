@@ -3,7 +3,7 @@ import datetime
 import os
 import sys
 
-from conceptdrifts.recurring_drift import recurring_drift
+from ConceptDrifts.recurring_drift import recurring_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_doc

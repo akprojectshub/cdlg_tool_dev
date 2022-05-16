@@ -4,7 +4,7 @@ from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
 from controllers.input_controller import input_percentage, input_no, input_no_yes, input_per_not_null, input_yes_no, input_per_half, \
-    input_percentage_end_noise
+    input_percentage_end
 from controllers.process_tree_controller import generate_tree
 
 
@@ -26,7 +26,7 @@ def add_noise_randomized_tree(log_total, tree_one):
           "The created model, which will appear as an image, will be used to generate traces introduced in the event log as noise.\n")
     type_noise = input_no("Type of model for generating the noise [changed_model, random_model]: ")
     start_noise = input_percentage("Start point of noise in the event log (0 <= x <= 1): ")
-    end_noise = input_percentage_end_noise("End point of noise in the event log (0 <= x <= 1): ", start_noise)
+    end_noise = input_percentage_end("End point of noise in the event log (0 <= x <= 1): ", start_noise)
     pro_noise = input_per_half("Proportion of noise in the set sector of the event log (0 < x < 0.5): ")
     nu_traces = int(
         round(((length_of_log(log_total) * end_noise) - (

@@ -25,6 +25,9 @@ def input_int_max(str_in, min_in):
 
 def input_int_odd(str_in):
     int_one = input(str_in)
+    if int_one == "":
+        print('Default: 3')
+        return 3
     while re.fullmatch('[0-9]*[13579]', int_one) is None:
         print('Wrong input! It has to be an odd integer.')
         int_one = input(str_in)
@@ -33,6 +36,9 @@ def input_int_odd(str_in):
 
 def input_int_even(str_in):
     int_one = input(str_in)
+    if int_one == "":
+        print('Default: 4')
+        return 4
     while re.fullmatch('[0-9]*[02468]', int_one) is None:
         print('Wrong input! It has to be an even integer.')
         int_one = input(str_in)
@@ -54,8 +60,8 @@ def input_season(start_point, end_point):
 def input_int_hun(str_in):
     int_one = input(str_in)
     if int_one == "":
-        int_one = '1000'
         print('Default: 1000')
+        return 1000
     while re.fullmatch('[0-9]+', int_one) is None or int(int_one) < 100:
         print('Wrong input! It has to be an integer larger than 99.')
         int_one = input(str_in)
@@ -65,8 +71,8 @@ def input_int_hun(str_in):
 def input_drift(str_in):
     drift_type = input(str_in)
     if drift_type == "":
-        drift_type = 'sudden'
         print('Default: sudden')
+        return 'sudden'
     while drift_type != "sudden" and drift_type != "gradual" and drift_type != "recurring" and drift_type != "incremental":
         print("Wrong input! It has to be 'sudden', 'gradual', 'recurring' or 'incremental'.")
         drift_type = input(str_in)
@@ -76,6 +82,7 @@ def input_drift(str_in):
 def input_percentage(str_in):
     per_one = input(str_in)
     if per_one == "":
+        print('Default: 0.5')
         return 0.5
     while re.fullmatch('0|0\.[0-9]+|1', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 1.')
@@ -83,8 +90,12 @@ def input_percentage(str_in):
     return float(per_one)
 
 
-def input_percentage_end_noise(str_in, start):
+def input_percentage_end(str_in, start):
     per_one = input(str_in)
+    if per_one == "":
+        per_one = start + (1-start)*0.8
+        print('Default: '+str(per_one))
+        return float(per_one)
     while re.fullmatch('0|0\.[0-9]+|1', per_one) is None or float(per_one) <= start:
         print('Wrong input! It must be a floating point number between 0 and 1 and greater than ' + str(start)+'.')
         per_one = input(str_in)
@@ -94,6 +105,7 @@ def input_percentage_end_noise(str_in, start):
 def input_per_half(str_in):
     per_one = input(str_in)
     if per_one == "":
+        print('Default: 0.25')
         return 0.25
     while re.fullmatch('0\.[0-4][0-9]*', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 0.5.')
@@ -104,6 +116,7 @@ def input_per_half(str_in):
 def input_per_not_null(str_in):
     per_one = input(str_in)
     if per_one == "":
+        print('Default: 0.5')
         return 0.5
     while re.fullmatch('0\.[0-9]*', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 1.')

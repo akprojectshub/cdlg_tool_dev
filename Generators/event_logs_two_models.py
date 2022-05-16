@@ -1,12 +1,12 @@
 from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree.obj import ProcessTree
 
-from conceptdrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
-from conceptdrifts.incremental_drift import log_with_incremental_drift_two_models_random, \
+from ConceptDrifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
+from ConceptDrifts.incremental_drift import log_with_incremental_drift_two_models_random, \
     log_with_incremental_drift_two_models_imported, additional_incremental_drift_in_log, \
     additional_incremental_drift_in_log_imported
-from conceptdrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
-from conceptdrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
+from ConceptDrifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
+from ConceptDrifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree import semantics
 
@@ -14,10 +14,11 @@ from controllers.control_flow_controller import change_tree_on_control_flow
 from controllers.event_log_controller import get_num_trace, get_timestamp_log
 from controllers.input_controller import input_int, input_drift, input_percentage, input_date, input_typ_gradual, \
     generate_tree_out_of_file, input_int_hun, input_int_max, input_yes_no, input_im, input_tree_one, input_comp, \
-    input_season
+    input_season, input_percentage_end
 from controllers.noise_controller import add_noise_to_log
 from controllers.process_tree_controller import generate_specific_trees
 import datetime
+
 
 def generate_logs_with_models(tree_one, tree_two, incremental_ran, out_file, parameters=None):
     """ Generation of event logs with different concept drifts from two models
@@ -27,10 +28,11 @@ def generate_logs_with_models(tree_one, tree_two, incremental_ran, out_file, par
     :param tree_one: first process tree
     :param tree_two: second process tree
     """
-    datestamp = datetime.datetime.strptime('20/23/8 8:0:0', '%y/%d/%m %H:%M:%S')  # input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
-    min_duration = 10 #input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
-    max_duration = 100 #input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
-                                 #min_duration)
+    datestamp = datetime.datetime.strptime('20/23/8 8:0:0',
+                                           '%y/%d/%m %H:%M:%S')  # input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
+    min_duration = 10  # input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
+    max_duration = 100  # input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
+    # min_duration)
 
     print("\n--- INPUT DRIFT ---")
     drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")
@@ -50,7 +52,7 @@ def generate_logs_with_models(tree_one, tree_two, incremental_ran, out_file, par
     elif drift_type == 'gradual':
         num_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
         start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
-        end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
+        end_point = input_percentage_end("Ending point of the drift (" + str(start_point) + "0 < x < 1): ", start_point)
         distribution_type = input_typ_gradual(
             "Method for distributing the traces during the gradual drift [linear, exponential]: ")
         dr_s += "drift type: gradual; drift specific information: " + distribution_type + " distribution; "
@@ -68,7 +70,8 @@ def generate_logs_with_models(tree_one, tree_two, incremental_ran, out_file, par
             num_seasonal_changes = input_int("Number of seasonal changes of the model versions (int): ")
         else:
             start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
-            end_point = input_percentage("Ending point of the drift (0 < x < 1): ")
+            end_point = input_percentage_end("Ending point of the drift (" + str(start_point) + "0 < x < 1): ",
+                                             start_point)
             num_seasonal_changes = input_season(start_point, end_point)
         proportion_first = input_percentage(
             "Proportion of the initial version of the model in the final log (0 < x < 1): ")
@@ -196,17 +199,20 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
     result, noise_data = add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
     i = 1
     for x in drifts:
-        start = int(x['t'][0])/len(result)
-        end = int(x['t'][1])/len(result)
+        start = int(x['t'][0]) / len(result)
+        end = int(x['t'][1]) / len(result)
         start_drift = get_timestamp_log(result, len(result), start)
         if end == 0:
             end_drift = 'N/A'
         else:
-            end_drift = str(get_timestamp_log(result, len(result), end))+" (" + str(round(end, 2)) + ")"
-        result.attributes['drift info '+str(i)+':'] = str(x['d']) + "drift start timestamp: "+str(start_drift)+" (" + str(round(start, 2)) + "); drift end timestamp: " + end_drift
+            end_drift = str(get_timestamp_log(result, len(result), end)) + " (" + str(round(end, 2)) + ")"
+        result.attributes['drift info ' + str(i) + ':'] = str(x['d']) + "drift start timestamp: " + str(
+            start_drift) + " (" + str(round(start, 2)) + "); drift end timestamp: " + end_drift
         i += 1
     if noise_data is not None:
         start_noise = get_timestamp_log(result, len(result), noise_data['t'][0])
         end_noise = get_timestamp_log(result, len(result), noise_data['t'][1])
-        result.attributes['noise info:'] = "noise proportion: "+str(noise_data['p']) + "; start point: " + str(start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(round(noise_data['t'][1], 2)) + "); noise type: "+noise_data['ty']
+        result.attributes['noise info:'] = "noise proportion: " + str(noise_data['p']) + "; start point: " + str(
+            start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(
+            round(noise_data['t'][1], 2)) + "); noise type: " + noise_data['ty']
     return result

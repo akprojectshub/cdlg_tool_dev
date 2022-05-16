@@ -8,7 +8,6 @@ from controllers.process_tree_controller import generate_tree, generate_specific
 import time
 
 
-
 def main():
     out_folder = 'data/generated_logs'
     if not os.path.exists(out_folder):
@@ -51,12 +50,13 @@ def main():
                 parameters = input_parameters()
                 tree_ran = generate_tree(parameters)
             else:
-                str_clp = input_comp("Complexity of the process tree to be generated [simple, middle, complex]: ")
+                str_clp = input_comp(
+                    "Complexity of the process tree to be generated [simple, middle, complex]: ")
                 tree_ran = generate_specific_trees(str_clp)
             generate_logs_with_model(tree_ran, out_file)
         elif imp == 'two_models':
             default = input_no_yes(
-                    "Do you want to adjust the various settings/parameters for the process tree, which will be used to generate the model randomly [yes, no]? ")
+                "Do you want to adjust the various settings/parameters for the process tree, which will be used to generate the model randomly [yes, no]? ")
             parameters = {}
             if default == 'yes':
                 parameters = input_parameters()
@@ -71,4 +71,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

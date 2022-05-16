@@ -5,10 +5,10 @@ import os
 import sys
 from random import randint, uniform
 
-from conceptdrifts.gradual_drift import gradual_drift
-from conceptdrifts.incremental_drift import incremental_drift_gs
-from conceptdrifts.recurring_drift import recurring_drift
-from conceptdrifts.sudden_drift import sudden_drift
+from ConceptDrifts.gradual_drift import gradual_drift
+from ConceptDrifts.incremental_drift import incremental_drift_gs
+from ConceptDrifts.recurring_drift import recurring_drift
+from ConceptDrifts.sudden_drift import sudden_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
