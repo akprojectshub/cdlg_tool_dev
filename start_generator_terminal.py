@@ -1,7 +1,7 @@
 import os
 
-from Generators.event_logs_one_model import generate_logs_with_model
-from Generators.event_logs_two_models import generate_logs_with_models
+from log_generators.event_logs_one_model import generate_logs_with_model
+from log_generators.event_logs_two_models import generate_logs_with_models
 from controllers.input_controller import input_start, input_parameters, generate_tree_out_of_file, input_comp, \
     input_start_second, input_no_yes
 from controllers.process_tree_controller import generate_tree, generate_specific_trees

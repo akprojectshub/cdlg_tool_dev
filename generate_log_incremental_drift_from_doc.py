@@ -2,7 +2,7 @@ import datetime
 import os
 import sys
 
-from ConceptDrifts.incremental_drift import incremental_drift_doc
+from concept_drifts.incremental_drift import incremental_drift_doc
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_doc
 from controllers.process_tree_controller import generate_specific_trees, generate_tree_from_file
@@ -10,6 +10,7 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import time
 
 out_folder = 'data/generated_logs'
+param_file = 'data/parameters/parameters_incremental_drift'
 
 def generate_log_with_incremental_drift(file_path_one=None):
     """ Generation of an event log with an incremental drift
@@ -17,6 +18,8 @@ def generate_log_with_incremental_drift(file_path_one=None):
     :param file_path_one: file path to own process model, if it is to be used
     :return: event log with incremental drift saved in out_file
     """
+    print('Generating event log with an incremental drift based on', param_file)
+
     out_file = os.path.join(out_folder, 'param_log_incremental_' + str(int(time.time())) + '.xes')
 
     tree_complexity, date, min_sec, max_sec, nu_traces_initial, nu_traces_int, nu_traces_evl, nu_int_models, proportion_random_evolution, start_sector_noise, end_sector_noise, proportion_noise_in_sector, type_noise = get_parameters()
@@ -50,7 +53,7 @@ def get_parameters():
 
     :return: parameters for the generation of an event log with an incremental drift
     """
-    doc = open('data/parameters/parameters_incremental_drift', 'r')
+    doc = open(param_file, 'r')
     one = doc.readline().split(' ')[1]
     tree_complexity = one[0:len(one) - 1]
     dates = doc.readline().split(' ')

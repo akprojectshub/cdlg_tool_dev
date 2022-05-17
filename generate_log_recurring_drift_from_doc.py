@@ -3,7 +3,7 @@ import datetime
 import os
 import sys
 
-from ConceptDrifts.recurring_drift import recurring_drift
+from concept_drifts.recurring_drift import recurring_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_doc
@@ -12,6 +12,7 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 import time
 
 out_folder = 'data/generated_logs'
+param_file = 'data/parameters/parameters_recurring_drift'
 
 def generate_log_with_recurring_drift(file_path_one=None, file_path_two=None):
     """ Generation of an event log with a recurring drift
@@ -20,6 +21,9 @@ def generate_log_with_recurring_drift(file_path_one=None, file_path_two=None):
     :param file_path_two: file path to second own process model, if desired to be used
     :return: event log with recurring drift saved in out_file
     """
+
+    print('Generating event log with a recurring drift based on', param_file)
+
     out_file = os.path.join(out_folder, 'param_log_recurring_' + str(int(time.time())) + '.xes')
     tree_complexity, date, min_sec, max_sec, num_traces, start_point, end_point, seasonal_changes, proportion_initial_model, proportion_random_evolution, start_sector_noise, end_sector_noise, proportion_noise_in_sector, type_noise = get_parameters()
     deleted_acs = []
@@ -64,7 +68,7 @@ def get_parameters():
 
     :return: parameters for the generation of an event log with a recurring drift
     """
-    doc = open('data/parameters/parameters_recurring_drift', 'r')
+    doc = open(param_file, 'r')
     one = doc.readline().split(' ')[1]
     tree_complexity = one[0:len(one) - 1]
     dates = doc.readline().split(' ')
