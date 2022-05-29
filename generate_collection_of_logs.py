@@ -113,7 +113,7 @@ def generate_logs(file_path_one=None):
 
 
 def get_parameters():
-    """ Getting parameters from the text file 'parameters_logs' placed in the folder 'Data/parameters'
+    """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
 
     :return: parameters for the generation of a set of event logs
     """
