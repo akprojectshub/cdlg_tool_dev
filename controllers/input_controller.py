@@ -7,8 +7,11 @@ from pm4py.objects.conversion.wf_net import converter as wf_net_converter
 from pm4py.objects.petri_net.importer import importer as pnml_importer
 
 
-def input_int(str_in):
+def input_int(str_in, default = 10):
     int_one = input(str_in)
+    if int_one == "":
+        print('Set to default:', default)
+        return default
     while re.fullmatch('[0-9]+', int_one) is None:
         print('Wrong input! It has to be an integer.')
         int_one = input(str_in)
@@ -79,11 +82,11 @@ def input_drift(str_in):
     return drift_type
 
 
-def input_percentage(str_in):
+def input_percentage(str_in, default = 0.5):
     per_one = input(str_in)
     if per_one == "":
-        print('Default: 0.5')
-        return 0.5
+        print('Set to default:', default)
+        return default
     while re.fullmatch('0|0\.[0-9]+|1', per_one) is None:
         print('Wrong input! It must be a floating point number between 0 and 1.')
         per_one = input(str_in)
@@ -157,39 +160,39 @@ def input_type_cf(str_in):
 
 
 def input_parameters():
-    mode = input_int("MODE: most frequent number of visible activities (default 20): ")
-    min_in = input_int("MIN: minimum number of visible activities (default 10): ")
+    mode = input_int("MODE: most frequent number of visible activities (default 20): ", default = 20)
+    min_in = input_int("MIN: minimum number of visible activities (default 10): ", default = 10)
     while min_in > mode:
         print("Wrong input! MIN has to be smaller than MODE (" + str(mode) + ").")
-        min_in = input_int("MIN: minimum number of visible activities (default 10): ")
-    max_in = input_int("MAX: maximum number of visible activities (default 30): ")
+        min_in = input_int("MIN: minimum number of visible activities (default 10): ", default = 10)
+    max_in = input_int("MAX: maximum number of visible activities (default 30): ", default = 30)
     while max_in < mode:
         print("Wrong input! MAX has to be bigger than MODE (" + str(mode) + ").")
-        max_in = input_int("MAX: maximum number of visible activities (default 30): ")
+        max_in = input_int("MAX: maximum number of visible activities (default 30): ", default = 30)
     parameters = {'mode': mode,
                   'min': min_in,
                   'max': max_in,
                   'sequence': input_percentage(
-                      "SEQUENCE: probability to add a sequence operator to tree (default 0.25): "),
-                  'choice': input_percentage("CHOICE: probability to add a choice operator to tree (default 0.25): "),
+                      "SEQUENCE: probability to add a sequence operator to tree (default 0.25): ", default=0.25),
+                  'choice': input_percentage("CHOICE: probability to add a choice operator to tree (default 0.25): ", default=0.25),
                   'parallel': input_percentage(
-                      "PARALLEL: probability to add a parallel operator to tree (default 0.25): "),
-                  'loop': input_percentage("LOOP: probability to add a loop operator to tree (default 0.25): "),
-                  'or': input_percentage("OR: probability to add an or operator to tree (default 0): "),
+                      "PARALLEL: probability to add a parallel operator to tree (default 0.25): ", default=0.25),
+                  'loop': input_percentage("LOOP: probability to add a loop operator to tree (default 0.25): ", default=0.25),
+                  'or': input_percentage("OR: probability to add an or operator to tree (default 0.00): ", default=0.00),
                   'silent': input_percentage(
-                      "SILENT: probability to add silent activity to a choice or loop operator (default 0.25): "),
-                  'duplicate': input_percentage("DUPLICATE: probability to duplicate an activity label (default 0): "),
+                      "SILENT: probability to add silent activity to a choice or loop operator (default 0.25): ", default=0.25),
+                  'duplicate': input_percentage("DUPLICATE: probability to duplicate an activity label (default 0.00): ", default=0.00),
                   'lt_dependency': input_percentage(
-                      "LT_DEPENDENCY: probability to add a random dependency to the tree (default 0): "),
+                      "LT_DEPENDENCY: probability to add a random dependency to the tree (default 0.00): ", default=0.00),
                   'infrequent': input_percentage(
-                      "INFREQUENT: probability to make a choice have infrequent paths (default 0.25): "),
-                  'no_models': input_int("NO_MODELS: number of trees to generate from model population (default 10): "),
+                      "INFREQUENT: probability to make a choice have infrequent paths (default 0.25): ", default=0.25),
+                  'no_models': input_int("NO_MODELS: number of trees to generate from model population (default 10): ", default = 10),
                   'unfold': input_int(
                       "UNFOLD: whether or not to unfold loops in order to include choices underneath in dependencies: 0=False, 1=True\n"
                       "\t if lt_dependency <= 0: this should always be 0 (False)\n"
-                      "\t if lt_dependency > 0: this can be 1 or 0 (True or False) (default 10): "),
+                      "\t if lt_dependency > 0: this can be 1 or 0 (True or False) (default 1): ", default = 1),
                   'max_repeat': input_int(
-                      "MAX_REPEAT: maximum number of repetitions of a loop (only used when unfolding is True) (default 10): ")}
+                      "MAX_REPEAT: maximum number of repetitions of a loop (only used when unfolding is True) (default 10): ", default = 10)}
     return parameters
 
 
