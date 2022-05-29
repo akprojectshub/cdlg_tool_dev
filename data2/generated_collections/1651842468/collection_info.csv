@@ -1,0 +1,2 @@
+Event Log,Drift Perspective,Drift Type,Drift Specific Information,Drift Start Timestamp,Drift End Timestamp,Noise Proportion,Activities Added,Activities Deleted,Activities Moved
+event_log_0,control-flow,recurring,1 seasonal changes,2020-03-14 04:43:10,2020-03-15 22:10:55 (0.59),0.0318,"[Random activity 1, Random activity 2, Random activity 3]",[],[]

@@ -1,0 +1,5 @@
+--- USED PARAMETERS ---
+number of traces: 1000; drift: sudden; change point: 0.61; random evolution: 0.26
+
+--- DRIFT INFORMATION ---
+event log: event_log_91; drift perspective: control-flow; drift type: sudden; drift specific information: N/A; drift start timestamp: 2020-04-01 06:35:10 (0.61); drift end timestamp: N/A; noise proportion: 0.0777; activities added: [Random activity 1]; activities deleted: []; activities moved: [a, i]

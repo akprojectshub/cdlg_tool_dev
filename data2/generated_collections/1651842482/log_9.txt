@@ -1,0 +1,5 @@
+--- USED PARAMETERS ---
+number of traces: 1000; drift: incremental; start point: 0.65; end point: 0.77; number evolving versions: 3; random evolution per model: 0.08
+
+--- DRIFT INFORMATION ---
+event log: event_log_9; drift perspective: control-flow; drift type: incremental; drift specific information: 4 versions of the process model; drift start timestamp: 2020-03-22 13:47:00 (0.65); drift end timestamp: 2020-03-24 22:23:17 (0.77); noise proportion: 0.0958; activities added: [Random activity 1, Random activity 2]; activities deleted: [c]; activities moved: []

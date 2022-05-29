@@ -1,0 +1,21 @@
+Event Log,Drift Perspective,Drift Type,Drift Specific Information,Drift Start Timestamp,Drift End Timestamp,Noise Proportion,Activities Added,Activities Deleted,Activities Moved
+event_log_0,control-flow,gradual,linear distribution,2020-03-18 21:16:41,2020-04-02 01:55:37 (0.54),0.0817,[],[],"[d, c, e, k]"
+event_log_1,control-flow,incremental,3 versions of the process model,2020-04-12 17:23:21,2020-04-20 12:23:49 (0.66),0.01,[],"[h, j]",[]
+event_log_2,control-flow,incremental,4 versions of the process model,2020-04-16 06:46:30,2020-04-26 00:06:55 (0.79),0.0517,"[Random activity 1, Random activity 2, Random activity 3]",[],[]
+event_log_3,control-flow,sudden,N/A,2020-03-30 07:08:50,N/A,0.0314,[],[a],[]
+event_log_4,control-flow,sudden,N/A,2020-03-23 20:37:29,N/A,0.0,[],"[e, k]",[]
+event_log_5,control-flow,gradual,exponential distribution,2020-04-11 21:18:26,2020-04-27 10:21:15 (0.74),0.0559,[],[],"[e, k]"
+event_log_6,control-flow,recurring,1 seasonal changes,2020-03-20 08:25:01,2020-04-06 11:36:16 (0.57),0.0,[],[d],"[e, h, i]"
+event_log_7,control-flow,incremental,4 versions of the process model,2020-03-20 22:07:27,2020-04-13 05:01:18 (0.66),0.0725,"[Random activity 1, Random activity 2, Random activity 3]",[],[]
+event_log_8,control-flow,gradual,exponential distribution,2020-03-20 13:59:05,2020-04-23 23:18:57 (0.78),0.0018,[],[],"[e, k]"
+event_log_9,control-flow,gradual,linear distribution,2020-04-15 19:42:48,2020-04-24 12:23:17 (0.66),0.0142,[],[],"[h, i]"
+event_log_10,control-flow,recurring,1 seasonal changes,2020-04-07 06:07:32,2020-04-15 11:56:18 (0.51),0.0078,[Random activity 1],[],[]
+event_log_11,control-flow,sudden,N/A,2020-03-25 09:34:47,N/A,0.0097,[Random activity 1],[],"[h, i]"
+event_log_12,control-flow,sudden,N/A,2020-04-10 13:28:36,N/A,0.0012,[Random activity 1],[],"[h, i]"
+event_log_13,control-flow,sudden,N/A,2020-04-11 23:51:27,N/A,0.0848,"[Random activity 1, Random activity 2]",[a],[]
+event_log_14,control-flow,sudden,N/A,2020-03-28 07:50:47,N/A,0.0061,[],"[b, j, h, i]",[]
+event_log_15,control-flow,gradual,linear distribution,2020-03-29 08:25:43,2020-04-06 13:34:19 (0.53),0.0835,[],[],"[j, h, i]"
+event_log_16,control-flow,incremental,5 versions of the process model,2020-03-18 22:49:40,2020-04-08 21:32:12 (0.58),0.0238,"[Random activity 1, Random activity 2, Random activity 3]",[i],[]
+event_log_17,control-flow,recurring,3 seasonal changes,2020-03-27 17:43:02,2020-04-06 07:27:34 (0.39),0.0185,"[Random activity 1, Random activity 2]",[c],[]
+event_log_18,control-flow,gradual,linear distribution,2020-03-26 06:42:33,2020-04-06 14:56:33 (0.45),0.0719,[],[],"[h, i, d, e]"
+event_log_19,control-flow,recurring,5 seasonal changes,2020-04-02 09:27:48,2020-04-15 13:39:31 (0.58),0.064,[],[],"[e, k, d, c]"

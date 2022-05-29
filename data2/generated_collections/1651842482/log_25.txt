@@ -1,0 +1,5 @@
+--- USED PARAMETERS ---
+number of traces: 1000; drift: gradual; start point: 0.61; end point: 0.79; distribution: linear; random evolution: 0.13
+
+--- DRIFT INFORMATION ---
+event log: event_log_25; drift perspective: control-flow; drift type: gradual; drift specific information: linear distribution; drift start timestamp: 2020-03-29 17:29:33 (0.61); drift end timestamp: 2020-04-05 07:30:49 (0.79); noise proportion: 0.0361; activities added: []; activities deleted: [f]; activities moved: []
