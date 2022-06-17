@@ -37,7 +37,7 @@ Otherwise, errors may occur.
 
 Usage
 ---
-The repository contains a tutorial document "cdlg_tutorial". This document explains the main use cases of the tool and provided a step-by-step guidance. In addition, the video document "cdlg_explanation_video.mp4" screencasts and demonstrates the tool.
+The repository contains a tutorial document "cdlg_tutorial". This document explains the main use cases of the tool and provides a step-by-step guidance. In addition, the video document "cdlg_explanation_video.mp4" screencasts and demonstrates the tool.
 
 ### Execution Files ###
 
