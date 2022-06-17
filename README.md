@@ -1,8 +1,16 @@
 CDLG: Concept Drift Log Generator
 ====
-___
 
-Generation of event logs with concept drifts
+About
+---
+This repository contains the prototype of the CDLG tool described in the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022.
+This submission comes with a corresponding [tutorial document](https://gitlab.uni-mannheim.de/processanalytics/cdlg_tool/-/blob/main/cdlg_tutorial.pdf) and [explanation video](https://gitlab.uni-mannheim.de/processanalytics/cdlg_tool/-/blob/main/cdlg_explanation_video.mp4).
+
+The primary contact for questions or comments regarding CDLG is Alexander Kraus: alexander[dot]kraus[at]uni-mannheim[dot]de 
+
+**If you want to use parts of the approach in your project we refer to our [python package](https://gitlab.uni-mannheim.de/processanalytics/cdlg-package).**
+
+Scope
 ---
 
 This approach supports the generation of event logs with following features:
@@ -13,12 +21,6 @@ This approach supports the generation of event logs with following features:
 * Random control-flow changes
 * Controlled control-flow changes
 
-About
----
-This repository contains the prototype of the CDLG tool described in the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022.
-The primary contact for questions or comments regarding CDLG is Alexander Kraus: alexander[dot]kraus[at]uni-mannheim[dot]de 
-
-**If you want to use parts of the approach in your project we refer to our [python package](https://gitlab.uni-mannheim.de/processanalytics/cdlg-package).**
 
 Installation
 ---
