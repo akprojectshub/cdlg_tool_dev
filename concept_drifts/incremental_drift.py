@@ -182,7 +182,7 @@ def additional_incremental_drift_in_log(log, tree, nu_models):
     :param nu_models: number of evolving models
     :return: event log with incremental drift
     """
-    add_end = input_end("Adding the additional recurring drift at the end of the log or into the log [end, into]? ")
+    add_end = input_end("Adding the additional incremental drift at the end of the log or into the log [end, into]? ")
     if add_end == 'into':
         pro_old_model = input_percentage("Proportion of the previously generated log in the new log (0 < x < 1): ")
         log_old = get_part_of_log(log, pro_old_model)
