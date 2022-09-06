@@ -29,7 +29,7 @@ def additional_sudden_drift_in_log(log, tree_two):
     """
     dr_s = "drift perspective: control-flow; drift type: sudden;"
     start_trace = 0
-    add_end = input_end("Adding the additional recurring drift at the end of the log or into the log [end, into]? ")
+    add_end = input_end("Adding the additional sudden drift at the end of the log or into the log [end, into]? ")
     if add_end == 'into':
         drift_time = input_percentage("Starting point of the drift (0 < x < 1): ")
         start_trace = get_num_trace(len(log), drift_time)
