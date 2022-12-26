@@ -28,16 +28,20 @@ def generate_logs(file_path_one=None):
         os.makedirs(out_folder)
 
     tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec = get_parameters()
-    if file_path_one is None:
-        tree_one = generate_specific_trees(tree_complexity.strip())
-    else:
-        tree_one = generate_tree_from_file(file_path_one)
     print('Generating', num_logs, 'logs')
     with open(os.path.join(out_folder, "collection_info.csv"), 'w', newline='') as log_file:
         writer = csv.writer(log_file)
-        writer.writerow(["Event Log", "Drift Perspective", "Drift Type", "Drift Specific Information", "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added", "Activities Deleted", "Activities Moved"])
+        writer.writerow(["Event Log","Drift Perspective","Complexity", "Drift Type", "Drift Specific Information", "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added", "Activities Deleted", "Activities Moved"])
         for i in range(num_logs):
             parameters = "number of traces: "+str(num_traces)
+            
+            complexity = tree_complexity[randint(0,len(tree_complexity)-1)] # New Line 
+            if file_path_one is None:
+                tree_one = generate_specific_trees(complexity.strip())
+            else:
+                tree_one = generate_tree_from_file(file_path_one)
+            print("The generated tree will have a " + complexity + " complexity") # New line 
+
             drift = drifts[randint(0, len(drifts)-1)].strip()
             drift_area_one = round(uniform(float(drift_area[0].strip()), (float(drift_area[0].strip())+0.8*(float(drift_area[1].strip())-float(drift_area[0].strip())))), 2)
             drift_area_two = round(uniform(drift_area_one + (float(drift_area[1].strip())-float(drift_area[0].strip())) * 0.2, float(drift_area[1].strip())), 2)
@@ -98,10 +102,10 @@ def generate_logs(file_path_one=None):
                 end_drift = "N/A"
             else:
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(drift_area_two) + ")"
-            data = "event log: "+"event_log_"+str(i)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
+                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
             event_log.attributes['drift info'] = data
             xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
-            writer.writerow(["event_log_"+str(i), "control-flow", drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])
+            writer.writerow(["event_log_"+str(i),"control-flow", complexity ,drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])
             file_object = open(os.path.join(out_folder, "log_"+str(i)+".txt"), 'w')
             file_object.write("--- USED PARAMETERS ---\n")
             file_object.write(parameters+"\n\n")
@@ -119,7 +123,7 @@ def get_parameters():
     """
     doc = open('data/parameters/parameters_log_collection', 'r')
     one = doc.readline().split(' ')[1]
-    tree_complexity = one[0:len(one) - 1]
+    tree_complexity = one[0:len(one) - 1].split(";") ## new added line
     num_logs = int(doc.readline().split(' ')[1])
     num_traces = int(doc.readline().split(' ')[1])
     one = doc.readline().split(' ')[1]
