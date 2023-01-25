@@ -21,8 +21,8 @@ def generate_logs_with_model(tree_one, out_file):
     :param tree_one: the initial model version
     """
     datestamp = datetime.datetime.strptime('20/23/8 8:0:0', '%y/%d/%m %H:%M:%S')  # input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
-    min_duration = 10  # input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
-    max_duration = 100  # input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
+    min_duration = 7200  # input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
+    max_duration = 72000  # input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
     # min_duration)
     print("\n--- INPUT DRIFT ---")
     drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")
