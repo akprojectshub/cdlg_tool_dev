@@ -9,6 +9,7 @@ from concept_drifts.gradual_drift import gradual_drift
 from concept_drifts.incremental_drift import incremental_drift_gs
 from concept_drifts.recurring_drift import recurring_drift
 from concept_drifts.sudden_drift import sudden_drift
+from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
@@ -50,13 +51,13 @@ def generate_logs(file_path_one=None):
             else:
                 ran_evolve = round(uniform(float(proportion_random_evolution[0].strip()), float(proportion_random_evolution[1].strip())), 2)
             drift_tree = copy.deepcopy(tree_one)
-            if drift != 'incremental':
+            if drift.casefold() != 'incremental':
                 tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
-            if drift == 'sudden':
+            if drift.casefold() == 'sudden':
                 event_log = sudden_drift(tree_one, tree_two, num_traces, drift_area_one)
                 parameters += "; drift: sudden; change point: "+str(drift_area_one) + "; random evolution: "+str(ran_evolve)
                 dr_s = "N/A"
-            elif drift == 'gradual':
+            elif drift.casefold() == 'gradual':
                 ra = randint(0, 1)
                 if ra == 0:
                     gr_type = 'linear'
@@ -66,7 +67,7 @@ def generate_logs(file_path_one=None):
                     dr_s = 'exponential distribution'
                 event_log = gradual_drift(tree_one, tree_two, num_traces, drift_area_one, drift_area_two, gr_type)
                 parameters += "; drift: gradual; start point: "+str(drift_area_one)+"; end point: "+str(drift_area_two)+"; distribution: "+gr_type + "; random evolution: "+str(ran_evolve)
-            elif drift == 'recurring':
+            elif drift.casefold() == 'recurring':
                 ran_odd = [1, 3, 5]
                 pro_first = round(uniform(0.3, 0.7), 2)
                 if drift_area_one > 0 and drift_area_two != 1:
@@ -78,12 +79,16 @@ def generate_logs(file_path_one=None):
                     dr_s = str(sea_cha)+" seasonal changes"
                 event_log = recurring_drift(tree_one, tree_two, num_traces, sea_cha, pro_first, drift_area_one, drift_area_two)
                 parameters += "; drift: recurring; start point: "+str(drift_area_one)+"; end point: "+str(drift_area_two)+"; seasonal changes: "+str(sea_cha)+"; proportion initial version: "+str(pro_first) + "; random evolution: "+str(ran_evolve)
-            elif drift == 'incremental':
+            elif drift.casefold() == 'incremental':
                 num_models = randint(2, 5)
                 ran_in_evolve = round(ran_evolve/num_models, 2)
                 event_log, deleted_acs, added_acs, moved_acs = incremental_drift_gs(tree_one, drift_area_one, drift_area_two, num_traces, num_models, ran_in_evolve)
                 dr_s = str(num_models+1) + " versions of the process model"
                 parameters += "; drift: incremental; start point: "+str(drift_area_one)+"; end point: "+str(drift_area_two) + "; number evolving versions: " + str(num_models) + "; random evolution per model: "+str(ran_in_evolve)
+            elif drift.casefold() == 'none':
+                event_log = no_drift(tree=tree_one, nu_traces=num_traces)
+                parameters += "; drift: None; change point: None; random evolution: None"
+                dr_s = "no drift" 
             noise_prop = 0
             noise_ha = True
             if noise != 0:
@@ -102,7 +107,12 @@ def generate_logs(file_path_one=None):
                 end_drift = "N/A"
             else:
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(drift_area_two) + ")"
+            if drift.casefold() != 'none':
                 data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
+            elif drift.casefold() == 'none':
+                # set parameters to none, since no drift was specified
+                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: None; drift_end: None; noise_level: " + str(noise_prop) + "; activities_added: None; activities_deleted: None; activities_moved: None"
+                start_drift, end_drift, added_acs, deleted_acs, moved_acs = "None", "None", "None", "None", "None"    
             event_log.attributes['drift info'] = data
             xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
             writer.writerow(["event_log_"+str(i),"control-flow", complexity ,drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])

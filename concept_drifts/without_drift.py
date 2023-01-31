@@ -29,3 +29,14 @@ def generate_log_without_drift(tree, nu_logs):
         print("Event log 'event_log_" + str(
             i) + "_without_drift' is saved in the folder 'Data/result_data/terminal/event_logs'.")
         i = i + 1
+        
+
+def no_drift(tree, nu_traces):
+    """ Generation of an event log without any drift
+
+    :param tree: the initial version of the process model
+    :param nu_logs: number traces in event log
+    :return: event log
+    """
+    log_without_drift = semantics.generate_log(tree, nu_traces)
+    return log_without_drift
