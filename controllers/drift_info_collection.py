@@ -2,17 +2,16 @@ from dataclasses import dataclass
 
 @dataclass
 class DriftInfo:
-    """
-        Object for keeping information of a single drift added to an event log
-    """
-    log_id: str  # unique name of the log to which the drift belongs
-    drift_id: int  # unique per log (1, 2, 3, ...)
-    process_perspective: str  # it is always control-flow for now
-    drift_type: str  # sudden, gradual, incremental, or recurring
-    drift_time: list  # list with at least one timestamp as a string
-    activities_added: list  # list of activity labels as str (might be a list of list)
-    activities_deleted: list  # list of activity labels as str (might be a list of list)
-    activities_moved: list  # list of activity labels as str (might be a list of list)
+    __init__(self, log_id, drift_id=1, process_perspective, drift_type, drift_time, activities_added, activities_deleted,
+             actrivites_moved):
+    self.log_id = log_id
+    self.drift_id = drift_id  # isn't there only one drift per log generated in log generation via a file ? In this case isn't the drift_id always 1 ?
+    self.process_perspective = process_perspective
+    self.drift_type = drift_type
+    self.drift_time = drift_time
+    self.activities_added = activities_added
+    self.activities_deleted = activities_deleted
+    self.activities_moved = activities_moved
 
 @dataclass
 class NoiseInfo:
