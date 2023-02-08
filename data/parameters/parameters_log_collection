@@ -6,8 +6,7 @@ Drift_Area: 0.2-0.8
 Proportion_Random_Evolution_Sector: 0.1-0.4
 Proportion_Noise_Sector: 0.0-0.1
 Timestamp_First_Trace: 20/8/3 8:0:0
-Min_Time_Activity_Sec: 40000
-Max_Time_Activity_Sec: 500000
-
+Trace_exp_arrival_sec: 40000
+Task_exp_duration_sec: 500000
 
 
