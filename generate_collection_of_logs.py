@@ -14,8 +14,6 @@ from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
 from controllers.drift_info_collection import DriftInfo
-from controllers.drift_info_collection import NoiseInfo
-from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
@@ -128,7 +126,27 @@ def generate_logs(file_path_one=None):
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(
                     drift_area_two) + ")"
 
-            # ***********************************************            
+            # DI is an instance that stores the log level data
+            t = [start_drift, end_drift]
+            if("N/A" in t):
+                t.remove("N/A")
+            if drift.casefold() != "none":
+                DI = DriftInfo(i, 1, "control flow", drift, t, added_acs,
+                               deleted_acs,
+                               moved_acs)  # case the drift is sudden then there is no                                                                                                  #end_drift
+            else:
+                DI = DriftInfo(i, 1, "control flow", drift, [], [], [])
+
+            print(DI.log_id)
+            print(DI.drift_id)
+            print(DI.process_perspective)
+            print(DI.drift_type)
+            print(DI.drift_time)
+            print(DI.activities_added)
+            print(DI.activities_deleted)
+            print(DI.activities_moved)
+#*******************************************************************
+
             if drift.casefold() != 'none':
                 data = "event log: " + "event_log_" + str(i) + "; Complexity:" + str(
                     complexity) + "; perspective: control-flow; type: " + drift + "; specific_information: " + dr_s + "; drift_start: " + str(
@@ -154,19 +172,7 @@ def generate_logs(file_path_one=None):
             file_object.close()
     ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
     print('Finished generating collection of', num_logs, 'logs in', out_folder)
-    # ***********************************************    
-    # DI is an instance that stores the log level data
-    if (drift.casefold() != "none"):
-        DI = DriftInfo(i, 1, "control flow", drift, [drift_start, end_drift].remove("N/A"), added_acs, deleted_acs,
-                       moved_acs)  # case the drift is sudden then there is no                                                                                                  #end_drift
-    else:
-        DI = DriftInfo(i, 1, "control flow", drift, [], [], [])
-
-    # NI is an instance that stores noise information 
-
-
-# In this part I must instantiate 3 classes the first one saves log level data, the second one stores data about noise and the third one stores the information of class 1 and 2 in a XES file.
-
+# ******************************************************************************************
 
 def get_parameters():
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'

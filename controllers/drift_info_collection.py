@@ -2,16 +2,15 @@ from dataclasses import dataclass
 
 @dataclass
 class DriftInfo:
-    __init__(self, log_id, drift_id=1, process_perspective, drift_type, drift_time, activities_added, activities_deleted,
-             actrivites_moved):
-    self.log_id = log_id
-    self.drift_id = drift_id  # isn't there only one drift per log generated in log generation via a file ? In this case isn't the drift_id always 1 ?
-    self.process_perspective = process_perspective
-    self.drift_type = drift_type
-    self.drift_time = drift_time
-    self.activities_added = activities_added
-    self.activities_deleted = activities_deleted
-    self.activities_moved = activities_moved
+    def __init__(self, log_id, drift_id, process_perspective, drift_type, drift_time, activities_added, activities_deleted,activites_moved):
+        self.log_id = log_id
+        self.drift_id = 1  # isn't there only one drift per log generated in log generation via a file ? In this case isn't the drift_id always 1 ?
+        self.process_perspective = process_perspective
+        self.drift_type = drift_type
+        self.drift_time = drift_time
+        self.activities_added = activities_added
+        self.activities_deleted = activities_deleted
+        self.activities_moved = activites_moved
 
 @dataclass
 class NoiseInfo:
