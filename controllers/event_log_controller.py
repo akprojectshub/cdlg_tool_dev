@@ -19,6 +19,12 @@ def combine_two_logs(log_one, log_two):
         log_combined.append(line)
     for line in log_two:
         log_combined.append(line)
+
+    trace_id = 0
+    for trace in log_combined:
+        trace.attributes['concept:name'] = str(trace_id)
+        trace_id += 1
+
     return log_combined
 
 
