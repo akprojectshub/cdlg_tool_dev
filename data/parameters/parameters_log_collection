@@ -1,6 +1,6 @@
 Complexity_Random_Tree: middle
-Number_Event_logs: 20
-Number_Traces_Per_Event_Log: 1000
+Number_Event_logs: 5
+Number_Traces_Per_Event_Log: 10
 Drifts: sudden;gradual;recurring;incremental
 Drift_Area: 0.2-0.8
 Proportion_Random_Evolution_Sector: 0.1-0.4

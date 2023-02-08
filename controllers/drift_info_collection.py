@@ -22,6 +22,7 @@ class NoiseInfo:
         self.noise_id = noise_id
         self.noise_perspective = noise_perspective
         self.noise_type = noise_type
+        self.noise_proportion = noise_proportion
         self.noise_start = noise_start
         self.noise_end = noise_end
 

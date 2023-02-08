@@ -13,7 +13,7 @@ from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
-from controllers.drift_info_collection import DriftInfo
+from controllers.drift_info_collection import DriftInfo,NoiseInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
@@ -129,11 +129,11 @@ def generate_logs(file_path_one=None):
             # DI is an instance that stores the log level data
             t = [start_drift, end_drift]
             if("N/A" in t):
-                t.remove("N/A")
-            if drift.casefold() != "none":
+                t.remove("N/A") # So that the list t only contains start or both start and end timestamps of the drift.
+            if drift.casefold() != "none": #if there is a drift
                 DI = DriftInfo(i, 1, "control flow", drift, t, added_acs,
                                deleted_acs,
-                               moved_acs)  # case the drift is sudden then there is no                                                                                                  #end_drift
+                               moved_acs)                                                                                                  #end_drift
             else:
                 DI = DriftInfo(i, 1, "control flow", drift, [], [], [])
 
@@ -145,8 +145,31 @@ def generate_logs(file_path_one=None):
             print(DI.activities_added)
             print(DI.activities_deleted)
             print(DI.activities_moved)
-#*******************************************************************
 
+            # NI is an instance that stores information about noise
+
+            start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
+            end_time_noise = event_log[len(event_log)-1][len(event_log[len(event_log)-1])-1]["time:timestamp"] #Last time_stamp in the log
+
+            if noise!=0:
+                if ran_no == 0: #1st type of noise
+                    NI =NoiseInfo(i,1,"control-flow","random_model",noise_prop,start_time_noise, end_time_noise)
+                elif ran_no !=0:
+                    NI = NoiseInfo(i, 1, "control-flow", "changed_model",noise_prop,start_time_noise, end_time_noise)
+
+            print(NI.log_id)
+            print(NI.noise_id)
+            print(NI.noise_perspective)
+            print(NI.noise_start)
+            print(NI.noise_end)
+            print(NI.noise_type)
+            print(NI.noise_proportion)
+
+            #Store the two classes as log attributes in the XES file
+            event_log.attributes["classes"] = [DI, NI]
+            
+
+            #*******************************************************************
             if drift.casefold() != 'none':
                 data = "event log: " + "event_log_" + str(i) + "; Complexity:" + str(
                     complexity) + "; perspective: control-flow; type: " + drift + "; specific_information: " + dr_s + "; drift_start: " + str(
