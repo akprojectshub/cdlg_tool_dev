@@ -21,8 +21,8 @@ def generate_logs_with_model(tree_one, out_file):
     :param tree_one: the initial model version
     """
     datestamp = datetime.datetime.strptime('20/23/8 8:0:0', '%y/%d/%m %H:%M:%S')  # input_date("Starting date of the first trace in the event log (y/d/m H:M:S like '20/23/8 8:0:0'): ")
-    min_duration = 7200  # input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
-    max_duration = 72000  # input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
+    Trace_exp_arrival_sec = 40000  # input_int("Minimum for the duration of the activities in the event log in seconds (int): ")
+    Task_exp_duration_sec = 500000  # input_int_max("Maximum for the duration of the activities in the event log in seconds (int): ",
     # min_duration)
     print("\n--- INPUT DRIFT ---")
     drift_type = input_drift("Type of concept drift [sudden, gradual, recurring, incremental]: ")
@@ -83,7 +83,7 @@ def generate_logs_with_model(tree_one, out_file):
     if drift_type != 'incremental':
         acs_data = "activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs)+"; activities moved: "+str(moved_acs)
         drift_info = {'d': dr_s, 't': [start_trace, end_trace], 'a': acs_data}
-    result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, min_duration, max_duration, drift_info)
+    result = add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, Trace_exp_arrival_sec, Task_exp_duration_sec, drift_info)
     xes_exporter.apply(result, out_file)
     print("Resulting event log stored as", out_file)
 
