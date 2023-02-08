@@ -2,7 +2,8 @@ import datetime
 import itertools
 from random import randint
 import numpy
-
+from scipy.stats import expon
+import random
 from pm4py.objects.log.obj import EventLog
 
 
@@ -59,8 +60,37 @@ def generate_several_parts_of_event_log(log, number):
     logs.append(log_two)
     return logs
 
+def add_duration_to_log(log, log_start_timestamp: datetime.datetime(2023, 1, 1, 0, 0), trace_exp_arrival_sec, task_exp_duration_sec):
 
-def add_duration_to_log(log, datestamp, min_duration, max_duration):
+    # Main loop over all traces and events
+    for index_trace, trace in enumerate(log):
+        if index_trace == 0:
+            # First trace
+            for index_event, event in enumerate(trace):
+                if index_event == 0:
+                    # Define the timestamp of the first trace and first event
+                    log[0][0]['time:timestamp'] = log_start_timestamp
+                else:
+                    # Define the timestamp of all other events in the first
+                    task_duration = numpy.random.exponential(task_exp_duration_sec)
+                    event['time:timestamp'] = trace[index_event - 1]['time:timestamp'] + datetime.timedelta(seconds=task_duration)
+        else:
+            # All other traces
+            for index_event, event in enumerate(trace):
+                if index_event == 0:
+                    # The timestamp of the first event depends on the start timestamp of the previous trace + exp. timedelta
+                    trace_arrival = numpy.random.exponential(trace_exp_arrival_sec)
+                    event['time:timestamp'] = log[index_trace-1][0]['time:timestamp'] + datetime.timedelta(seconds=trace_arrival)
+                else:
+                    # The timestamp of the next event depends on the previous timestamp + exp. timedelta
+                    task_duration = numpy.random.exponential(task_exp_duration_sec)
+                    event['time:timestamp'] = trace[index_event-1]['time:timestamp'] + datetime.timedelta(seconds=task_duration)
+
+    return None
+
+
+
+def add_duration_to_log_old(log, datestamp, min_duration, max_duration):
     """ Adding duration to the activities in the event log
 
     :param max_duration: minimum for the duration of one activity in seconds

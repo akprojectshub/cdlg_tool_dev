@@ -1,7 +1,7 @@
 Complexity_Random_Tree: middle
 Timestamp_First_Trace: 20/8/3 8:0:0
-Min_Time_Activity_Sec: 120
-Max_Time_Activity_Sec: 1200
+Min_Time_Activity_Sec: 40000
+Max_Time_Activity_Sec: 500000
 Number_Traces_Initial_Model: 300
 Number_Traces_Drift_Models: 100
 Number_Traces_Evolved_Model: 300
