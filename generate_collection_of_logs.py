@@ -167,7 +167,7 @@ def generate_logs(file_path_one=None):
 
             #Store the two classes as log attributes in the XES file
             event_log.attributes["classes"] = [DI, NI]
-            
+
 
             #*******************************************************************
             if drift.casefold() != 'none':

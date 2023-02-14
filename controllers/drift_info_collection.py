@@ -1,30 +1,38 @@
 from dataclasses import dataclass
-
+import datetime
 @dataclass
 class DriftInfo:
-    def __init__(self, log_id, drift_id, process_perspective, drift_type, drift_time, activities_added, activities_deleted,activites_moved):
-        self.log_id = log_id
-        self.drift_id = 1  # isn't there only one drift per log generated in log generation via a file ? In this case isn't the drift_id always 1 ?
-        self.process_perspective = process_perspective
-        self.drift_type = drift_type
-        self.drift_time = drift_time
-        self.activities_added = activities_added
-        self.activities_deleted = activities_deleted
-        self.activities_moved = activites_moved
+
+        log_id:str
+        drift_id = 1  # One drift per log so drift_id is always 1
+
+        process_perspective:str
+        if process_perspective not in ["control-flow"]:
+            raise ValueError("wrong value inserted for process_perspective")
+
+        drift_type:str
+        if drift_type not in ["sudden", "gradual", "incremental","recurring"]:
+            raise ValueError ("wrong drift type")
+
+        drift_time:list
+        activities_added:list
+        activities_deleted:list
+        activities_moved:list
+
 
 @dataclass
 class NoiseInfo:
     """
         Object for keeping information about added noise to a generated event log
     """
-    def __init__(self, log_id, noise_id, noise_perspective, noise_type, noise_proportion, noise_start, noise_end):
-        self.log_id = log_id
-        self.noise_id = noise_id
-        self.noise_perspective = noise_perspective
-        self.noise_type = noise_type
-        self.noise_proportion = noise_proportion
-        self.noise_start = noise_start
-        self.noise_end = noise_end
+    log_id: str  # unique name of the log to which the drift belongs
+    noise_id: int  # unique per log
+    noise_perspective: str  # control-flow
+    noise_type: str  # like random_model
+    noise_proportion: float  # 0.05
+    noise_start: datetime.datetime  # timestamp like 2020-03-27 05:32:12
+    noise_end: datetime.datetime # timestamp like 2020-08-21 07:05:11
+
 
 
 @dataclass
@@ -38,20 +46,28 @@ class LogDriftInfo:
     noise = list()
     log_id = str
 
-    def __init__(self, DriftInfo, NoiseInfo=None):  ##NoiseInfo take the value None by default if no
-        # class NoiseInfo have been instantiated
-        self.DriftInfo = DriftInfo
-        self.NoiseInfo = NoiseInfo
-        LogDriftInfo.number_of_drifts += 1  # Each time an instance is created (a drift is generated the LogDriftInfor.counter is
-        # incremented by 1)
-        if NoiseInfo != None:  # NoiseInfo is incremented only if the log instance have noise
-            LogDriftInfo.number_of_noises += 1
+    @dataclass
+    class LogDriftInfo:
+        """
+            Object for keeping information about added drift and noise instances for a generated event log
+        """
 
-        LogDriftInfo.drifts.append(
-            DriftInfo)  # stores the instance DriftInfo in a list that can be accessed by "LogDriftInfo.drifts"
-        LogDriftInfo.noise.append(
-            DriftInfo)  # stores the instance Noise info in a list that can be accessed by "LogDriftInfo.noise
-        LogDriftInfo.log_id = DriftInfo.log_id
+        drifts: list[DriftInfo]
+        noise: list[NoiseInfo]
+        number_of_drifts: int = 0  # initially 0
+        number_of_noises: int = 0  # initially 0
+
+        def add_drift(self,DriftInfo):
+            self.drifts.append(DriftInfo)
+
+        def add_noise(self,NoiseInfo):
+            self.noise.append(NoiseInfo)
+
+        def increase_drift_count(self):
+            self.number_of_drifts+=1
+
+        def increase_noise_count(self):
+            self.number_of_noises+=1
 
 # IGNORE THINGS BELOW
 # @dataclass
