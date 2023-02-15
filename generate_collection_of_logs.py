@@ -13,7 +13,9 @@ from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
-from controllers.drift_info_collection import DriftInfo,NoiseInfo
+from controllers.drift_info_collection import DriftInfo
+from controllers.drift_info_collection import NoiseInfo
+from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
@@ -26,6 +28,7 @@ def generate_logs(file_path_one=None):
     :param file_path_one: file path to own process model, if desired to be used
     :return: collection of event logs with drifts saved in out_folder
     """
+
     out_folder = 'data/generated_collections/' + str(int(time.time()))
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
@@ -38,6 +41,7 @@ def generate_logs(file_path_one=None):
                          "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added",
                          "Activities Deleted", "Activities Moved"])
         for i in range(num_logs):
+            driftinf = LogDriftInfo(i) # instantiate the class LogDriftInfo with just the log id as value
             parameters = "number of traces: " + str(num_traces)
 
             complexity = tree_complexity[randint(0, len(tree_complexity) - 1)]  # New Line 
@@ -131,11 +135,9 @@ def generate_logs(file_path_one=None):
             if("N/A" in t):
                 t.remove("N/A") # So that the list t only contains start or both start and end timestamps of the drift.
             if drift.casefold() != "none": #if there is a drift
-                DI = DriftInfo(i, 1, "control flow", drift, t, added_acs,
-                               deleted_acs,
-                               moved_acs)                                                                                                  #end_drift
+                DI = DriftInfo(i, 1, "control flow", drift, t, added_acs, deleted_acs, moved_acs)
             else:
-                DI = DriftInfo(i, 1, "control flow", drift, [], [], [])
+                DI = DriftInfo(i, 1, "control flow", drift, [], [], [], [])
 
             print(DI.log_id)
             print(DI.drift_id)
@@ -145,6 +147,16 @@ def generate_logs(file_path_one=None):
             print(DI.activities_added)
             print(DI.activities_deleted)
             print(DI.activities_moved)
+
+            driftinf.add_drift(DI)
+            print("*******")
+            print(driftinf.drifts)
+            driftinf.increase_drift_count()
+            print(driftinf.number_of_drifts)
+
+            driftinf.log_drift(event_log)
+
+
 
             # NI is an instance that stores information about noise
 
@@ -165,12 +177,14 @@ def generate_logs(file_path_one=None):
             print(NI.noise_type)
             print(NI.noise_proportion)
 
-            #Store the two classes as log attributes in the XES file
-            event_log.attributes["classes"] = [DI, NI]
+            driftinf.add_noise(NI)
 
+            #driftinf.log_noise(event_log)
+
+            xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(i) + ".xes"))
 
             #*******************************************************************
-            if drift.casefold() != 'none':
+           ''' if drift.casefold() != 'none':
                 data = "event log: " + "event_log_" + str(i) + "; Complexity:" + str(
                     complexity) + "; perspective: control-flow; type: " + drift + "; specific_information: " + dr_s + "; drift_start: " + str(
                     start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(
@@ -184,7 +198,7 @@ def generate_logs(file_path_one=None):
                 start_drift, end_drift, added_acs, deleted_acs, moved_acs = "None", "None", "None", "None", "None"
             event_log.attributes['drift info'] = data
             xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(i) + ".xes"))
-            writer.writerow(
+                writer.writerow(
                 ["event_log_" + str(i), "control-flow", complexity, drift, dr_s, start_drift, end_drift, noise_prop,
                  added_acs, deleted_acs, moved_acs])
             file_object = open(os.path.join(out_folder, "log_" + str(i) + ".txt"), 'w')
@@ -194,9 +208,10 @@ def generate_logs(file_path_one=None):
             file_object.write(data)
             file_object.close()
     ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
-    print('Finished generating collection of', num_logs, 'logs in', out_folder)
+    print('Finished generating collection of', num_logs, 'logs in', out_folder)'''
 # ******************************************************************************************
-
+    print("########################")
+    print(len(driftinf.drifts))
 def get_parameters():
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
     :return: parameters for the generation of a set of event logs

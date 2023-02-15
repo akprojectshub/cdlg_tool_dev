@@ -2,22 +2,21 @@ from dataclasses import dataclass
 import datetime
 @dataclass
 class DriftInfo:
+    log_id:str
+    drift_id: int # One drift per log so drift_id is always 1
 
-        log_id:str
-        drift_id = 1  # One drift per log so drift_id is always 1
+    process_perspective:str
+    #if process_perspective not in ["control-flow"]:
+     #   raise ValueError("wrong value inserted for process_perspective")
 
-        process_perspective:str
-        if process_perspective not in ["control-flow"]:
-            raise ValueError("wrong value inserted for process_perspective")
+    drift_type:str
+    #if drift_type not in ["sudden", "gradual", "incremental","recurring"]:
+     #   raise ValueError ("wrong drift type")
 
-        drift_type:str
-        if drift_type not in ["sudden", "gradual", "incremental","recurring"]:
-            raise ValueError ("wrong drift type")
-
-        drift_time:list
-        activities_added:list
-        activities_deleted:list
-        activities_moved:list
+    drift_time:list
+    activities_added:list
+    activities_deleted:list
+    activities_moved:list
 
 
 @dataclass
@@ -35,39 +34,40 @@ class NoiseInfo:
 
 
 
+
 @dataclass
 class LogDriftInfo:
     """
-        Object for keeping information about added drift and noise instances for a generated event log
+    Object for keeping information about added drift and noise instances for a generated event log
     """
-    number_of_drifts = 0
-    number_of_noises = 0
+    log_id:int
     drifts = list()
     noise = list()
-    log_id = str
+    number_of_drifts: int = 0  # initially 0
+    number_of_noises: int = 0  # initially 0
 
-    @dataclass
-    class LogDriftInfo:
-        """
-            Object for keeping information about added drift and noise instances for a generated event log
-        """
+    def add_drift(self, dinf):
+        self.drifts.append(dinf)
 
-        drifts: list[DriftInfo]
-        noise: list[NoiseInfo]
-        number_of_drifts: int = 0  # initially 0
-        number_of_noises: int = 0  # initially 0
+    def add_noise(self, ninf):
+        self.noise.append(ninf)
 
-        def add_drift(self,DriftInfo):
-            self.drifts.append(DriftInfo)
+    def increase_drift_count(self):
+        self.number_of_drifts+=1
 
-        def add_noise(self,NoiseInfo):
-            self.noise.append(NoiseInfo)
+    def increase_noise_count(self):
+        self.number_of_noises+=1
 
-        def increase_drift_count(self):
-            self.number_of_drifts+=1
+    def log_drift(self, log):
+        log.attributes["drift:info"] = self.drifts[self.log_id]
 
-        def increase_noise_count(self):
-            self.number_of_noises+=1
+    def log_noise(self, log):
+        log.attributes["noise:info"] = self.noise[self.log_id]
+
+    def table(self,log): #this method will be used to fill the table
+        
+
+
 
 # IGNORE THINGS BELOW
 # @dataclass
