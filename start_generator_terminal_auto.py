@@ -186,18 +186,19 @@ def main():
     console = child.before
     log_name = console[-31:]
     config_dict = {log_name[2:-2]: drift_setting_dict}
+
     return config_dict
 
 
 if __name__ == "__main__":
-    number_of_logs = 5
+    number_of_logs = 79
 
     cmd_path = 'C:\windows\system32\cmd.exe'
     command = 'python start_generator_terminal.py'
     log_config = ['random', 'one_model', 'no', 'complex']
     LOG_SETTING = [cmd_path, command, log_config]
 
-    drift_numbers = [1, 3]
+    drift_numbers = [1, 5]
     drift_types = ['sudden', 'gradual']
     drift_starts = [0.2, 0.8]
     drift_gradual_durations = [500, 1000]
