@@ -3,7 +3,7 @@ import datetime
 import csv
 import os
 import sys
-from random import randint, uniform
+from random import randint, uniform, choice
 
 from concept_drifts.gradual_drift import gradual_drift
 from concept_drifts.incremental_drift import incremental_drift_gs
@@ -19,6 +19,10 @@ from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from pm4py.objects.process_tree.exporter import exporter as ptml_exporter
+from controllers.drift_info_xes_file import store_drift
+from controllers.drift_info_xes_file import store_noise
+
+
 
 import time
 
@@ -40,8 +44,8 @@ def generate_logs(file_path_one=None):
         writer.writerow(["Event Log", "Drift Perspective", "Complexity", "Drift Type", "Drift Specific Information",
                          "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added",
                          "Activities Deleted", "Activities Moved"])
+        collection = LogDriftInfo()
         for i in range(num_logs):
-            driftinf = LogDriftInfo(i) # instantiate the class LogDriftInfo with just the log id as value
             parameters = "number of traces: " + str(num_traces)
 
             complexity = tree_complexity[randint(0, len(tree_complexity) - 1)]  # New Line 
@@ -114,12 +118,10 @@ def generate_logs(file_path_one=None):
             noise_ha = True
             if noise != 0:
                 noise_prop = round(uniform(float(noise[0].strip()), float(noise[1].strip())), 4)
-                if noise_prop != 0:
-                    ran_no = randint(0, 1)
-                    if ran_no == 0:
-                        event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, 'changed_model', 0, 1)
-                    else:
-                        event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, 'random_model', 0, 1)
+
+                if noise_prop != 0: # Create a ticket so that this value can be picked by the user replace by a list and select .choice() randomly: TO DO
+                    noise_type = choice(['changed_model','random_model'])
+                    event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, noise_type, 0, 1)
             if not noise_ha:
                 noise_prop = 0.0
             add_duration_to_log(event_log, date, min_sec, max_sec)
@@ -130,88 +132,54 @@ def generate_logs(file_path_one=None):
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(
                     drift_area_two) + ")"
 
-            # DI is an instance that stores the log level data
-            t = [start_drift, end_drift]
-            if("N/A" in t):
-                t.remove("N/A") # So that the list t only contains start or both start and end timestamps of the drift.
+
+                                                     # DI is an instance that stores the log level data
             if drift.casefold() != "none": #if there is a drift
-                DI = DriftInfo(i, 1, "control flow", drift, t, added_acs, deleted_acs, moved_acs)
-            else:
-                DI = DriftInfo(i, 1, "control flow", drift, [], [], [], [])
+                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs, out_folder)
+                # Drift ID in the instance DI will take the number_of_drifts. Should go back to 0 once a new log is generated.
 
-            print(DI.log_id)
-            print(DI.drift_id)
-            print(DI.process_perspective)
-            print(DI.drift_type)
-            print(DI.drift_time)
-            print(DI.activities_added)
-            print(DI.activities_deleted)
-            print(DI.activities_moved)
+            collection.add_drift(DI)
+            collection.increase_drift_count()
+            #store_drift(event_log, DI)
+            #collection.log_drift(event_log)
 
-            driftinf.add_drift(DI)
-            print("*******")
-            print(driftinf.drifts)
-            driftinf.increase_drift_count()
-            print(driftinf.number_of_drifts)
-
-            driftinf.log_drift(event_log)
-
-
-
-            # NI is an instance that stores information about noise
-
+                                                     # NI is an instance that stores information about noise
             start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
             end_time_noise = event_log[len(event_log)-1][len(event_log[len(event_log)-1])-1]["time:timestamp"] #Last time_stamp in the log
-
             if noise!=0:
-                if ran_no == 0: #1st type of noise
-                    NI =NoiseInfo(i,1,"control-flow","random_model",noise_prop,start_time_noise, end_time_noise)
-                elif ran_no !=0:
-                    NI = NoiseInfo(i, 1, "control-flow", "changed_model",noise_prop,start_time_noise, end_time_noise)
+                    NI =NoiseInfo(str(i),collection.number_of_noises,"control-flow",noise_type,noise_prop,start_time_noise, end_time_noise,out_folder)
 
-            print(NI.log_id)
-            print(NI.noise_id)
-            print(NI.noise_perspective)
-            print(NI.noise_start)
-            print(NI.noise_end)
-            print(NI.noise_type)
-            print(NI.noise_proportion)
 
-            driftinf.add_noise(NI)
+            collection.add_noise(NI)
+            collection.increase_noise_count()
+            #store_noise(event_log, NI)
+            #collection.log_noise(event_log)
 
-            #driftinf.log_noise(event_log)
-
-            xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(i) + ".xes"))
-
-            #*******************************************************************
-           ''' if drift.casefold() != 'none':
-                data = "event log: " + "event_log_" + str(i) + "; Complexity:" + str(
-                    complexity) + "; perspective: control-flow; type: " + drift + "; specific_information: " + dr_s + "; drift_start: " + str(
-                    start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(
-                    noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(
-                    deleted_acs) + "; activities_moved: " + str(moved_acs)
+            if drift.casefold() != 'none':
+                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
             elif drift.casefold() == 'none':
                 # set parameters to none, since no drift was specified
-                data = "event log: " + "event_log_" + str(i) + "; Complexity:" + str(
-                    complexity) + "; perspective: control-flow; type: " + drift + "; specific_information: " + dr_s + "; drift_start: None; drift_end: None; noise_level: " + str(
-                    noise_prop) + "; activities_added: None; activities_deleted: None; activities_moved: None"
+                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: None; drift_end: None; noise_level: " + str(noise_prop) + "; activities_added: None; activities_deleted: None; activities_moved: None"
                 start_drift, end_drift, added_acs, deleted_acs, moved_acs = "None", "None", "None", "None", "None"
-            event_log.attributes['drift info'] = data
-            xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(i) + ".xes"))
-                writer.writerow(
-                ["event_log_" + str(i), "control-flow", complexity, drift, dr_s, start_drift, end_drift, noise_prop,
-                 added_acs, deleted_acs, moved_acs])
-            file_object = open(os.path.join(out_folder, "log_" + str(i) + ".txt"), 'w')
+            #event_log.attributes['drift info'] = data
+            xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
+            writer.writerow(["event_log_"+str(i),"control-flow", complexity ,drift, dr_s, start_drift, end_drift, noise_prop, added_acs, deleted_acs, moved_acs])
+            file_object = open(os.path.join(out_folder, "log_"+str(i)+".txt"), 'w')
             file_object.write("--- USED PARAMETERS ---\n")
-            file_object.write(parameters + "\n\n")
+            file_object.write(parameters+"\n\n")
             file_object.write("--- DRIFT INFORMATION ---\n")
             file_object.write(data)
             file_object.close()
-    ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
-    print('Finished generating collection of', num_logs, 'logs in', out_folder)'''
-# ******************************************************************************************
-    print("########################")
-    print(len(driftinf.drifts))
+        ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
+        print('Finished generating collection of', num_logs, 'logs in', out_folder)
+
+    collection.store_drift_xes()
+    collection.store_noise_xes()
+
+
+
+
+
 def get_parameters():
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
     :return: parameters for the generation of a set of event logs
@@ -235,6 +203,9 @@ def get_parameters():
     min_sec = int(doc.readline().split(' ')[1])
     max_sec = int(doc.readline().split(' ')[1])
     return tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec
+
+
+
 
 
 def main():
