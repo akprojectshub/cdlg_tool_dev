@@ -1,17 +1,39 @@
 from dataclasses import dataclass
 import datetime
+
+@dataclass
+class DriftAttributeClass():
+    att1 = "log_id"
+    att2 = "drift_id"
+    att3 = "process_perspective"
+    att4 ="drift_type"
+    att5 ="drift_time"
+    att6 = "activities_added"
+    att7 = "activities_deleted"
+    att8="activities_moved"
+    att9="folder_id"
+
+    def extract_name_val(self):
+        s =""
+        att = list()
+        for property, value in vars(DriftAttributeClass).items():
+            s = s + str(property) + ":" + str(value) + "\n"
+
+        for i in s.split("\n"):
+            if i.split(":")[0] == "extract_name_val":
+                break
+            att.append(i)
+        return att[1:]
+
+
+
+
 @dataclass
 class DriftInfo:
-    log_id: int
-    drift_id: int # One drift per log so drift_id is always 1
-    process_perspective:str
-    drift_type: str
-    drift_time:list[datetime.datetime] # With one timestamp or two timestamps according to the drift type so that the drift instantiation class is done in a single line
-    activities_added:list
-    activities_deleted:list
-    activities_moved:list
-    folder_id:int ## useful for accessing the folder and add the drift information in the logs generated in the collection of logs folder
+    for i in DriftAttributeClass().extract_name_val():
+        exec("%s = %s" % (i.split(":")[1], None))
 
+    ##### PROBLEM : WE CANNOT INFORCE THE VARIABLE TYPE ANYMORE
     def __post_init__(self):
         if self.process_perspective not in ["control-flow"]:
             raise ValueError("wrong value inserted for process_perspective")
@@ -51,19 +73,40 @@ class DriftInfo:
         self.drift_id=0 #Once we generate multiple drifts this should be changed
 
 
+
+class NoiseAttributeClass():
+    att1 =  "log_id"
+    att2 = "noise_id"
+    att3 = "noise_perspective"
+    att4 = "noise_type"
+    att5 = "noise_proportion"
+    att6 =  "noise_start"
+    att7 = " noise_end"
+    att8 = "activities_moved"
+    att9 = "folder_id"
+
+    def extract_name_val(self):
+        s = ""
+        att = list()
+        for property, value in vars(DriftAttributeClass).items():
+            s = s + str(property) + ":" + str(value) + "\n"
+
+        for i in s.split("\n"):
+            if i.split(":")[0] == "extract_name_val":
+                break
+            att.append(i)
+        return att[1:]
+
+
+
+
 @dataclass
 class NoiseInfo:
     """
         Object for keeping information about added noise to a generated event log
     """
-    log_id: int  # unique name of the log to which the drift belongs
-    noise_id: int  # unique per log
-    noise_perspective: str  # control-flow
-    noise_type: str  # like random_model
-    noise_proportion: float  # 0.05
-    noise_start: datetime.datetime  # timestamp like 2020-03-27 05:32:12
-    noise_end: datetime.datetime # timestamp like 2020-08-21 07:05:11
-    folder_id:int ## useful for accessing the folder and add the drift information in the logs generated in the collection of logs folder
+    for i in NoiseAttributeClass().extract_name_val():
+        exec("%s = %s" % (i.split(":")[1], None))
 
     def __post_init__(self):
         if (type(self.log_id)!=str):

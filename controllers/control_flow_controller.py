@@ -14,7 +14,6 @@ from controllers.process_tree_controller import swap_two_existing_activities, vi
 
 def change_tree_on_control_flow(tree):
     """ Changing the process tree to the desired evolved model
-
     :param tree: process tree
     :return: changed tree version
     """
@@ -59,7 +58,6 @@ def change_tree_on_control_flow(tree):
 
 def change_tree_on_control_flow_incremental(tree, round_ev):
     """ Changing the process tree to the desired evolved model for incremental drift
-
     :param round_ev: number of evolved model
     :param tree: process tree
     :return: changed tree version
@@ -87,7 +85,6 @@ def change_tree_on_control_flow_incremental(tree, round_ev):
 
 def change_tree_on_control_flow_incremental_random(tree, round_ev):
     """ Changing the process tree to a random evolved model for incremental drift
-
     :param round_ev: number of evolved model
     :param tree: process tree
     :return: changed tree
@@ -100,7 +97,6 @@ def change_tree_on_control_flow_incremental_random(tree, round_ev):
 
 def control_flow_change(drift_tree, control_flow_type):
     """ Changing the process tree depending on the set control flow type
-
     :param drift_tree: process tree to be changed
     :param control_flow_type: way of change
     :return: changed tree version
@@ -197,7 +193,6 @@ def control_flow_change(drift_tree, control_flow_type):
 
 def evolve_tree_randomly_terminal(drift_tree, evolution_stage):
     """ Random change of the process tree for the terminal
-
     :param drift_tree: tree to be changed
     :param evolution_stage: percentage of activities to be affected by the change
     :return: randomly evolved process tree version
@@ -278,7 +273,6 @@ def evolve_tree_randomly_terminal(drift_tree, evolution_stage):
 
 def evolve_tree_randomly(drift_tree, evolution_stage):
     """ Random change of the process tree
-
     :param drift_tree: tree to be changed
     :param evolution_stage: percentage of activities to be affected by the change
     :return: randomly evolved process tree version
