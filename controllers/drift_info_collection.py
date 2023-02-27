@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import datetime
 
-@dataclass
+"""@dataclass
 class DriftAttributeClass():
     att1 = "log_id"
     att2 = "drift_id"
@@ -24,7 +24,7 @@ class DriftAttributeClass():
                 break
             att.append(i)
         return att[1:]
-
+"""
 
 
 
