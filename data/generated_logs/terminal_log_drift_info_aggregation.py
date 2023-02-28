@@ -47,29 +47,45 @@ def save_dict_to_csv(all_logs_drift_info):
     return flat_file_df
 
 
-def main(file_path, file_name, max_number_of_drifts):
+def parse_drift_info(log):
 
-    log = load_event_log(file_path, file_name)
     log_drifts = {}
+    number_of_drifts = len([key for key in log.attributes.keys() if 'drift info' in key])
 
-    for i in range(1, max_number_of_drifts):
-        try:
-            log_drift_id = f'drift info {i}:'
-            drift_info = log.attributes[log_drift_id]
-            drift_info_dict = {}
-            drift_info = drift_info.replace("; ", ";")
-            for row in drift_info.split(';'):
-                infos = row.split(': ', 1)
-                if infos[1].find("(") == -1:
-                    drift_info_dict[infos[0]] = infos[1]
-                else:
-                    drift_info_dict[infos[0]] = re.sub("[\(\[].*?[\)\]]", "", infos[1])[:-1]
 
-            log_drifts[log_drift_id] = drift_info_dict
-        except:
-            break
+    for i in range(1, number_of_drifts+1):
+        log_drift_id = f'drift info {i}:'
+        drift_info = log.attributes[log_drift_id]
+        drift_info_dict = {}
+        drift_info = drift_info.replace("; ", ";")
+        for row in drift_info.split(';'):
+            infos = row.split(': ', 1)
+            if infos[1].find("(") == -1:
+                drift_info_dict[infos[0]] = infos[1]
+            else:
+                drift_info_dict[infos[0]] = re.sub("[\(\[].*?[\)\]]", "", infos[1])[:-1]
+
+        log_drifts[log_drift_id] = drift_info_dict
 
     return log_drifts
+
+
+def parse_process_tree_info(log):
+
+    log_process_trees = {}
+    for tree_pair in log.attributes['process_trees'].split('; '):
+        key, value = tree_pair.split(': ')
+        log_process_trees[key] = value
+
+    return {'process_trees': log_process_trees}
+
+
+def main(log):
+
+    log_drifts = parse_drift_info(log)
+    log_process_trees = parse_process_tree_info(log)
+
+    return log_drifts | log_process_trees
 
 
 def transform_flat_file(all_logs_drift_info_df):
@@ -100,13 +116,13 @@ def transform_flat_file(all_logs_drift_info_df):
 
 
 if __name__ == "__main__":
-    max_number_of_drifts = 5
 
     all_logs_drift_info = {}
     list_of_event_logs = load_event_log_names()
     for file_name, file_path in list_of_event_logs.items():
         print("\n", '=' * 80, "\n", f"Log in progress: '{file_name}'")
-        all_logs_drift_info[file_name] = main(file_path, file_name, max_number_of_drifts)
+        log = load_event_log(file_path, file_name)
+        all_logs_drift_info[file_name] = main(log)
 
 
     all_logs_drift_info_df = save_dict_to_csv(all_logs_drift_info)
