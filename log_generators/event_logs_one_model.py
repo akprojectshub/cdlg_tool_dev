@@ -47,11 +47,11 @@ def generate_logs_with_model(tree_one, out_file):
     elif drift_type == 'gradual':
         num_traces = input_int_hun("Number of traces in the event log (x >= 100): ")
         start_point = input_percentage("Starting point of the drift (0 < x < 1): ")
-        end_point = input_percentage_end("Ending point of the drift ("+str(start_point)+"0 < x < 1): ", start_point)
+        end_point = input_percentage_end("Ending point of the drift (" + str(start_point) + "0 < x < 1): ", start_point)
         distribution_type = input_typ_gradual(
             "Method for distributing the traces during the gradual drift [linear, exponential]: ")
         tree_two, deleted_acs, added_acs, moved_acs = change_tree_on_control_flow(tree_one)
-        dr_s += "drift type: gradual; drift specific information: "+distribution_type+" distribution; "
+        dr_s += "drift type: gradual; drift specific information: " + distribution_type + " distribution; "
         start_trace = get_num_trace(num_traces, start_point)
         end_trace = get_num_trace(num_traces, end_point)
         log = gradual_drift(tree_one, tree_two, num_traces, start_point, end_point, distribution_type)
@@ -151,17 +151,35 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
     result, noise_data = add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
     i = 1
     for x in drifts:
-        start = int(x['t'][0])/len(result)
-        end = int(x['t'][1])/len(result)
+        start = int(x['t'][0]) / len(result)
+        end = int(x['t'][1]) / len(result)
         start_drift = get_timestamp_log(result, len(result), start)
         if end == 0:
             end_drift = 'N/A'
         else:
-            end_drift = str(get_timestamp_log(result, len(result), end))+" (" + str(round(end, 2)) + ")"
-        result.attributes['drift info '+str(i)+':'] = str(x['d']) + "drift start timestamp: "+str(start_drift)+" (" + str(round(start, 2)) + "); drift end timestamp: " + end_drift + "; " + str(x['a'])
+            end_drift = str(get_timestamp_log(result, len(result), end)) + " (" + str(round(end, 2)) + ")"
+
+        result.attributes['drift info ' + str(i) + ':'] = str(x['d']) + "drift start timestamp: " + str(
+            start_drift) + " (" + str(round(start, 2)) + "); drift end timestamp: " + end_drift + "; " + str(x['a'])
         i += 1
+
+    # Save used process trees as a log-level attribute
+    trees.insert(0, tree_one)
+    trees_string = convert_trees_to_string(trees)
+    result.attributes['process_trees'] = trees_string
+
     if noise_data is not None:
         start_noise = get_timestamp_log(result, len(result), noise_data['t'][0])
         end_noise = get_timestamp_log(result, len(result), noise_data['t'][1])
-        result.attributes['noise info:'] = "noise proportion: "+str(noise_data['p']) + "; start point: " + str(start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(round(noise_data['t'][1], 2)) + "); noise type: "+noise_data['ty']
+        result.attributes['noise info:'] = "noise proportion: " + str(noise_data['p']) + "; start point: " + str(
+            start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(
+            round(noise_data['t'][1], 2)) + "); noise type: " + noise_data['ty']
     return result
+
+
+def convert_trees_to_string(trees):
+    trees_info = {'tree_' + str(trace_id): str(trace) for trace_id, trace in enumerate(trees)}
+    trees_string = str()
+    for key in trees_info:
+        trees_string += key + ': ' + trees_info[key] + '; '
+    return trees_string[:-2]
