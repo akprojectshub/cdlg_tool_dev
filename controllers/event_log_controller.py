@@ -7,6 +7,8 @@ import random
 from pm4py.objects.log.obj import EventLog
 
 
+
+
 def combine_two_logs(log_one, log_two):
     """ Merging of two event logs
 
@@ -15,9 +17,15 @@ def combine_two_logs(log_one, log_two):
     :return: combined event log
     """
     log_combined = EventLog()
+    last_model_version = 1
     for line in log_one:
+        try:
+            last_model_version = line.attributes['model:version']
+        except:
+            line.attributes['model:version'] = last_model_version
         log_combined.append(line)
     for line in log_two:
+        line.attributes['model:version'] = last_model_version + 1
         log_combined.append(line)
 
     trace_id = 0
