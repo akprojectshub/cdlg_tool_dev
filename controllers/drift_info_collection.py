@@ -1,39 +1,17 @@
 from dataclasses import dataclass
 import datetime
-
-"""@dataclass
-class DriftAttributeClass():
-    att1 = "log_id"
-    att2 = "drift_id"
-    att3 = "process_perspective"
-    att4 ="drift_type"
-    att5 ="drift_time"
-    att6 = "activities_added"
-    att7 = "activities_deleted"
-    att8="activities_moved"
-    att9="folder_id"
-
-    def extract_name_val(self):
-        s =""
-        att = list()
-        for property, value in vars(DriftAttributeClass).items():
-            s = s + str(property) + ":" + str(value) + "\n"
-
-        for i in s.split("\n"):
-            if i.split(":")[0] == "extract_name_val":
-                break
-            att.append(i)
-        return att[1:]
-"""
-
-
-
 @dataclass
 class DriftInfo:
-    for i in DriftAttributeClass().extract_name_val():
-        exec("%s = %s" % (i.split(":")[1], None))
+    log_id: int
+    drift_id: int # One drift per log so drift_id is always 1
+    process_perspective:str
+    drift_type: str
+    drift_time:list # With one timestamp or two timestamps according to the drift type so that the drift instantiation class is done in a single line
+    activities_added:list
+    activities_deleted:list
+    activities_moved:list
+    folder_id:int ## useful for accessing the folder and add the drift information in the logs generated in the collection of logs folder
 
-    ##### PROBLEM : WE CANNOT INFORCE THE VARIABLE TYPE ANYMORE
     def __post_init__(self):
         if self.process_perspective not in ["control-flow"]:
             raise ValueError("wrong value inserted for process_perspective")
@@ -69,35 +47,11 @@ class DriftInfo:
 
         if "N/A" in self.drift_time: # Removes "N/A" in case the drift if sudden and there is no end_drift_time
             self.drift_time.remove("N/A")
+        else:
+            self.drift_time[1] = datetime.datetime.strptime(self.drift_time[1][0:len(self.drift_time[1])-6].strip(),"%Y-%d-%m %H:%M:%S")
+
 
         self.drift_id=0 #Once we generate multiple drifts this should be changed
-
-
-
-class NoiseAttributeClass():
-    att1 =  "log_id"
-    att2 = "noise_id"
-    att3 = "noise_perspective"
-    att4 = "noise_type"
-    att5 = "noise_proportion"
-    att6 =  "noise_start"
-    att7 = " noise_end"
-    att8 = "activities_moved"
-    att9 = "folder_id"
-
-    def extract_name_val(self):
-        s = ""
-        att = list()
-        for property, value in vars(DriftAttributeClass).items():
-            s = s + str(property) + ":" + str(value) + "\n"
-
-        for i in s.split("\n"):
-            if i.split(":")[0] == "extract_name_val":
-                break
-            att.append(i)
-        return att[1:]
-
-
 
 
 @dataclass
@@ -105,8 +59,14 @@ class NoiseInfo:
     """
         Object for keeping information about added noise to a generated event log
     """
-    for i in NoiseAttributeClass().extract_name_val():
-        exec("%s = %s" % (i.split(":")[1], None))
+    log_id: int  # unique name of the log to which the drift belongs
+    noise_id: int  # unique per log
+    noise_perspective: str  # control-flow
+    noise_type: str  # like random_model
+    noise_proportion: float  # 0.05
+    noise_start: datetime.datetime  # timestamp like 2020-03-27 05:32:12
+    noise_end: datetime.datetime # timestamp like 2020-08-21 07:05:11
+    folder_id:int ## useful for accessing the folder and add the drift information in the logs generated in the collection of logs folder
 
     def __post_init__(self):
         if (type(self.log_id)!=str):
@@ -131,6 +91,8 @@ class NoiseInfo:
             raise TypeError
 
         self.noise_id=0 #Once we generate multiple drifts this should be changed
+
+
 
 
 
@@ -164,21 +126,20 @@ class LogDriftInfo:
         log.attributes["noise:info"] = self.noise[self.log_id]
 
     def store_drift_xes(self):
+
         special_line = '<log xes.version="1849-2016" xes.features="nested-attributes" xmlns="http://www.xes-standard.org/">'
         for i in self.drifts:
+            values = list()
+            i_keys = list(vars(i).keys())
+            i_val = list(vars(i).values())
+
             with open(str(i.folder_id) +"/log_" + str(i.log_id) +".xes", "r") as f:
                 contents = f.readlines()
             line_index = [x for x in range(len(contents)) if special_line in contents[x]][0]
 
-            values = ["<int key= 'Drift:info' value=" + "'" + str(i.log_id) + "'" +  ">",  ## What value should I put here
-                      "<int key='Drift:id' value=" + "'" +str(i.drift_id) + "'" + "/>",
-                      "<int key='Drift:process_perspective' value=" + "'"+ str(i.process_perspective) + "'" +"/>",
-                      "<int key='Drift:type' value=" + "'" + str(i.drift_type) + "'" + "/>",
-                      "<list key='Drift:drift_time' value=" + "'" + str(i.drift_time).strip() + "'" + "/>",
-                      "<list key='Drift:activities_added' value=" + "'" + str(i.activities_added).strip() + "'" + "/>",
-                      "<list key='Drift:activities_deleted' value=" + "'" + str(i.activities_deleted).strip() + "'" + "/>",
-                      "<list key='Drift:activities_moved' value=" + "'" + str(i.activities_moved).strip() + "'" + "/>",
-                      "</int>"]
+            values.append("<string key='drift:info' value='Yes'>")
+            values.extend(["<string key='drift:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in range(0, len(i_keys) - 1)])
+            values.append("</string>")
 
 
             for j, v in enumerate(values):
@@ -217,52 +178,43 @@ class LogDriftInfo:
 
 
 
-# IGNORE THINGS BELOW
-# @dataclass
-# class CollectionLogDriftInfo:
-#     """
-#         Object for keeping information about drift information accros all generated event logs
-#     """
-#
-#     def export_to_json(self):
-#         pass
 
-# "perspective: control-flow; " \
-# "type: sudden; " \
-# "drift_moment: 2020-04-01 10:01:57 (0.4); " \
-# "activities_added: [Random activity 1, Random activity 2, Random activity 3]; " \
-# "activities_deleted: []; " \
-# "activities_moved: []"
-#
-# "perspective: control-flow;"
-# " type: gradual;"
-# " specific_information: linear distribution;"
-# " drift_start: 2020-10-08 21:11:36 (0.4);"
-# " drift_end: 2021-01-25 08:13:53 (0.6); "
-# "activities_added: [Random activity 1]; "
-# "activities_deleted: [a]; "
-# "activities_moved: []"
-#
-# "perspective: control-flow; "
-# "type: incremental; "
-# "specific_information: 5 versions of the process model;"
-# " drift_start: 2020-03-23 18:40:23 (0.33);"
-# "drift_end: 2020-04-04 21:57:37 (0.67);"
-# "activities_added: [Random activity 1, Random activity 2];"
-# "activities_deleted: [h, k, e, b];"
-# "activities_moved: [c, f]"
-#
-# "perspective: control-flow; "
-# "type: recurring; "
-# "specific_information: 3 seasonal_changes;"
-# "drift_start: 2020-04-13 09:42:30 (0.2);"
-# "drift_end: 2020-08-03 13:43:19 (0.8);"
-# " activities_added: [Random activity 1];"
-# "activities_deleted: [g];
-# "activities_moved: []"
-#
-# "noise_info:"
-# "noise_proportion: 0.05;"
-# "start_point: 2020-03-27 05:32:12 (0.1);"
-# "end_point: 2020-08-21 07:05:11 (0.9);"
-# "noise_type: random_model"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

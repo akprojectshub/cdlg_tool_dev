@@ -132,8 +132,7 @@ def generate_logs(file_path_one=None):
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(
                     drift_area_two) + ")"
 
-
-                                                     # DI is an instance that stores the log level data
+                # DI is an instance that stores the log level data
             if drift.casefold() != "none": #if there is a drift
                 DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs, out_folder)
                 # Drift ID in the instance DI will take the number_of_drifts. Should go back to 0 once a new log is generated.
@@ -156,7 +155,7 @@ def generate_logs(file_path_one=None):
             #collection.log_noise(event_log)
 
             if drift.casefold() != 'none':
-                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + end_drift + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
+                data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + str(end_drift) + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
             elif drift.casefold() == 'none':
                 # set parameters to none, since no drift was specified
                 data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: None; drift_end: None; noise_level: " + str(noise_prop) + "; activities_added: None; activities_deleted: None; activities_moved: None"
