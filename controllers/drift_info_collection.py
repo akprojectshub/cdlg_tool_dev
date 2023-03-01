@@ -133,38 +133,39 @@ class LogDriftInfo:
             i_keys = list(vars(i).keys())
             i_val = list(vars(i).values())
 
-            with open(str(i.folder_id) +"/log_" + str(i.log_id) +".xes", "r") as f:
+            print(vars(i))
+
+            with open(str(i.folder_id) + "/log_" + str(i.log_id) + ".xes", "r") as f:
                 contents = f.readlines()
             line_index = [x for x in range(len(contents)) if special_line in contents[x]][0]
 
             values.append("<string key='drift:info' value='Yes'>")
-            values.extend(["<string key='drift:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in range(0, len(i_keys) - 1)])
+            values.extend(
+                ["<string key='drift:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in
+                 range(0, len(i_keys) - 1)])
             values.append("</string>")
 
-
             for j, v in enumerate(values):
-                contents.insert(line_index + j + 1 , v)
+                contents.insert(line_index + j + 1, v)
             contents.insert(line_index + j + 2, "\n")
-            with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" +".xes", "w") as f:
+            with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" + ".xes", "w") as f:
                 contents = "".join(contents)
                 f.write(contents)
 
     def store_noise_xes(self):
         special_line = '<log xes.version="1849-2016" xes.features="nested-attributes" xmlns="http://www.xes-standard.org/">'
         for i in self.noise:
+            values = list()
+            i_keys = list(vars(i).keys())
+            i_val = list(vars(i).values())
+
             with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" +".xes", "r") as f:
                 contents = f.readlines()
             line_index = [x for x in range(len(contents)) if special_line in contents[x]][0]
 
-            values = ["<int key= 'noise:info' value=" + "'" + str(i.log_id) + "'" + ">",
-                      ## What value should I put here
-                      "<int key='noise:id' value=" + "'" + str(i.noise_id) + "'" + "/>",
-                      "<string key='noise:perspective' value=" + "'" + str(i.noise_perspective) + "'" + "/>",
-                      "<string key='noise:type' value=" + "'" + str(i.noise_type) + "'" + "/>",
-                      "<float key='noise:proportion' value=" + "'" + str(i.noise_proportion) + "'" + "/>",
-                      "<string key='noise:start_time' value=" + "'" + str(i.noise_start) + "'" + "/>",
-                      "<string key='noise:end_time' value=" + "'" + str(i.noise_end) + "'" + "/>",
-                      "</int>"]
+            values.append("<string key='noise:info' value='Yes'>")
+            values.extend(["<string key='noise:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in range(0, len(i_keys) - 1)])
+            values.append("</string>")
 
             for j, v in enumerate(values):
                 contents.insert(line_index + j + 2, v)
