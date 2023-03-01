@@ -48,12 +48,12 @@ def generate_logs(file_path_one=None):
         for i in range(num_logs):
             parameters = "number of traces: " + str(num_traces)
 
-            complexity = tree_complexity[randint(0, len(tree_complexity) - 1)]  # New Line 
+            complexity = tree_complexity[randint(0, len(tree_complexity) - 1)]  # New Line
             if file_path_one is None:
                 tree_one = generate_specific_trees(complexity.strip())
             else:
                 tree_one = generate_tree_from_file(file_path_one)
-            print("The generated tree will have a " + complexity + " complexity")  # New line 
+            print("The generated tree will have a " + complexity + " complexity")  # New line
 
             drift = drifts[randint(0, len(drifts) - 1)].strip()
             drift_area_one = round(uniform(float(drift_area[0].strip()), (float(drift_area[0].strip()) + 0.8 * (
@@ -137,10 +137,11 @@ def generate_logs(file_path_one=None):
                 DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs, out_folder)
                 # Drift ID in the instance DI will take the number_of_drifts. Should go back to 0 once a new log is generated.
 
+
             collection.add_drift(DI)
             collection.increase_drift_count()
-            #store_drift(event_log, DI)
-            #collection.log_drift(event_log)
+            event_log.attributes["drift:info"] = DI.drift_info_to_dict(DI)
+
 
                                                      # NI is an instance that stores information about noise
             start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
@@ -151,8 +152,9 @@ def generate_logs(file_path_one=None):
 
             collection.add_noise(NI)
             collection.increase_noise_count()
-            #store_noise(event_log, NI)
-            #collection.log_noise(event_log)
+            event_log.attributes["noise:info"] = NI.noise_info_to_dict(NI)
+
+
 
             if drift.casefold() != 'none':
                 data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + str(end_drift) + "; noise_level: " + str(noise_prop) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
@@ -172,8 +174,8 @@ def generate_logs(file_path_one=None):
         ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
         print('Finished generating collection of', num_logs, 'logs in', out_folder)
 
-    collection.store_drift_xes()
-    collection.store_noise_xes()
+    #collection.store_drift_xes()
+    #collection.store_noise_xes()
 
 
 

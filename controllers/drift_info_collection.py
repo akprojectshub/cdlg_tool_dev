@@ -15,8 +15,6 @@ class DriftInfo:
     def __post_init__(self):
         if self.process_perspective not in ["control-flow"]:
             raise ValueError("wrong value inserted for process_perspective")
-        else:
-            print("True")
 
         if self.drift_type not in ["sudden", "gradual", "incremental", "recurring"]:
             raise ValueError("wrong drift type")
@@ -53,6 +51,12 @@ class DriftInfo:
 
         self.drift_id=0 #Once we generate multiple drifts this should be changed
 
+    def drift_info_to_dict(self, DI):
+        d = dict()
+        d["value"] = True
+        d["children"] = dict({i[0]:i[1] for i in zip(vars(DI).keys(), list(vars(DI).values()))})
+        del d["children"]["folder_id"]
+        return d
 
 @dataclass
 class NoiseInfo:
@@ -91,10 +95,12 @@ class NoiseInfo:
             raise TypeError
 
         self.noise_id=0 #Once we generate multiple drifts this should be changed
-
-
-
-
+    def noise_info_to_dict(self, NI):
+        d = dict()
+        d["value"] = True
+        d["children"] = dict({i[0]: i[1] for i in zip(vars(NI).keys(), list(vars(NI).values()))})
+        del d["children"]["folder_id"]
+        return d
 
 
 @dataclass
@@ -119,63 +125,9 @@ class LogDriftInfo:
     def increase_noise_count(self):
         self.number_of_noises+=1
 
-    def log_drift(self, log): #add drift information  to the log in the attribute level
-        log.attributes["drift:info"] = self.drifts[self.log_id]
 
-    def log_noise(self, log): #add noise information to the log in the attribute level
-        log.attributes["noise:info"] = self.noise[self.log_id]
 
-    def store_drift_xes(self):
 
-        special_line = '<log xes.version="1849-2016" xes.features="nested-attributes" xmlns="http://www.xes-standard.org/">'
-        for i in self.drifts:
-            values = list()
-            i_keys = list(vars(i).keys())
-            i_val = list(vars(i).values())
-
-            print(vars(i))
-
-            with open(str(i.folder_id) + "/log_" + str(i.log_id) + ".xes", "r") as f:
-                contents = f.readlines()
-            line_index = [x for x in range(len(contents)) if special_line in contents[x]][0]
-
-            values.append("<string key='drift:info' value='Yes'>")
-            values.extend(
-                ["<string key='drift:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in
-                 range(0, len(i_keys) - 1)])
-            values.append("</string>")
-
-            for j, v in enumerate(values):
-                contents.insert(line_index + j + 1, v)
-            contents.insert(line_index + j + 2, "\n")
-            with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" + ".xes", "w") as f:
-                contents = "".join(contents)
-                f.write(contents)
-
-    def store_noise_xes(self):
-        special_line = '<log xes.version="1849-2016" xes.features="nested-attributes" xmlns="http://www.xes-standard.org/">'
-        for i in self.noise:
-            values = list()
-            i_keys = list(vars(i).keys())
-            i_val = list(vars(i).values())
-
-            with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" +".xes", "r") as f:
-                contents = f.readlines()
-            line_index = [x for x in range(len(contents)) if special_line in contents[x]][0]
-
-            values.append("<string key='noise:info' value='Yes'>")
-            values.extend(["<string key='noise:" + str(i_keys[j]) + "'" + " value=" + "'" + str(i_val[j]) + "'" + "/>" for j in range(0, len(i_keys) - 1)])
-            values.append("</string>")
-
-            for j, v in enumerate(values):
-                contents.insert(line_index + j + 2, v)
-            contents.insert(line_index + j + 3, "\n")
-
-            with open(str(i.folder_id) + "/log_" + str(i.log_id) + "_modified" + ".xes", "w") as f:
-                contents = "".join(contents)
-                f.write(contents)
-
-    #def table(self,log): #this method will be used to fill the table
 
 
 
