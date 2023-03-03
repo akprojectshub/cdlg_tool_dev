@@ -143,7 +143,7 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
             nu_models = input_int("Number of evolving models (int): ")
             log, tree_ev, drift_data = additional_incremental_drift_in_log(log, tree, nu_models)
         if drift_type != 'incremental':
-            drift_data['a'] = "activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs)+"; activities moved: "+str(moved_acs)
+            drift_data['a'] = "activities added: "+str(added_acs)+"; activities deleted: "+str(deleted_acs) + "; activities moved: " + str(moved_acs)
         drifts.append(drift_data)
         trees.append(tree_ev)
         drift_step = drift_step + 1
@@ -174,6 +174,7 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
         result.attributes['noise info:'] = "noise proportion: " + str(noise_data['p']) + "; start point: " + str(
             start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(
             round(noise_data['t'][1], 2)) + "); noise type: " + noise_data['ty']
+        result.attributes['noise_process_tree'] = str(noise_data['process_tree'])
     return result
 
 

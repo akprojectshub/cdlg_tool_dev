@@ -84,8 +84,9 @@ def main(log):
 
     log_drifts = parse_drift_info(log)
     log_process_trees = parse_process_tree_info(log)
+    log_process_tree_noise = {'noise_process_tree': {'tree_1': log.attributes['noise_process_tree']}}
 
-    return log_drifts | log_process_trees
+    return log_drifts | log_process_trees | log_process_tree_noise
 
 
 def transform_flat_file(all_logs_drift_info_df):
