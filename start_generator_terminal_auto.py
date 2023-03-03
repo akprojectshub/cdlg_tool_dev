@@ -193,7 +193,7 @@ def main():
 
 
 if __name__ == "__main__":
-    number_of_logs = 5
+    number_of_logs = 100
 
     cmd_path = 'C:\windows\system32\cmd.exe'
     command = 'python start_generator_terminal.py'
@@ -219,8 +219,8 @@ if __name__ == "__main__":
     noise_type = 'changed_model'
     noise_starts = [0.1, 0.9]
     noise_ends = [0.1, 0.9]
-    noise_proportions = [0.05, 0.2]
-    noise_severities = [0.1, 0.5]
+    noise_proportions = [0.05, 0.1]
+    noise_severities = [0.5, 0.5]
     NOISE_SETTINGS = [noise, noise_type, noise_starts, noise_ends, noise_proportions, noise_severities]
 
     USED_PARAMETERS = {}
