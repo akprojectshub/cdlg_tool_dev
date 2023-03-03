@@ -80,13 +80,40 @@ def parse_process_tree_info(log):
     return {'process_trees': log_process_trees}
 
 
+def parse_noise_process_tree_info(log):
+
+    try:
+        log_process_tree_noise = {'noise_process_tree': {'tree_1': log.attributes['noise_process_tree']}}
+        return log_process_tree_noise
+    except:
+        return {}
+
+
+def parse_change_moments(log):
+
+    print()
+    change_moments = {}
+    # for key, value in log.attributes['change_moments']['children'].items():
+    #     change_moments[key]
+    #     print(key, value)
+    #     info
+    # 1, drift
+    # perspective, control - flow
+    try:
+        return {'change_moments': log.attributes['change_moments']['children']}
+    except:
+        return {}
+
+
+
 def main(log):
 
     log_drifts = parse_drift_info(log)
     log_process_trees = parse_process_tree_info(log)
-    log_process_tree_noise = {'noise_process_tree': {'tree_1': log.attributes['noise_process_tree']}}
+    log_process_tree_noise = parse_noise_process_tree_info(log)
+    log_process_change_moments = parse_change_moments(log)
 
-    return log_drifts | log_process_trees | log_process_tree_noise
+    return log_drifts | log_process_trees | log_process_tree_noise | log_process_change_moments
 
 
 def transform_flat_file(all_logs_drift_info_df):
@@ -107,6 +134,7 @@ def transform_flat_file(all_logs_drift_info_df):
         elif row.drift_type == "sudden" and row.attribute == "drift start timestamp":
             values = [row.log, row.value, "sudden"]
             output.append(values)
+        #elif row.drift_type == "recurring" and row.attribute == "drift start timestamp":
         else:
             pass
 
