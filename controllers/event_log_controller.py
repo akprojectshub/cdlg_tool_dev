@@ -16,8 +16,10 @@ def combine_two_logs(log_one, log_two):
     :param log_two: second event log
     :return: combined event log
     """
+
+    # join two logs and add trace belonging to a process version
     log_combined = EventLog()
-    last_model_version = 1
+    last_model_version = 0
     for line in log_one:
         try:
             last_model_version = line.attributes['model:version']
@@ -28,6 +30,7 @@ def combine_two_logs(log_one, log_two):
         line.attributes['model:version'] = last_model_version + 1
         log_combined.append(line)
 
+    # Update trace ids to be unique
     trace_id = 0
     for trace in log_combined:
         trace.attributes['concept:name'] = str(trace_id)
