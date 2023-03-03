@@ -14,6 +14,8 @@ from controllers.input_controller import input_drift, input_int, input_date, inp
     input_percentage_end
 from controllers.noise_controller import add_noise_to_log
 import datetime
+from collections import defaultdict
+
 
 def generate_logs_with_model(tree_one, out_file):
     """ Generation of event logs with different concept drifts from one model
@@ -76,6 +78,7 @@ def generate_logs_with_model(tree_one, out_file):
         end_trace = get_num_trace(num_traces, end_point)
         log = recurring_drift(tree_one, tree_two, num_traces, num_seasonal_changes, proportion_first,
                               start_point, end_point)
+
 
     elif drift_type == 'incremental':
         num_models = input_int("Number of evolving versions (int): ")
@@ -149,6 +152,9 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
         drift_step = drift_step + 1
         addi_drift = input_yes_no("Do you want to add an additional drift to the event log [yes, no]? ")
     result, noise_data = add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
+
+    result = add_change_moments_to_log(result)
+
     i = 1
     for x in drifts:
         start = int(x['t'][0]) / len(result)
@@ -175,7 +181,24 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
             start_noise) + " (" + str(round(noise_data['t'][0], 2)) + "); end point: " + str(end_noise) + " (" + str(
             round(noise_data['t'][1], 2)) + "); noise type: " + noise_data['ty']
         result.attributes['noise_process_tree'] = str(noise_data['process_tree'])
+
     return result
+
+def add_change_moments_to_log(created_log):
+    change_moments = {}
+    current_model_version = created_log[0].attributes['model:version']
+    change_id = 0
+    for trace in created_log:
+        change_moment = trace[0]['time:timestamp']
+        version = trace.attributes['model:version']
+        if version != current_model_version:
+            change_id += 1
+            change_moments['change_' + str(change_id)] = change_moment #.strftime("%Y-%m-%d, %H:%M:%S")
+            current_model_version = version
+
+    created_log.attributes['change_moments'] = {"value": "timestamps", "children": change_moments}
+
+    return created_log
 
 
 def convert_trees_to_string(trees):
