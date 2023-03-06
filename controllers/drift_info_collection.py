@@ -49,7 +49,7 @@ class DriftInfo:
             self.drift_time.remove('N/A')
 
         if self.drift_type !="sudden":
-            self.drift_time[1] = datetime.datetime.strptime(self.drift_time[1][0:len(self.drift_time[1])-6].strip(),"%Y-%d-%m %H:%M:%S")
+            self.drift_time[1] = datetime.datetime.strptime(self.drift_time[1][0:len(self.drift_time[1])-6].strip(),"%Y-%m-%d %H:%M:%S.%f")
 
         self.drift_id=0 #Once we generate multiple drifts this should be changed
 
@@ -59,6 +59,7 @@ class DriftInfo:
         d["value"] = True ## By default need to add this as a parameter
         d["children"] = dict({i[0]:i[1] for i in zip(list(DI.keys()), list(DI.values()))})
         return d
+
 
 @dataclass
 class NoiseInfo:
@@ -127,6 +128,9 @@ class LogDriftInfo:
 
     def increase_noise_count(self):
         self.number_of_noises+=1
+
+    def fill_drift_log(self): #This method is used to store the dictionary with log attribute levels in the log (xes file)
+        param_drift = vars(DriftInfo)
 
 
 

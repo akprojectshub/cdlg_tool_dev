@@ -5,3 +5,5 @@ __pycache__/
 *.xes
 *.csv
 *.txt
+*.ptml
+*.pyc

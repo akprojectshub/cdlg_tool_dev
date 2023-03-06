@@ -1,7 +1,7 @@
 Complexity_Random_Tree: middle
 Timestamp_First_Trace: 20/8/3 8:0:0
-Min_Time_Activity_Sec: 120
-Max_Time_Activity_Sec: 1200
+Trace_exp_arrival_sec: 40000
+Task_exp_duration_sec: 500000
 Number_Traces: 1000
 Change_Point_Sudden_Drift: 0.4
 Proportion_Random_Evolution: 0.3

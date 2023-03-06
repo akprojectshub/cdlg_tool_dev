@@ -3,6 +3,8 @@ import random
 import wexpect
 
 
+# py -3.9 start_generator_terminal_auto.py
+
 def initial_config(log_setting):
     # Start the program and provide initial log information
     cmd_path, command, log_config = log_setting
@@ -184,31 +186,26 @@ def main():
 
     child.expect(wexpect.EOF)
     console = child.before
-    #discprint(console)
     log_name = console[-31:]
-    #child.terminate()
-
-    #print(console)
-    #child.kill()
-
     config_dict = {log_name[2:-2]: drift_setting_dict}
+
     return config_dict
 
 
 if __name__ == "__main__":
-    number_of_logs = 5
+    number_of_logs = 100
 
     cmd_path = 'C:\windows\system32\cmd.exe'
     command = 'python start_generator_terminal.py'
     log_config = ['random', 'one_model', 'no', 'complex']
     LOG_SETTING = [cmd_path, command, log_config]
 
-    drift_numbers = [4, 5]
+    drift_numbers = [1, 5]
     drift_types = ['sudden', 'gradual']
     drift_starts = [0.2, 0.8]
-    drift_gradual_durations = [100, 1000]
-    drift_gradual_after = [500, 2000]
-    drift_sudden_lengths = [1000, 2000]
+    drift_gradual_durations = [500, 1000]
+    drift_gradual_after = [1000, 2000]
+    drift_sudden_lengths = [2000, 4000]
     drift_severities = [0.2, 0.8]
     SETTINGS = [drift_numbers,
                 drift_types,
@@ -218,12 +215,12 @@ if __name__ == "__main__":
                 drift_sudden_lengths,
                 drift_severities]
 
-    noise = 'no'
+    noise = 'yes'
     noise_type = 'changed_model'
     noise_starts = [0.1, 0.9]
     noise_ends = [0.1, 0.9]
-    noise_proportions = [0.1, 0.5]
-    noise_severities = [0.1, 0.5]
+    noise_proportions = [0.05, 0.1]
+    noise_severities = [0.5, 0.5]
     NOISE_SETTINGS = [noise, noise_type, noise_starts, noise_ends, noise_proportions, noise_severities]
 
     USED_PARAMETERS = {}
@@ -234,344 +231,3 @@ if __name__ == "__main__":
 
 
     sys.exit()
-
-
-
-# import wexpect
-#
-#
-# def initial_config(cmd_path, command, log_config):
-#     # Start the program and provide initial log information
-#     child = wexpect.spawn(cmd_path, ['/c', command])
-#     for config in log_config:
-#         child.expect(" ")
-#         child.sendline(config)
-#     print("Log initialized with ", log_config)
-#
-#     return child
-#
-#
-# def main():
-#     child = initial_config(cmd_path, command, log_config)
-#
-#     print("drift 1")
-#     child.expect(" ")
-#     child.sendline('sudden')
-#     child.expect(" ")
-#     child.sendline('2000')
-#     child.expect(" ")
-#     child.sendline('0.5')
-#     child.expect(" ")
-#     child.sendline('random')
-#     child.expect(" ")
-#     child.sendline('0.3')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('yes')
-#
-#     print("drift 2")
-#     child.expect(" ")
-#     child.sendline('gradual')
-#     child.expect(" ")
-#     child.sendline('evolved_version')
-#     child.expect(" ")
-#     child.sendline('random')
-#     child.expect(" ")
-#     child.sendline('0.5')
-#     child.expect("[end, into]?")
-#     child.sendline('end')
-#     child.expect(" ")
-#     child.sendline('500')
-#     child.expect(" ")
-#     child.sendline('1000')
-#     child.expect(" ")
-#     child.sendline('linear')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('yes')
-#
-#     print("drift 3")
-#     child.expect(" ")
-#     child.sendline('sudden')
-#     child.expect(" ")
-#     child.sendline('evolved_version')
-#     child.expect(" ")
-#     child.sendline('random')
-#     child.expect(" ")
-#     child.sendline('0.3')
-#     child.expect("[end, into]?")
-#     child.sendline('end')
-#     child.expect(" ")
-#     child.sendline('2000')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('yes')
-#
-#     print("drift 4")
-#     child.expect(" ")
-#     child.sendline('gradual')
-#     child.expect(" ")
-#     child.sendline('evolved_version')
-#     child.expect(" ")
-#     child.sendline('random')
-#     child.expect(" ")
-#     child.sendline('0.5')
-#     child.expect("[end, into]?")
-#     child.sendline('end')
-#     child.expect(" ")
-#     child.sendline('500')
-#     child.expect(" ")
-#     child.sendline('1000')
-#     child.expect(" ")
-#     child.sendline('linear')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('yes')
-#
-#     print("drift 5")
-#     child.expect(" ")
-#     child.sendline('sudden')
-#     child.expect(" ")
-#     child.sendline('evolved_version')
-#     child.expect(" ")
-#     child.sendline('random')
-#     child.expect(" ")
-#     child.sendline('0.3')
-#     child.expect("[end, into]?")
-#     child.sendline('end')
-#     child.expect(" ")
-#     child.sendline('2000')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('no')
-#
-#     child.expect("[yes, no]?")
-#     child.sendline('no')
-#
-#     child.expect(wexpect.EOF)
-#     print(child.before)
-#
-#
-# if __name__ == "__main__":
-#     cmd_path = 'C:\windows\system32\cmd.exe'
-#     command = 'python start_generator_terminal.py'
-#     log_config = ['random', 'one_model', 'no', 'middle']
-#
-#     drift_number_max = 5
-#     drift_types = ['sudden', 'gradual']
-#     drift_starts = [0.2, 0.8]
-#     drift_gradual_durations = [100, 1000]
-#     drift_gradual_after = [500, 2000]
-#     drift_sudden_lengths = [1000, 2000]
-#
-#     SETTINGS = [drift_number_max,
-#                 drift_types,
-#                 drift_starts,
-#                 drift_gradual_durations,
-#                 drift_gradual_after,
-#                 drift_sudden_lengths]
-#
-#     main()
-
-
-
-# print('progress 0')
-#
-# child.expect("Import models or use randomly generated models [import, random]: ")
-# child.sendline('random')
-# child.expect("Evolution of one randomly generated model or use of two randomly generated models [one_model, two_models]:")
-# child.sendline('one_model')
-# child.expect("Do you want to adjust the various settings/parameters for the process tree, which will be used to generate the model randomly [yes, no]?")
-# child.sendline('no')
-# child.expect("Complexity of the process tree to be generated [simple, middle, complex]:")
-# child.sendline('middle')
-#
-# print('progress 1')
-# child.expect("Type of concept drift [sudden, gradual, recurring, incremental]:")
-# child.sendline('sudden')
-# child.expect("Number of traces in the event log (x >= 100):")
-# child.sendline('2000')
-# child.expect("Starting point of the drift (0 < x < 1):")
-# child.sendline('0.5')
-# child.expect("Controlled or random evolution of the process tree version [controlled, random]:")
-# child.sendline('random')
-# child.expect("Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):")
-# child.sendline('0.3')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-# child.sendline('yes')
-#
-# print('progress 2')
-#
-# child.expect("Type of 2. concept drift in the event log [sudden, gradual, recurring, incremental]:")
-# child.sendline('gradual')
-# child.expect("Process model version for the evolution of the additional gradual drift [initial_version, evolved_version]:")
-# child.sendline('revolved_version')
-# child.expect("Controlled or random evolution of the process tree version [controlled, random]:")
-# child.sendline('random')
-# child.expect("Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):")
-# child.sendline('0.5')
-# child.expect("Adding the additional gradual drift at the end of the log or into the log [end, into]?")
-# child.sendline('end')
-# child.expect("Number of additional traces of the gradual drift to be added at the end of the event log (int):")
-# child.sendline('500')
-# child.expect("Number of additional traces of the new model to be added after the drift occurred (int):")
-# child.sendline('1000')
-# child.expect("Method for distributing the traces during the gradual drift [linear, exponential]:")
-# child.sendline('linear')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-# child.sendline('yes')
-#
-# print('progress 3')
-#
-#
-# child.expect("Type of 3. concept drift in the event log [sudden, gradual, recurring, incremental]:")
-# child.sendline('sudden')
-# child.expect("Process model version for the evolution of the additional sudden drift [initial_version, evolved_version]:")
-# child.sendline('evolved_version')
-# child.expect("Controlled or random evolution of the process tree version [controlled, random]:")
-# child.sendline('random')
-# child.expect("Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):")
-# child.sendline('0.3')
-# child.expect("Adding the additional sudden drift at the end of the log or into the log [end, into]?")
-# child.sendline('end')
-# child.expect("Number of additional traces from the new model to be added at the end of the event log (int):")
-# child.sendline('500')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-# child.sendline('yes')
-#
-# print('progress 4')
-# child.expect("Type of 4. concept drift in the event log [sudden, gradual, recurring, incremental]:")
-# child.sendline('gradual')
-# child.expect("Process model version for the evolution of the additional gradual drift [initial_version, evolved_version]:")
-# child.sendline('revolved_version')
-# child.expect("Controlled or random evolution of the process tree version [controlled, random]:")
-# child.sendline('random')
-# child.expect("Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):")
-# child.sendline('0.5')
-# child.expect("Adding the additional gradual drift at the end of the log or into the log [end, into]?")
-# child.sendline('end')
-# child.expect("Number of additional traces of the gradual drift to be added at the end of the event log (int):")
-# child.sendline('500')
-# child.expect("Number of additional traces of the new model to be added after the drift occurred (int):")
-# child.sendline('1000')
-# child.expect("Method for distributing the traces during the gradual drift [linear, exponential]:")
-# child.sendline('linear')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-# child.sendline('yes')
-#
-# print('progress 5')
-# child.expect("Type of 5. concept drift in the event log [sudden, gradual, recurring, incremental]:")
-# child.sendline('sudden')
-# child.expect("Process model version for the evolution of the additional sudden drift [initial_version, evolved_version]:")
-# child.sendline('evolved_version')
-# child.expect("Controlled or random evolution of the process tree version [controlled, random]:")
-# child.sendline('random')
-# child.expect("Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):")
-# child.sendline('0.3')
-# child.expect("Adding the additional sudden drift at the end of the log or into the log [end, into]?")
-# child.sendline('end')
-# child.expect("Number of additional traces from the new model to be added at the end of the event log (int):")
-# child.sendline('500')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-# child.sendline('no')
-# child.expect("Do you want to add an additional drift to the event log [yes, no]?")
-#
-# child.expect("Do you want to add noise to the event log [yes, no]?")
-# child.sendline('no')
-#
-# print('done')
-#
-#
-# # Import models or use randomly generated models [import, random]:
-# random
-# # Evolution of one randomly generated model or use of two randomly generated models [one_model, two_models]:
-# one_model
-# # Do you want to adjust the various settings/parameters for the process tree, which will be used to generate the model randomly [yes, no]?
-# no
-# # Complexity of the process tree to be generated [simple, middle, complex]:
-# middle
-#
-# # Type of concept drift [sudden, gradual, recurring, incremental]:
-# sudden
-# # Number of traces in the event log (x >= 100):
-# 2000
-# # Starting point of the drift (0 < x < 1):
-# 0.5
-# # Controlled or random evolution of the process tree version [controlled, random]:
-# random
-# # Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):
-# 0.3
-#
-# # Do you want to add an additional drift to the event log [yes, no]?
-# yes
-#
-# # Type of 2. concept drift in the event log [sudden, gradual, recurring, incremental]:
-# gradual
-# # Process model version for the evolution of the additional gradual drift [initial_version, evolved_version]:
-# evolved_version
-# # Controlled or random evolution of the process tree version [controlled, random]:
-# random
-# # Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):
-# 0.5
-# # Adding the additional gradual drift at the end of the log or into the log [end, into]?
-# end
-# # Number of additional traces of the gradual drift to be added at the end of the event log (int):
-# 500
-# # Number of additional traces of the new model to be added after the drift occurred (int):
-# 1000
-# # Method for distributing the traces during the gradual drift [linear, exponential]:
-# linear
-# # Do you want to add an additional drift to the event log [yes, no]?
-# yes
-#
-# # Type of 3. concept drift in the event log [sudden, gradual, recurring, incremental]:
-# sudden
-# # Process model version for the evolution of the additional sudden drift [initial_version, evolved_version]:
-# evolved_version
-# # Controlled or random evolution of the process tree version [controlled, random]:
-# random
-# # Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):
-# 0.3
-# # Adding the additional sudden drift at the end of the log or into the log [end, into]?
-# end
-# # Number of additional traces from the new model to be added at the end of the event log (int):
-# 500
-# # Do you want to add an additional drift to the event log [yes, no]?
-# yes
-#
-# # Type of 4. concept drift in the event log [sudden, gradual, recurring, incremental]:
-# gradual
-# # Process model version for the evolution of the additional gradual drift [initial_version, evolved_version]:
-# evolved_version
-# # Controlled or random evolution of the process tree version [controlled, random]:
-# random
-# # Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):
-# 0.5
-# # Adding the additional gradual drift at the end of the log or into the log [end, into]?
-# end
-# # Number of additional traces of the gradual drift to be added at the end of the event log (int):
-# 5000
-# # Number of additional traces of the new model to be added after the drift occurred (int):
-# 500
-# # Method for distributing the traces during the gradual drift [linear, exponential]:
-# linear
-# # Do you want to add an additional drift to the event log [yes, no]?
-# yes
-#
-# # Type of 5. concept drift in the event log [sudden, gradual, recurring, incremental]:
-# sudden
-# # Process model version for the evolution of the additional sudden drift [initial_version, evolved_version]:
-# evolved_version
-# # Controlled or random evolution of the process tree version [controlled, random]:
-# random
-# # Proportion of the activities in the process tree to be affected by random evolution (0 < x < 1):
-# 0.3
-# # Adding the additional sudden drift at the end of the log or into the log [end, into]?
-# end
-# # Number of additional traces from the new model to be added at the end of the event log (int):
-# 500
-# # Do you want to add an additional drift to the event log [yes, no]?
-# no
-#
-# # Do you want to add noise to the event log [yes, no]?
-# no

@@ -37,7 +37,7 @@ def generate_logs(file_path_one=None):
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
 
-    tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec = get_parameters()
+    tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, log_start_timestamp, trace_exp_arrival_sec, task_exp_duration_sec = get_parameters()
     print('Generating', num_logs, 'logs')
     with open(os.path.join(out_folder, "collection_info.csv"), 'w', newline='') as log_file:
         writer = csv.writer(log_file)
@@ -124,7 +124,7 @@ def generate_logs(file_path_one=None):
                     event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, noise_type, 0, 1)
             if not noise_ha:
                 noise_prop = 0.0
-            add_duration_to_log(event_log, date, min_sec, max_sec)
+            add_duration_to_log(event_log, log_start_timestamp, trace_exp_arrival_sec, task_exp_duration_sec)
             start_drift = get_timestamp_log(event_log, num_traces, drift_area_one)
             if drift == 'sudden':
                 end_drift = "N/A"

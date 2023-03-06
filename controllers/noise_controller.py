@@ -35,15 +35,15 @@ def add_noise_randomized_tree(log_total, tree_one):
         drift_tree = copy.deepcopy(tree_one)
         evolution_stage = input_per_not_null(
             "Proportion of the changes in the initial tree version for creating the noise (0 < x < 1): ")
-        drift_tree, a, b, c = evolve_tree_randomly(drift_tree, evolution_stage)
-        log_noise = semantics.generate_log(drift_tree, nu_traces)
+        noise_tree, a, b, c = evolve_tree_randomly(drift_tree, evolution_stage)
+        log_noise = semantics.generate_log(noise_tree, nu_traces)
     else:
-        tree = generate_tree(
+        noise_tree = generate_tree(
             {'mode': 8, 'min': 6, 'max': 10, 'sequence': 0.25, 'choice': 0.25, 'parallel': 0.25, 'loop': 0.2, 'or': 0,
              'silent': 0, 'duplicate': 0, 'lt_dependency': 0, 'infrequent': 0.25, 'no_models': 10, 'unfold': 10,
              'max_repeat': 10})
-        log_noise = semantics.generate_log(tree, nu_traces)
-    return include_noise_in_log(log_total, log_noise, start_noise, end_noise), {'p': pro_noise, 't': [start_noise, end_noise], 'ty': type_noise}
+        log_noise = semantics.generate_log(noise_tree, nu_traces)
+    return include_noise_in_log(log_total, log_noise, start_noise, end_noise), {'p': pro_noise, 't': [start_noise, end_noise], 'ty': type_noise, 'process_tree': noise_tree}
 
 
 def add_noise_to_log(log, tree, datestamp, min_duration, max_duration):
