@@ -195,6 +195,7 @@ def main():
 if __name__ == "__main__":
     number_of_logs = 100
 
+
     cmd_path = 'C:\windows\system32\cmd.exe'
     command = 'python start_generator_terminal.py'
     log_config = ['random', 'one_model', 'no', 'complex']
