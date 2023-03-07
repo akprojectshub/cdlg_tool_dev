@@ -55,10 +55,23 @@ class DriftInfo:
 
     def drift_info_to_dict(self):
         DI = vars(self)
+        keys_list = list(DI.keys())
+        values_list = list(DI.values())
+        type_list = [type(i).__name__ for i in DI.values()]
         d = dict()
-        d["value"] = True ## By default need to add this as a parameter
-        d["children"] = dict({i[0]:i[1] for i in zip(list(DI.keys()), list(DI.values()))})
-        return d
+        d_final = dict()
+        d["value"] = True  ## By default need to add this as a parameter
+
+        for i in range(0, len(type_list)):
+            if type_list[i] == 'list':
+                d[keys_list[i]] = {keys_list[i] + "_" + str(j): values_list[i][j] for j in
+                                   range(0, len(values_list[i]))}
+            elif type_list[i] != 'list':
+                d[keys_list[i]] = values_list[i]
+
+        d_final["Children"] = d
+        return d_final
+
 
 
 @dataclass
