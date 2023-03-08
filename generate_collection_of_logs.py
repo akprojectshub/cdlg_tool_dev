@@ -13,6 +13,7 @@ from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
 from controllers.noise_controller import add_noise_gs
+from controllers.noise_controller_new import insert_noise
 from controllers.drift_info_collection import DriftInfo
 from controllers.drift_info_collection import NoiseInfo
 from controllers.drift_info_collection import LogDriftInfo
@@ -121,7 +122,8 @@ def generate_logs(file_path_one=None):
 
                 if noise_prop != 0: # Create a ticket so that this value can be picked by the user replace by a list and select .choice() randomly: TO DO
                     noise_type = choice(['changed_model','random_model'])
-                    event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, noise_type, 0, 1)
+                    event_log = insert_noise(event_log, noisy_trace_prob=0.1, noisy_event_prob=0.2)
+                    #event_log, noise_ha = add_noise_gs(event_log, tree_one, noise_prop, noise_type, 0, 1)
             if not noise_ha:
                 noise_prop = 0.0
             add_duration_to_log(event_log, log_start_timestamp, trace_exp_arrival_sec, task_exp_duration_sec)
@@ -135,23 +137,18 @@ def generate_logs(file_path_one=None):
                 # DI is an instance that stores the log level data
             if drift.casefold() != "none": #if there is a drift
                 DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs)
-
-
             collection.add_drift(DI)
             collection.increase_drift_count()
             event_log.attributes["drift:info"] = DI.drift_info_to_dict()
 
-
-                                                     # NI is an instance that stores information about noise
-            start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
-            end_time_noise = event_log[len(event_log)-1][len(event_log[len(event_log)-1])-1]["time:timestamp"] #Last time_stamp in the log
-            if noise!=0:
-                    NI =NoiseInfo(str(i),collection.number_of_noises,"control-flow",noise_type,noise_prop,start_time_noise, end_time_noise)
-
-
-            collection.add_noise(NI)
-            collection.increase_noise_count()
-            event_log.attributes["noise:info"] = NI.noise_info_to_dict()
+            # NI is an instance that stores information about noise
+            #start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
+            #end_time_noise = event_log[len(event_log)-1][len(event_log[len(event_log)-1])-1]["time:timestamp"] #Last time_stamp in the log
+            #if noise!=0:
+            #        NI =NoiseInfo(str(i),collection.number_of_noises,"control-flow",noise_type,noise_prop,start_time_noise, end_time_noise)
+            #collection.add_noise(NI)
+            #collection.increase_noise_count()
+            #event_log.attributes["noise:info"] = NI.noise_info_to_dict()
 
 
 
