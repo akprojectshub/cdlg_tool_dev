@@ -1,7 +1,7 @@
 Complexity_Random_Tree: complex
 Number_Event_logs: 5
 Number_Traces_Per_Event_Log: 5000
-Drifts: recurring;incremental
+Drifts: recurring;incremental;sudden
 Drift_Area: 0.2-0.8
 Proportion_Random_Evolution_Sector: 0.1-0.4
 Proportion_Noise_Sector: 0.0-0.1

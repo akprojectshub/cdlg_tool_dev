@@ -134,30 +134,13 @@ def generate_logs(file_path_one=None):
 
                 # DI is an instance that stores the log level data
             if drift.casefold() != "none": #if there is a drift
-                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs)
+                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs,True)
 
 
             collection.add_drift(DI)
             collection.increase_drift_count()
-            print(DI.drift_info_to_dict())
 
-
-
-            k = list(DI.drift_info_to_dict().keys())
-            event_log.attributes[k[0]] = DI.drift_info_to_dict()[k[0]]
-            for j in k[1:len(k)]:
-                if (type(DI.drift_info_to_dict()[j]) != dict):
-                    print("condition 1")
-                    event_log.attributes[j] = DI.drift_info_to_dict()[j]
-                elif (type(DI.drift_info_to_dict()[j]) == dict):
-                    print("condition 2 ")
-                    event_log.attributes[j] = DI.drift_info_to_dict()[j]
-                    for k in DI.drift_info_to_dict()[j].keys():
-                        event_log.attributes[j][k] = DI.drift_info_to_dict()[j][k]
-
-
-
-            #event_log.attributes["drift:info"] = DI.drift_info_to_dict()
+            event_log.attributes["drift:info"] = DI.drift_info_to_dict()
 
 
                                                      # NI is an instance that stores information about noise
@@ -170,7 +153,7 @@ def generate_logs(file_path_one=None):
             collection.add_noise(NI)
             collection.increase_noise_count()
 
-            print(NI.noise_info_to_dict())
+            print("#####", NI.noise_info_to_dict())
 
             event_log.attributes["noise:info"] = NI.noise_info_to_dict()
 
