@@ -132,29 +132,27 @@ def generate_logs(file_path_one=None):
                 end_drift = str(get_timestamp_log(event_log, num_traces, drift_area_two)) + " (" + str(
                     drift_area_two) + ")"
 
-                # DI is an instance that stores the log level data
-            if drift.casefold() != "none": #if there is a drift
-                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs,True)
-
+            # DI is an instance that stores the log level data
+            if drift.casefold() != "none":  # if there is a drift
+                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs,
+                               deleted_acs, moved_acs, True)
 
             collection.add_drift(DI)
             collection.increase_drift_count()
 
             event_log.attributes["drift:info"] = DI.drift_info_to_dict()
 
-
-                                                     # NI is an instance that stores information about noise
-            start_time_noise = event_log[0][0]["time:timestamp"] #1st time_stamp in the log
-            end_time_noise = event_log[len(event_log)-1][len(event_log[len(event_log)-1])-1]["time:timestamp"] #Last time_stamp in the log
-            if noise!=0:
-                    NI =NoiseInfo(str(i),collection.number_of_noises,"control-flow",noise_type,noise_prop,start_time_noise, end_time_noise)
+            # NI is an instance that stores information about noise
+            start_time_noise = event_log[0][0]["time:timestamp"]  # 1st time_stamp in the log
+            end_time_noise = event_log[len(event_log) - 1][len(event_log[len(event_log) - 1]) - 1][
+                "time:timestamp"]  # Last time_stamp in the log
+            if noise != 0:
+                NI = NoiseInfo(str(i), collection.number_of_noises, "control-flow", noise_type, noise_prop, start_time_noise,
+                               end_time_noise)
 
 
             collection.add_noise(NI)
             collection.increase_noise_count()
-
-            print("#####", NI.noise_info_to_dict())
-
             event_log.attributes["noise:info"] = NI.noise_info_to_dict()
 
 
