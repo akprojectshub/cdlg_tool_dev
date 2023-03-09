@@ -4,7 +4,11 @@ import csv
 import os
 import sys
 from random import randint, uniform, choice
-
+import numpy as np
+import ast
+from dateutil.parser import parse
+from datetime import datetime
+from controllers import configurations as config
 from concept_drifts.gradual_drift import gradual_drift
 from concept_drifts.incremental_drift import incremental_drift_gs
 from concept_drifts.recurring_drift import recurring_drift
@@ -27,6 +31,7 @@ from controllers.drift_info_xes_file import store_noise
 
 import time
 
+import pm4py.discovery
 
 def generate_logs(file_path_one=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
@@ -38,7 +43,8 @@ def generate_logs(file_path_one=None):
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
 
-    tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, log_start_timestamp, trace_exp_arrival_sec, task_exp_duration_sec = get_parameters()
+    parameters = get_parameters('parameters_log_collection')
+    #tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, log_start_timestamp, trace_exp_arrival_sec, task_exp_duration_sec = get_parameters('parameters_log_collection')
     print('Generating', num_logs, 'logs')
     with open(os.path.join(out_folder, "collection_info.csv"), 'w', newline='') as log_file:
         writer = csv.writer(log_file)
@@ -170,32 +176,33 @@ def generate_logs(file_path_one=None):
         print('Finished generating collection of', num_logs, 'logs in', out_folder)
 
 
-def get_parameters():
+def get_parameters(par_file_name: str):
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
     :return: parameters for the generation of a set of event logs
     """
-    doc = open('data/parameters/parameters_log_collection', 'r')
-    one = doc.readline().split(' ')[1]
-    tree_complexity = one[0:len(one) - 1].split(";")  ## new added line
-    num_logs = int(doc.readline().split(' ')[1])
-    num_traces = int(doc.readline().split(' ')[1])
-    one = doc.readline().split(' ')[1]
-    drifts = one[0:len(one) - 1].split(';')
-    drift_area = doc.readline().split(' ')[1].split('-')
-    proportion_random_evolution = doc.readline().split(' ')[1].split('-')
-    nos = doc.readline().split(' ')[1]
-    if nos.strip() == 'None' or nos.strip() == '0':
-        noise = 0
-    else:
-        noise = nos.split('-')
-    dates = doc.readline().split(' ')
-    date = datetime.datetime.strptime(dates[1] + " " + dates[2][0:len(dates[2]) - 1], '%y/%d/%m %H:%M:%S')
-    min_sec = int(doc.readline().split(' ')[1])
-    max_sec = int(doc.readline().split(' ')[1])
-    return tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise, date, min_sec, max_sec
 
+    parameter_doc = open(f'{config.DEFAULT_PARAMETER_DIR}/{par_file_name}', 'r')
+    parameters_input = parameter_doc.read()
+    parameter_doc.close()
+    parameters_dict = {}
+    for line in parameters_input.split('\n'):
+        if line:
+            par = line.split(': ')[0]
+            value = line.split(': ')[1]
+            if '/' in value:
+                value = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in value.split(',')]
+            elif '-' in value:
+                value = value.split('-')
+            else:
+                value = value.split(', ')
 
+            try:
+                value = [ast.literal_eval(v) for v in value]
+            except:
+                pass
+            parameters_dict[par] = value
 
+    return parameters_dict
 
 
 def main():
