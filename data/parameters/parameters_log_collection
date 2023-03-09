@@ -1,12 +1,12 @@
-Complexity_Random_Tree: middle
-Number_Event_logs: 3
-Number_Traces_Per_Event_Log: 5000
+Complexity_random_tree: middle
+Number_event_logs: 3
+Number_traces_per_event_log: 5000
 Drifts: recurring, incremental
-Drift_Area: 0.2-0.8
-Proportion_Random_Evolution_Sector: 0.1-0.4
+Drift_area: 0.2-0.8
+Proportion_random_evolution_sector: 0.1-0.4
 Noise: True
-Noisy_trace_prob: 0.0-0.1
+Noisy_trace_prob: 0.1
 Noisy_event_prob: 0.1
-Timestamp_First_Trace: 2020/08/01 08:00:00
+Timestamp_first_trace: 2020/08/01 08:00:00
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
