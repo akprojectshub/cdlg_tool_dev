@@ -33,119 +33,125 @@ def generate_logs(file_path_to_own_models=None):
     :return: collection of event logs with drifts saved in out_folder
     """
 
+    # CREATE DIR TO STORE GENERATED LOGS
     out_folder = os.path.join(config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR, str(int(time.time())))
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
 
+    # READE PARAMETERS FROM A FILE
     parameters_dict = get_parameters(config.PAR_LOG_COLLECTION)
     par = InputParameters(**parameters_dict)
 
     print('Generating', par.Number_event_logs[0], 'logs')
-    with open(os.path.join(out_folder, "collection_info.csv"), 'w', newline='') as log_file:
-        writer = csv.writer(log_file)
-        writer.writerow(["Event Log", "Drift Perspective", "Complexity", "Drift Type", "Drift Specific Information",
-                         "Drift Start Timestamp", "Drift End Timestamp", "Noise Proportion", "Activities Added",
-                         "Activities Deleted", "Activities Moved"])
-        collection = LogDriftInfo()
-        for i in range(par.Number_event_logs[0]):
-            parameters_str = "number of traces: " + str(par.Number_traces_per_event_log)
+    collection = LogDriftInfo()
+    # MAIN LOOP
+    for i in range(par.Number_event_logs[0]):
+        complexity = par.Complexity_random_tree[randint(0, len(par.Complexity_random_tree) - 1)]  # New Line
+        if file_path_to_own_models is None:
+            tree_one = generate_specific_trees(complexity.strip())
+        else:
+            tree_one = generate_tree_from_file(file_path_to_own_models)
+        print("The generated tree will have a " + complexity + " complexity")  # New line
 
-            complexity = par.Complexity_random_tree[randint(0, len(par.Complexity_random_tree) - 1)]  # New Line
-            if file_path_to_own_models is None:
-                tree_one = generate_specific_trees(complexity.strip())
+        #drift = par.Drifts[randint(0, len(par.Drifts) - 1)].strip()
+        drift = select_random(par.Drifts, option='random')
+        drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
+        #drift_area_one = round(uniform(par.Drift_area[0], (par.Drift_area[0] + 0.8 * (par.Drift_area[1] - par.Drift_area[0]))), 2)
+        #drift_area_two = round(uniform(drift_area_one + (par.Drift_area[1] - par.Drift_area[0]) * 0.2, par.Drift_area[1]), 2)
+
+        ran_evolve = select_random(par.Proportion_random_evolution_sector, option='uniform')
+        #if len(par.Proportion_random_evolution_sector) == 1:
+        #    ran_evolve = select_random(par.Proportion_random_evolution_sector)
+            #ran_evolve = round(par.Proportion_random_evolution_sector[0], 2)
+        #else:
+        #    ran_evolve = select_random(par.Proportion_random_evolution_sector, option='uniform')
+            #ran_evolve = round(uniform(float(par.Proportion_random_evolution_sector[0]),
+            #                           float(par.Proportion_random_evolution_sector[1])), 2)
+        drift_tree = copy.deepcopy(tree_one)
+        if drift.casefold() != 'incremental':
+            tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
+        if drift.casefold() == 'sudden':
+            event_log = sudden_drift(tree_one, tree_two, par.Number_traces_per_event_log, drift_area_one)
+        elif drift.casefold() == 'gradual':
+            ra = randint(0, 1)
+            if ra == 0:
+                gr_type = 'linear'
+                #dr_s = 'linear distribution'
             else:
-                tree_one = generate_tree_from_file(file_path_to_own_models)
-            print("The generated tree will have a " + complexity + " complexity")  # New line
-
-            drift = par.Drifts[randint(0, len(par.Drifts) - 1)].strip()
-            drift_area_one = round(uniform(par.Drift_area[0], (par.Drift_area[0] + 0.8 * (par.Drift_area[1] - par.Drift_area[0]))), 2)
-            drift_area_two = round(uniform(drift_area_one + (par.Drift_area[1] - par.Drift_area[0]) * 0.2, par.Drift_area[1]), 2)
-            if len(par.Proportion_random_evolution_sector) == 1:
-                ran_evolve = round(float(par.Proportion_random_evolution_sector[0]), 2)
+                gr_type = 'exponential'
+                #dr_s = 'exponential distribution'
+            event_log = gradual_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], drift_area_one, drift_area_two, gr_type)
+        elif drift.casefold() == 'recurring':
+            ran_odd = [1, 3, 5]
+            pro_first = round(uniform(0.3, 0.7), 2)
+            if drift_area_one > 0 and drift_area_two != 1:
+                ra = randint(0, 2)
+                sea_cha = ran_odd[ra]
+                #dr_s = str(sea_cha) + " seasonal changes"
             else:
-                ran_evolve = round(uniform(float(par.Proportion_random_evolution_sector[0]),
-                                           float(par.Proportion_random_evolution_sector[1])), 2)
-            drift_tree = copy.deepcopy(tree_one)
-            if drift.casefold() != 'incremental':
-                tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
-            if drift.casefold() == 'sudden':
-                event_log = sudden_drift(tree_one, tree_two, par.Number_traces_per_event_log, drift_area_one)
-                parameters_str += "; drift: sudden; change point: " + str(drift_area_one) + "; random evolution: " + str(
-                    ran_evolve)
-                dr_s = "N/A"
-            elif drift.casefold() == 'gradual':
-                ra = randint(0, 1)
-                if ra == 0:
-                    gr_type = 'linear'
-                    dr_s = 'linear distribution'
-                else:
-                    gr_type = 'exponential'
-                    dr_s = 'exponential distribution'
-                event_log = gradual_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], drift_area_one, drift_area_two, gr_type)
-                parameters_str += "; drift: gradual; start point: " + str(drift_area_one) + "; end point: " + str(
-                    drift_area_two) + "; distribution: " + gr_type + "; random evolution: " + str(ran_evolve)
-            elif drift.casefold() == 'recurring':
-                ran_odd = [1, 3, 5]
-                pro_first = round(uniform(0.3, 0.7), 2)
-                if drift_area_one > 0 and drift_area_two != 1:
-                    ra = randint(0, 2)
-                    sea_cha = ran_odd[ra]
-                    dr_s = str(sea_cha) + " seasonal changes"
-                else:
-                    sea_cha = randint(1, 6)
-                    dr_s = str(sea_cha) + " seasonal changes"
-                event_log = recurring_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], sea_cha, pro_first, drift_area_one,
-                                            drift_area_two)
-                parameters_str += "; drift: recurring; start point: " + str(drift_area_one) + "; end point: " + str(
-                    drift_area_two) + "; seasonal changes: " + str(sea_cha) + "; proportion initial version: " + str(
-                    pro_first) + "; random evolution: " + str(ran_evolve)
-            elif drift.casefold() == 'incremental':
-                num_models = randint(2, 5)
-                ran_in_evolve = round(ran_evolve / num_models, 2)
-                event_log, deleted_acs, added_acs, moved_acs = incremental_drift_gs(tree_one, drift_area_one,
-                                                                                    drift_area_two, par.Number_traces_per_event_log[0],
-                                                                                    num_models, ran_in_evolve)
-                dr_s = str(num_models + 1) + " versions of the process model"
-                parameters_str += "; drift: incremental; start point: " + str(drift_area_one) + "; end point: " + str(
-                    drift_area_two) + "; number evolving versions: " + str(
-                    num_models) + "; random evolution per model: " + str(ran_in_evolve)
-            elif drift.casefold() == 'none':
-                event_log = no_drift(tree=tree_one, nu_traces=par.Number_traces_per_event_log[0])
-                parameters_str += "; drift: None; change point: None; random evolution: None"
-                dr_s = "no drift"
+                sea_cha = randint(1, 6)
+                #dr_s = str(sea_cha) + " seasonal changes"
+            event_log = recurring_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], sea_cha, pro_first, drift_area_one,
+                                        drift_area_two)
 
-            # Add noise
-            if par.Noise:
-                event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
+        elif drift.casefold() == 'incremental':
+            num_models = randint(2, 5)
+            ran_in_evolve = round(ran_evolve / num_models, 2)
+            event_log, deleted_acs, added_acs, moved_acs = incremental_drift_gs(tree_one, drift_area_one,
+                                                                                drift_area_two, par.Number_traces_per_event_log[0],
+                                                                                num_models, ran_in_evolve)
+        elif drift.casefold() == 'none':
+            event_log = no_drift(tree=tree_one, nu_traces=par.Number_traces_per_event_log[0])
 
-            # Add timestamps to an event log
-            add_duration_to_log(event_log, par.Timestamp_first_trace[0], par.Trace_exp_arrival_sec[0], par.Task_exp_duration_sec[0])
+        # Add noise
+        if par.Noise:
+            event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
 
-            # Create an instance with drift info
-            start_drift = get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_one)
-            if drift == 'sudden':
-                end_drift = "N/A"
-            else:
-                end_drift = str(
-                    get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_two)) + " (" + str(
-                    drift_area_two) + ")"
+        # Add timestamps to an event log
+        add_duration_to_log(event_log, par.Timestamp_first_trace[0], par.Trace_exp_arrival_sec[0], par.Task_exp_duration_sec[0])
 
-            if drift.casefold() != "none": #if there is a drift
-                DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs)
-            collection.add_drift(DI)
-            collection.increase_drift_count()
-            event_log.attributes["drift:info"] = DI.drift_info_to_dict()
+        # Create an instance with drift info
+        start_drift = get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_one)
+        if drift == 'sudden':
+            end_drift = "N/A"
+        else:
+            end_drift = str(
+                get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_two)) + " (" + str(
+                drift_area_two) + ")"
 
-            # TODO: Create an instance with drift info
+        if drift.casefold() != "none": #if there is a drift
+            DI = DriftInfo(str(i), collection.number_of_drifts, "control-flow", drift, [start_drift, end_drift], added_acs, deleted_acs, moved_acs)
+        collection.add_drift(DI)
+        collection.increase_drift_count()
+        event_log.attributes["drift:info"] = DI.drift_info_to_dict()
+
+        # TODO: Create an instance with drift info
 
 
-            # Export generated event log
-            xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
-
-        ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
-        print('Finished generating collection of', par.Number_event_logs[0], 'logs in', out_folder)
+        # Export generated event log
+        xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
+    print('Finished generating collection of', par.Number_event_logs[0], 'logs in', out_folder)
 
 
+def select_random(data: list, option: str = 'random') -> any:
+    if len(data) == 1:
+        data_selected = round(data[0], 2)
+    elif len(data) == 2 and option == 'uniform':
+        data_selected = round(uniform(data[0], data[1]), 2)
+    elif len(data) == 2 and option == 'random':
+        data_selected = data[randint(0, len(data) - 1)]
+    else:
+        Warning(f"Check function 'select_random' call: {data, option}")
+
+    return data_selected
+
+
+def drift_area_selection(data: list, option: float = 0.2) -> any:
+    data_length = data[1] - data[0]
+    drift_area_one = round(uniform(data[0], (data[0] + (1-option) * data_length)), 2)
+    drift_area_two = round(uniform(drift_area_one + data_length * option, data[1]), 2)
+
+    return drift_area_one, drift_area_two
 
 def get_parameters(par_file_name: str):
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
