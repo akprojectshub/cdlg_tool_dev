@@ -60,17 +60,8 @@ def generate_logs(file_path_to_own_models=None):
             gr_type = select_random(par.Gradual_drift_type, option='random')
             event_log = gradual_drift(tree_one, tree_two, num_traces, drift_area_one, drift_area_two, gr_type)
         elif drift.casefold() == 'recurring':
-            sea_cha = select_random(par.Recurring_drift_seasons, option='random')
-            #ran_odd = [1, 3, 5]
-            #pro_first = round(uniform(0.3, 0.7), 2)
-            # if drift_area_one > 0 and drift_area_two != 1:
-            #     ra = randint(0, 2)
-            #     sea_cha = ran_odd[ra]
-            # else:
-            #     sea_cha = randint(1, 6)
-            # event_log = recurring_drift(tree_one, tree_two, num_traces, sea_cha, pro_first, drift_area_one,
-            #                             drift_area_two)
-            event_log = recurring_drift_new(tree_one, tree_two, num_traces, sea_cha)
+            number_of_seasonal_changes = select_random(par.Recurring_drift_seasons, option='random')
+            event_log = recurring_drift_new(tree_one, tree_two, num_traces, number_of_seasonal_changes)
         elif drift.casefold() == 'incremental':
             num_models = select_random(par.Incremental_drift_number, option='random')
             ran_in_evolve = round(ran_evolve / num_models, 2)
