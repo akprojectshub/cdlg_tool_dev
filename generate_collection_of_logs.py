@@ -87,14 +87,14 @@ def generate_logs(file_path_to_own_models=None):
         elif drift.casefold() == 'none':
             event_log = no_drift(tree=tree_one, nu_traces=par.Number_traces_per_event_log[0])
 
-        # Add noise
+        # ADD NOISE
         if par.Noise:
             event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
 
-        # Add timestamps to an event log
+        # ADD TIMESTAMPS
         add_duration_to_log(event_log, par.Timestamp_first_trace[0], par.Trace_exp_arrival_sec[0], par.Task_exp_duration_sec[0])
 
-        # Create an instance with drift info
+        # CREATE DRIFT INFO INSTANCE
         start_drift = get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_one)
         if drift == 'sudden':
             end_drift = "N/A"
@@ -109,10 +109,10 @@ def generate_logs(file_path_to_own_models=None):
         collection.increase_drift_count()
         event_log.attributes["drift:info"] = DI.drift_info_to_dict()
 
-        # TODO: Create an instance with drift info
+        # TODO: CREATE NOISE INFO INSTANCE
 
 
-        # Export generated event log
+        # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
     print('Finished generating collection of', par.Number_event_logs[0], 'logs in', out_folder)
 
