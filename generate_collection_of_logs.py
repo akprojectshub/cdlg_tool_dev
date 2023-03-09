@@ -52,21 +52,9 @@ def generate_logs(file_path_to_own_models=None):
         else:
             tree_one = generate_tree_from_file(file_path_to_own_models)
         print("The generated tree will have a " + complexity + " complexity")  # New line
-
-        #drift = par.Drifts[randint(0, len(par.Drifts) - 1)].strip()
         drift = select_random(par.Drifts, option='random')
         drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
-        #drift_area_one = round(uniform(par.Drift_area[0], (par.Drift_area[0] + 0.8 * (par.Drift_area[1] - par.Drift_area[0]))), 2)
-        #drift_area_two = round(uniform(drift_area_one + (par.Drift_area[1] - par.Drift_area[0]) * 0.2, par.Drift_area[1]), 2)
-
         ran_evolve = select_random(par.Proportion_random_evolution_sector, option='uniform')
-        #if len(par.Proportion_random_evolution_sector) == 1:
-        #    ran_evolve = select_random(par.Proportion_random_evolution_sector)
-            #ran_evolve = round(par.Proportion_random_evolution_sector[0], 2)
-        #else:
-        #    ran_evolve = select_random(par.Proportion_random_evolution_sector, option='uniform')
-            #ran_evolve = round(uniform(float(par.Proportion_random_evolution_sector[0]),
-            #                           float(par.Proportion_random_evolution_sector[1])), 2)
         drift_tree = copy.deepcopy(tree_one)
         if drift.casefold() != 'incremental':
             tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
@@ -76,10 +64,8 @@ def generate_logs(file_path_to_own_models=None):
             ra = randint(0, 1)
             if ra == 0:
                 gr_type = 'linear'
-                #dr_s = 'linear distribution'
             else:
                 gr_type = 'exponential'
-                #dr_s = 'exponential distribution'
             event_log = gradual_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], drift_area_one, drift_area_two, gr_type)
         elif drift.casefold() == 'recurring':
             ran_odd = [1, 3, 5]
@@ -87,10 +73,8 @@ def generate_logs(file_path_to_own_models=None):
             if drift_area_one > 0 and drift_area_two != 1:
                 ra = randint(0, 2)
                 sea_cha = ran_odd[ra]
-                #dr_s = str(sea_cha) + " seasonal changes"
             else:
                 sea_cha = randint(1, 6)
-                #dr_s = str(sea_cha) + " seasonal changes"
             event_log = recurring_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], sea_cha, pro_first, drift_area_one,
                                         drift_area_two)
 
