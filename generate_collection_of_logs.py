@@ -33,7 +33,7 @@ def generate_logs(file_path_to_own_models=None):
     :return: collection of event logs with drifts saved in out_folder
     """
 
-    out_folder = 'data/generated_collections/' + str(int(time.time()))
+    out_folder = os.path.join(config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR, str(int(time.time())))
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
 
@@ -114,17 +114,12 @@ def generate_logs(file_path_to_own_models=None):
                 parameters_str += "; drift: None; change point: None; random evolution: None"
                 dr_s = "no drift"
 
-
-
             # Add noise
             if par.Noise:
                 event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
 
             # Add timestamps to an event log
             add_duration_to_log(event_log, par.Timestamp_first_trace[0], par.Trace_exp_arrival_sec[0], par.Task_exp_duration_sec[0])
-
-
-
 
             # Create an instance with drift info
             start_drift = get_timestamp_log(event_log, par.Number_traces_per_event_log[0], drift_area_one)
@@ -147,28 +142,8 @@ def generate_logs(file_path_to_own_models=None):
             # Export generated event log
             xes_exporter.apply(event_log, os.path.join(out_folder, "log_"+str(i)+".xes"))
 
-
-            # if drift.casefold() != 'none':
-            #     data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: "+str(start_drift) + " (" + str(drift_area_one) + "); drift_end: " + str(end_drift) + "; activities_added: " + str(added_acs) + "; activities_deleted: " + str(deleted_acs) + "; activities_moved: " + str(moved_acs)
-            # elif drift.casefold() == 'none':
-            #     # set parameters to none, since no drift was specified
-            #     data = "event log: "+"event_log_"+str(i)+"; Complexity:"+str(complexity)+"; perspective: control-flow; type: "+drift+"; specific_information: "+dr_s+"; drift_start: None; drift_end: None;" + "activities_added: None; activities_deleted: None; activities_moved: None"
-            #     start_drift, end_drift, added_acs, deleted_acs, moved_acs = "None", "None", "None", "None", "None"
-            #
-
-            # writer.writerow(["event_log_"+str(i), "control-flow", complexity, drift, dr_s, start_drift, end_drift, added_acs, deleted_acs, moved_acs])
-            # file_object = open(os.path.join(out_folder, "log_"+str(i)+".txt"), 'w')
-            # file_object.write("--- USED PARAMETERS ---\n")
-            # file_object.write(parameters_str+"\n\n")
-            # file_object.write("--- DRIFT INFORMATION ---\n")
-            # file_object.write(data)
-            # file_object.close()
         ptml_exporter.apply(tree_one, os.path.join(out_folder, "initial_version.ptml"))
-        print('Finished generating collection of', par.Number_event_logs, 'logs in', out_folder)
-
-
-
-
+        print('Finished generating collection of', par.Number_event_logs[0], 'logs in', out_folder)
 
 
 
@@ -198,56 +173,7 @@ def get_parameters(par_file_name: str):
                 pass
             parameters_dict[par] = value
 
-    # If list has only one value, return it
-    # for key, value in parameters_dict.items():
-    #     if len(value) == 1:
-    #         parameters_dict[key] = value[0]
-
-
     return parameters_dict
-
-
-def get_parameters_old():
-    """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
-    :return: parameters for the generation of a set of event logs
-    """
-    doc = open('data/parameters/parameters_log_collection', 'r')
-    one = doc.readline().split(' ')[1]
-    tree_complexity = one[0:len(one) - 1].split(";")  ## new added line
-    num_logs = int(doc.readline().split(' ')[1])
-    num_traces = int(doc.readline().split(' ')[1])
-    one = doc.readline().split(' ')[1]
-    drifts = one[0:len(one) - 1].split(';')
-    drift_area = doc.readline().split(' ')[1].split('-')
-    proportion_random_evolution = doc.readline().split(' ')[1].split('-')
-    nos = doc.readline().split(' ')[1]
-    if nos.strip() == 'None' or nos.strip() == '0':
-        noise = 0
-    else:
-        noise = nos.split('-')
-
-    return tree_complexity, num_logs, num_traces, drifts, drift_area, proportion_random_evolution, noise
-
-
-
-# class AttrDict(dict):
-#     """Provide dictionary with items accessible as object attributes."""
-#     def __getattr__(self, attr: str) -> any:
-#         try:
-#             return self[attr]
-#         except KeyError as exception:
-#             raise AttributeError(f'AttrDict has no key {attr!r}') from exception
-#
-#     def __setattr__(self, attr: str, value: any) -> None:
-#         self[attr] = value
-#
-#     def __delattr__(self, attr: str) -> any:
-#         try:
-#             del self[attr]
-#         except KeyError as exception:
-#             raise AttributeError(f'AttrDict has no key {attr!r}') from exception
-
-
 
 
 def main():
