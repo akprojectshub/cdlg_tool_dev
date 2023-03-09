@@ -4,3 +4,12 @@ import os
 # DIRECTORIES
 ###################################################################
 DEFAULT_PARAMETER_DIR = os.path.join('data/parameters')
+
+
+
+###################################################################
+# FILE NAMES
+###################################################################
+
+
+PAR_LOG_COLLECTION = 'parameters_log_collection'
