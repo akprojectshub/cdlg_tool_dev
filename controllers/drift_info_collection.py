@@ -149,7 +149,20 @@ def DriftInfo_from_xes(path):
 
 
 
+def extract_change_moments(created_log):
+    change_moments = {}
+    current_model_version = created_log[0].attributes['model:version']
+    change_id = 0
+    for trace in created_log:
+        change_moment = trace[0]['time:timestamp']
+        version = trace.attributes['model:version']
+        if version != current_model_version:
+            change_id += 1
+            change_moments['change_' + str(change_id)] = change_moment #.strftime("%Y-%m-%d, %H:%M:%S")
+            current_model_version = version
 
+
+    return {"value": "timestamps", "children": change_moments}
 
 
 
