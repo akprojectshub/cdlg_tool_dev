@@ -5,15 +5,9 @@ import pm4py
 
 @dataclass
 class DriftInfo:
-    log_id: int
-    drift_id: int # One drift per log so drift_id is always 1
-    process_perspective:str
-    drift_type: str
-    drift_time:dict # With one timestamp or two timestamps according to the drift type so that the drift instantiation class is done in a single line
-    activities_added:dict # {"act added 1": ,...}
-    activities_deleted:dict
-    activities_moved:dict
-    log_inf: bool = False
+    def __init__(self, dictionary):
+        for k, v in dictionary.items():
+            setattr(self, k, v)
 
     def __post_init__(self):
         if self.process_perspective not in ["control-flow"]:
@@ -98,14 +92,9 @@ class NoiseInfo:
     """
         Object for keeping information about added noise to a generated event log
     """
-    log_id: int  # unique name of the log to which the drift belongs
-    noise_id: int  # unique per log
-    noise_perspective: str  # control-flow
-    noise_type: str  # like random_model
-    noise_proportion: float  # 0.05
-    noise_start: datetime.datetime  # timestamp like 2020-03-27 05:32:12
-    noise_end: datetime.datetime # timestamp like 2020-08-21 07:05:11
-
+    def __init__(self, dictionary):
+        for k, v in dictionary.items():
+            setattr(self, k, v)
     def __post_init__(self):
         if (type(self.log_id)!=str):
             raise TypeError
@@ -203,7 +192,7 @@ class LogDriftInfo:
 
         for p in [v+"/"+k for k,v in loaded_event_logs.items()]:
             log = pm4py.read_xes(p)
-            DI = DriftInfo(*list(DriftInfo.extract_info_xes(log).values()))
+            DI = DriftInfo(DriftInfo.extract_info_xes(log))
             read_class.append(DI)
         return read_class
 
@@ -219,7 +208,7 @@ class LogDriftInfo:
 
         for p in [v + "/" + k for k, v in loaded_event_logs.items()]:
             log = pm4py.read_xes(p)
-            NI = DriftInfo(*list(NoiseInfo.extract_info_xes(log).values()))
+            NI = DriftInfo(NoiseInfo.extract_info_xes(log))
             read_class.append(NI)
         return read_class
 
