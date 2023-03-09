@@ -5,30 +5,32 @@ import numpy
 from scipy.stats import expon
 import random
 from pm4py.objects.log.obj import EventLog
+from copy import deepcopy
 
 
 
-
-def combine_two_logs(log_one, log_two):
+def combine_two_logs(log_1, log_2):
     """ Merging of two event logs
 
     :param log_one: first event log
     :param log_two: second event log
     :return: combined event log
     """
-
+    log_one = deepcopy(log_1)
+    log_two = deepcopy(log_2)
     # join two logs and add trace belonging to a process version
     log_combined = EventLog()
     last_model_version = 0
-    for line in log_one:
+    for trace in log_one:
         try:
-            last_model_version = line.attributes['model:version']
+            last_model_version = trace.attributes['model:version']
         except:
-            line.attributes['model:version'] = last_model_version
-        log_combined.append(line)
-    for line in log_two:
-        line.attributes['model:version'] = last_model_version + 1
-        log_combined.append(line)
+            trace.attributes['model:version'] = last_model_version
+        log_combined.append(trace)
+
+    for trace in log_two:
+        trace.attributes['model:version'] = last_model_version + 1
+        log_combined.append(trace)
 
     # Update trace ids to be unique
     trace_id = 0
