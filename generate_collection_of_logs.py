@@ -42,16 +42,12 @@ def generate_logs(file_path_to_own_models=None):
     parameters_dict = get_parameters(config.PAR_LOG_COLLECTION)
     par = InputParameters(**parameters_dict)
 
+    # MAIN LOOP
     print('Generating', par.Number_event_logs[0], 'logs')
     collection = LogDriftInfo()
-    # MAIN LOOP
     for i in range(par.Number_event_logs[0]):
-        complexity = par.Complexity_random_tree[randint(0, len(par.Complexity_random_tree) - 1)]  # New Line
-        if file_path_to_own_models is None:
-            tree_one = generate_specific_trees(complexity.strip())
-        else:
-            tree_one = generate_tree_from_file(file_path_to_own_models)
-        print("The generated tree will have a " + complexity + " complexity")  # New line
+
+        tree_one, complexity = generate_initial_tree(par.Complexity_random_tree, file_path_to_own_models)
         drift = select_random(par.Drifts, option='random')
         drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
         ran_evolve = select_random(par.Proportion_random_evolution_sector, option='uniform')
@@ -61,12 +57,18 @@ def generate_logs(file_path_to_own_models=None):
         if drift.casefold() == 'sudden':
             event_log = sudden_drift(tree_one, tree_two, par.Number_traces_per_event_log, drift_area_one)
         elif drift.casefold() == 'gradual':
-            ra = randint(0, 1)
-            if ra == 0:
-                gr_type = 'linear'
-            else:
-                gr_type = 'exponential'
+
+            # ra = randint(0, 1)
+            # if ra == 0:
+            #     gr_type = 'linear'
+            # else:
+            #     gr_type = 'exponential'
+            #
+            # event_log = gradual_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], drift_area_one, drift_area_two, gr_type)
+
+            gr_type = select_random(par.GRADUAL_DRIFT_TYPE, option='random')
             event_log = gradual_drift(tree_one, tree_two, par.Number_traces_per_event_log[0], drift_area_one, drift_area_two, gr_type)
+
         elif drift.casefold() == 'recurring':
             ran_odd = [1, 3, 5]
             pro_first = round(uniform(0.3, 0.7), 2)
@@ -117,15 +119,29 @@ def generate_logs(file_path_to_own_models=None):
     print('Finished generating collection of', par.Number_event_logs[0], 'logs in', out_folder)
 
 
+def generate_initial_tree(complexity_options_list: list, file_path_to_own_models):
+    complexity = select_random(complexity_options_list, option='random')
+    if file_path_to_own_models is None:
+        generated_process_tree = generate_specific_trees(complexity.strip())
+    else:
+        generated_process_tree = generate_tree_from_file(file_path_to_own_models)
+    print(f"Used process tree complexity: {complexity}")
+    return generated_process_tree, complexity
+
+
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
-        data_selected = round(data[0], 2)
+        data_selected = data[0]
     elif len(data) == 2 and option == 'uniform':
-        data_selected = round(uniform(data[0], data[1]), 2)
+        data_selected = uniform(data[0], data[1])
     elif len(data) == 2 and option == 'random':
         data_selected = data[randint(0, len(data) - 1)]
     else:
-        Warning(f"Check function 'select_random' call: {data, option}")
+        data_selected = None
+        Warning(f"Check function 'select_random' call: {data, option, data_selected}")
+
+    if isinstance(data, float):
+        data_selected = round(data_selected, 2)
 
     return data_selected
 

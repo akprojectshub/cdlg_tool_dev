@@ -19,7 +19,7 @@ class InputParameters:
     Timestamp_first_trace: list
     Trace_exp_arrival_sec: list
     Task_exp_duration_sec: list
-
+    GRADUAL_DRIFT_TYPE: list
 
     # selected_complexity: str
     # selected_number_logs: int
