@@ -1,9 +1,9 @@
-Complexity_random_tree: middle
+Process_tree_complexity: middle
+Process_tree_evolution_proportion: 0.1-0.4
 Number_event_logs: 3
 Number_traces_per_event_log: 4000-5000
-Drifts: recurring
+Drift_types: recurring
 Drift_area: 0.2-0.8
-Proportion_random_evolution_sector: 0.1-0.4
 Noise: True
 Noisy_trace_prob: 0.1
 Noisy_event_prob: 0.1
@@ -12,4 +12,4 @@ Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
 Gradual_drift_type: linear, exponential
 Incremental_drift_number: 2-5
-Recurring_drift_seasons: 3-5
+Recurring_drift_number: 3-5
