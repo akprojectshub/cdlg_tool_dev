@@ -1,7 +1,7 @@
 Complexity_random_tree: middle
 Number_event_logs: 3
-Number_traces_per_event_log: 5000
-Drifts: recurring, incremental
+Number_traces_per_event_log: 4000-5000
+Drifts: recurring
 Drift_area: 0.2-0.8
 Proportion_random_evolution_sector: 0.1-0.4
 Noise: True
@@ -10,4 +10,6 @@ Noisy_event_prob: 0.1
 Timestamp_first_trace: 2020/08/01 08:00:00
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
-GRADUAL_DRIFT_TYPE: linear, exponential
+Gradual_drift_type: linear, exponential
+Incremental_drift_number: 2-5
+Recurring_drift_seasons: 3-5

@@ -19,31 +19,15 @@ class InputParameters:
     Timestamp_first_trace: list
     Trace_exp_arrival_sec: list
     Task_exp_duration_sec: list
-    GRADUAL_DRIFT_TYPE: list
-
-    # selected_complexity: str
-    # selected_number_logs: int
-    # selected_number_traces: int
-    # selected_drift: str
-    # selected_drift_area: list
-    # selected_proportion_random_evolution: list
-    # selected_noise: list
-    # selected_noisy_trace_prob: list
-    # selected_noisy_event_prob: list
-    # selected_timestamp_first_trace: datetime
-    # selected_trace_exp_arrival_sec: int
-    # selected_task_exp_duration_sec: int
+    Gradual_drift_type: list
+    Incremental_drift_number: list
+    Recurring_drift_seasons: list
 
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
             if key in {field.name for field in fields(InputParameters)}:
                 setattr(self, key, value)
-
-    # def select_par(self):
-    #     selected_option = attribute_option_list[randint(0, len(attribute_option_list) - 1)]
-    #     setattr(self, 'selected_', selected_option)
-    #     return selected_option
 
 
 
