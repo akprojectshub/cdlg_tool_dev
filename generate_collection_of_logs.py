@@ -30,7 +30,7 @@ def generate_logs(file_path_to_own_models=None):
     :return: collection of event logs with drifts saved in out_folder
     """
 
-    #CREATE DICTIONARY TO STORE LOG ATTRIBUTE DATA
+    # CREATE DICTIONARY TO STORE LOG ATTRIBUTE DATA
     drift_dic_attr = {}
     noise_dic_attr = {}
 
@@ -41,9 +41,7 @@ def generate_logs(file_path_to_own_models=None):
 
     # READE PARAMETERS FROM A FILE
     parameters_dict = get_parameters(config.PAR_LOG_COLLECTION)
-
     par = InputParameters(**parameters_dict)
-
 
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
@@ -79,22 +77,20 @@ def generate_logs(file_path_to_own_models=None):
             ran_in_evolve = round(ran_evolve / num_models, 2)
             # TODO: write a new incremental drift generation function
             event_log, deleted_acs, added_acs, moved_acs, tree_list = incremental_drift_gs(tree_one, drift_area_one,
-                                                                                drift_area_two, num_traces,
-                                                                                num_models, ran_in_evolve)
+                                                                                           drift_area_two, num_traces,
+                                                                                           num_models, ran_in_evolve)
 
             drift_dic_attr["Tree"] = tree_list
             drift_dic_attr["deleted_acs"] = deleted_acs
             drift_dic_attr["added_acs"] = added_acs
-            drift_dic_attr["moved_acs"]=moved_acs
+            drift_dic_attr["moved_acs"] = moved_acs
         else:
             event_log = no_drift(tree=tree_one, nu_traces=num_traces)
-        drift_dic_attr["drift_type"] = drift # Store the drift_type in the dictionary
+        drift_dic_attr["drift_type"] = drift  # Store the drift_type in the dictionary
 
         # TODO@Zied: please update the DriftInfo class s.t. the attribute 'drift_time' takes the following dict
         change_moments_dict = extract_change_moments(event_log)
-        drift_dic_attr["drift_time"] = change_moments_dict # Store the drift_time in the dictionary
-
-
+        drift_dic_attr["drift_time"] = change_moments_dict  # Store the drift_time in the dictionary
 
         # ADD NOISE
         if par.Noise:
@@ -119,10 +115,8 @@ def generate_logs(file_path_to_own_models=None):
         collection.increase_drift_count()
         event_log.attributes["drift:info"] = DI.drift_info_to_dict()
 
-
         # CREATE NOISE INFO INSTANCE
         # TODO@Zied: please add
-
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(i) + ".xes"))
