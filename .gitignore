@@ -7,3 +7,5 @@ __pycache__/
 *.txt
 *.ptml
 *.pyc
+drift_info_xes_file.py
+test.py
