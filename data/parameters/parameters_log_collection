@@ -1,12 +1,17 @@
-Complexity_Random_Tree: complex
-Number_Event_logs: 5
-Number_Traces_Per_Event_Log: 5000
-Drifts: recurring;incremental
-Drift_Area: 0.2-0.8
+Process_tree_complexity: complex
+Process_tree_evolution_proportion: 0.1
+Number_event_logs: 5
+Number_traces_per_event_log: 5000
+Drift_types: incremental
+Drift_area: 0.2-0.8
+Noise: True
+Noisy_trace_prob: 0.1
+Noisy_event_prob: 0.3
 Proportion_Random_Evolution_Sector: 0.1-0.4
 Proportion_Noise_Sector: 0.0-0.1
-Timestamp_First_Trace: 20/8/3 8:0:0
+Timestamp_first_trace: 2020/8/3 8:0:0
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
-
-
+Gradual_drift_type: "linear"
+Incremental_drift_number: 3
+Recurring_drift_number: 2

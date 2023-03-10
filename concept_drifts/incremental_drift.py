@@ -78,12 +78,13 @@ def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models,
         i = i + 1
     drift_tree = copy.deepcopy(trees[i])
     tree_ev, deleted_ac, added_ac, moved_ac = evolve_tree_randomly(drift_tree, proportion_random_evolution)
+    trees.append(tree_ev)
     deleted_acs.extend(deleted_ac)
     added_acs.extend(added_ac)
     moved_acs.extend(moved_ac)
     log = semantics.generate_log(tree_ev, end_traces)
     result = combine_two_logs(result, log)
-    return result, deleted_acs, added_acs, moved_acs
+    return result, deleted_acs, added_acs, moved_acs,trees
 
 
 def log_with_incremental_drift_two_models_random(tree_one, tree_two, num_models, parameters):

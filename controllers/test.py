@@ -10,6 +10,9 @@ import datetime
 import pm4py
 
 class DriftInfo:
+    log_id: int
+    drift_id: int # One drift per log so drift_id is always 1
+
     def __init__(self, dictionary):
         for k, v in dictionary.items():
             setattr(self, k, v)
@@ -88,3 +91,9 @@ class DriftInfo:
                 d[key] = list(value["children"].values())
         return d
 
+
+
+
+
+trial = DriftInfo(1,2)
+print(trial.log_id)
