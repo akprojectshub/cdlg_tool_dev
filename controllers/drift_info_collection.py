@@ -23,6 +23,7 @@ class DriftInfo:
         DI = vars(self)
         keys_list = list(DI.keys())
         values_list = list(DI.values())
+        # TODO@Zied: please do not use methods starting with _ or __
         type_list = [type(i).__name__ for i in DI.values()]
         d = dict()
         d["value"] = True  ## By default need to add this as a parameter
@@ -50,6 +51,7 @@ class DriftInfo:
         for key, value in xes.items():
             if value == 0 and key != "drift_id":
                 d[key] = []
+            # TODO@Zied: please do not use methods starting with _ or __
             elif (type(value).__name__ != 'dict'):
                 d[key] = value
             else:
@@ -71,6 +73,7 @@ class NoiseInfo:
         NI = vars(self)
         keys_list = list(NI.keys())
         values_list = list(NI.values())
+        # TODO@Zied: please do not use methods starting with _ or __
         type_list = [type(i).__name__ for i in NI.values()]
         d = dict()
         d["value"] = True  ## By default need to add this as a parameter
@@ -96,6 +99,7 @@ class NoiseInfo:
         for key, value in xes.items():
             if value == 0 and key != "drift_id":
                 d[key] = []
+            # TODO@Zied: please do not use methods starting with _ or __
             elif (type(value).__name__ != 'dict'):
                 d[key] = value
             else:
@@ -117,9 +121,9 @@ class LogDriftInfo:
         self.drifts.append(instance)
         self.increase_drift_count()
 
-    def add_noise(self, ninf):
-        self.noise.append(ninf)
-        self.increase_drift_count()
+    def add_noise(self,  instance: NoiseInfo):
+        self.noise.append(instance)
+        self.increase_noise_count()
 
     def increase_drift_count(self):
         self.number_of_drifts += 1
@@ -131,37 +135,30 @@ class LogDriftInfo:
             self):  # This method is used to store the dictionary with log attribute levels in the log (xes file)
         param_drift = vars(DriftInfo)
 
+
+    def extract_drift_and_noise_info(self, path):
+
+        loaded_event_logs = self.load_log_names_and_paths(path)
+        for log_name, log_folder in loaded_event_logs.items():
+            log = pm4py.read_xes(os.path.join(log_folder, log_name))
+            DI = DriftInfo.extract_info_xes(log)
+            NI = NoiseInfo.extract_info_xes(log)
+            self.drifts.append(DI)
+            self.increase_drift_count()
+            self.noise.append(NI)
+            self.increase_noise_count()
+
+        return self
+
+
     @staticmethod
-    def extract_drift_xes_all(path):  # The path specified here must be a path to a folder without a slash at the end
+    def load_log_names_and_paths(path):
         loaded_event_logs = {}
         for dir_path, dir_names, filenames in os.walk(path):
             for index, filename in enumerate(filenames):
                 if filename.endswith('.xes'):
                     loaded_event_logs[filename] = os.sep.join([dir_path])
-
-        read_class = list()
-
-        for p in [v + "/" + k for k, v in loaded_event_logs.items()]:
-            log = pm4py.read_xes(p)
-            DI = DriftInfo(DriftInfo.extract_info_xes(log))
-            read_class.append(DI)
-        return read_class
-
-    @staticmethod
-    def extract_noise_xes_all(path):  # The path specified here must be a path to a folder without a slash at the end
-        loaded_event_logs = {}
-        for dir_path, dir_names, filenames in os.walk(path):
-            for index, filename in enumerate(filenames):
-                if filename.endswith('.xes'):
-                    loaded_event_logs[filename] = os.sep.join([dir_path])
-
-        read_class = list()
-
-        for p in [v + "/" + k for k, v in loaded_event_logs.items()]:
-            log = pm4py.read_xes(p)
-            NI = DriftInfo(NoiseInfo.extract_info_xes(log))
-            read_class.append(NI)
-        return read_class
+        return loaded_event_logs
 
 
 def extract_change_moments_to_dict(created_log):
