@@ -29,6 +29,7 @@ def generate_logs(file_path_to_own_models=None):
     :param file_path_to_own_models: file path to own process model, if desired to be used
     :return: collection of event logs with drifts saved in out_folder
     """
+
     # CREATE DIR TO STORE GENERATED LOGS
     out_folder = creat_output_folder(config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR)
 
@@ -46,8 +47,8 @@ def generate_logs(file_path_to_own_models=None):
         drift = select_random(par.Drift_types, option='random')
         drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
         ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
-        drift_tree = copy.deepcopy(tree_one)
-        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(drift_tree, ran_evolve)
+
+        tree_two, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(copy.deepcopy(tree_one), ran_evolve)
         tree_list = [tree_one, tree_two]
 
         # GENERATE LOG WITH A CERTAIN DRIFT TYPE
@@ -79,6 +80,7 @@ def generate_logs(file_path_to_own_models=None):
         # CREATE DRIFT INFO INSTANCE
         drift_input = [log_id, 1, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
         drift_instance = initialize_drift_instance_from_list(drift_input)
+        # TODO@Zied: it looks like the drift info is not added to the log! Please check it out.
         event_log.attributes["drift:info"] = drift_instance.drift_info_to_dict()
         collection.add_drift(drift_instance)
 
@@ -111,7 +113,7 @@ def get_parameters(path: str = config.PAR_LOG_COLLECTION):
 def generate_initial_tree(complexity_options_list: list, file_path_to_own_models):
     complexity = select_random(complexity_options_list, option='random')
     if file_path_to_own_models is None:
-        generated_process_tree = generate_specific_trees(complexity.strip())
+        generated_process_tree = generate_specific_trees(complexity)
     else:
         generated_process_tree = generate_tree_from_file(file_path_to_own_models)
     print(f"Used process tree complexity: {complexity}")
@@ -125,7 +127,7 @@ def select_random(data: list, option: str = 'random') -> any:
         data_selected = uniform(data[0], data[1])
     elif len(data) == 2 and option == 'uniform_int':
         data_selected = randint(data[0], data[1])
-    elif len(data) == 2 and option == 'random':
+    elif option == 'random':
         data_selected = data[randint(0, len(data) - 1)]
     else:
         data_selected = None
