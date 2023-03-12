@@ -46,10 +46,10 @@ def incremental_drift_doc(tree_one, nu_traces_initial, nu_traces_int, nu_traces_
     return result, deleted_acs, added_acs, moved_acs
 
 
-def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models, proportion_random_evolution):
+def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models, ran_in_evolve):
     """ Generation of an event log with an incremental drift for gold standard generation
 
-    :param proportion_random_evolution: proportion of the process model version to be evolved
+    :param ran_in_evolve: proportion of the process model version to be evolved
     :param tree_one: initial model
     :param start_point: starting point for the incremental drift
     :param end_point: ending point for the incremental drift
@@ -57,6 +57,8 @@ def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models,
     :param nu_models: number of intermediate models
     :return: event log with incremental drift
     """
+    proportion_random_evolution = round(ran_in_evolve / nu_models, 2)
+
     deleted_acs = []
     added_acs = []
     moved_acs = []
@@ -84,7 +86,7 @@ def incremental_drift_gs(tree_one, start_point, end_point, nu_traces, nu_models,
     moved_acs.extend(moved_ac)
     log = semantics.generate_log(tree_ev, end_traces)
     result = combine_two_logs(result, log)
-    return result, deleted_acs, added_acs, moved_acs,trees
+    return [result, deleted_acs, added_acs, moved_acs, trees]
 
 
 def log_with_incremental_drift_two_models_random(tree_one, tree_two, num_models, parameters):
