@@ -77,6 +77,13 @@ def generate_logs(file_path_to_own_models=None):
         # EXTRACT DRIFT TIMESTAMPS
         drift_times = extract_change_moments_to_list(event_log)
 
+        # ADD NOISE
+        if par.Noise:
+            event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
+            noise_instance = NoiseInfo(log_id, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
+            collection.add_noise(noise_instance)
+            event_log.attributes["noise:info"] = noise_instance.noise_info_to_dict()
+
         # CREATE DRIFT INFO INSTANCE
         drift_input = [log_id, 1, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
         drift_instance = initialize_drift_instance_from_list(drift_input)
@@ -84,12 +91,7 @@ def generate_logs(file_path_to_own_models=None):
         event_log.attributes["drift:info"] = drift_instance.drift_info_to_dict()
         collection.add_drift(drift_instance)
 
-        # ADD NOISE
-        if par.Noise:
-            event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
-            noise_instance = NoiseInfo(log_id, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
-            collection.add_noise(noise_instance)
-            event_log.attributes["noise:info"] = noise_instance.noise_info_to_dict()
+
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(log_id) + ".xes"))
