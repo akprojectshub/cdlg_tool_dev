@@ -24,7 +24,7 @@ class DriftInfo:
         keys_list = list(DI.keys())
         values_list = list(DI.values())
         # TODO@Zied: please do not use methods starting with _ or __
-        type_list = [type(i).__name__ for i in DI.values()]
+        type_list = [str(type(i)).split(" ")[1][:-1].replace("'","") for i in DI.values()]
         d = dict()
         d["value"] = True  ## By default need to add this as a parameter
 
@@ -52,7 +52,8 @@ class DriftInfo:
             if value == 0 and key != "drift_id":
                 d[key] = []
             # TODO@Zied: please do not use methods starting with _ or __
-            elif (type(value).__name__ != 'dict'):
+
+            elif (str(type(value)).split(" ")[1][:-1].replace("'", "") != 'dict'):
                 d[key] = value
             else:
                 d[key] = list(value["children"].values())
@@ -74,7 +75,7 @@ class NoiseInfo:
         keys_list = list(NI.keys())
         values_list = list(NI.values())
         # TODO@Zied: please do not use methods starting with _ or __
-        type_list = [type(i).__name__ for i in NI.values()]
+        type_list = [str(type(i)).split(" ")[1][:-1].replace("'","") for i in NI.values()]
         d = dict()
         d["value"] = True  ## By default need to add this as a parameter
 
@@ -100,7 +101,7 @@ class NoiseInfo:
             if value == 0 and key != "drift_id":
                 d[key] = []
             # TODO@Zied: please do not use methods starting with _ or __
-            elif (type(value).__name__ != 'dict'):
+            elif (str(type(value)).split(" ")[1][:-1].replace("'", "")!= 'dict'):
                 d[key] = value
             else:
                 d[key] = list(value["children"].values())
@@ -186,7 +187,5 @@ def extract_change_moments_to_list(created_log):
             change_moments.append(change_moment)  # .strftime("%Y-%m-%d, %H:%M:%S"))
             current_model_version = version
     return change_moments
-
-
 
 
