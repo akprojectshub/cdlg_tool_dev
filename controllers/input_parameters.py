@@ -9,7 +9,7 @@ class InputParameters:
 
     Process_tree_complexity: list
     Process_tree_evolution_proportion: list
-    Number_event_logs: int
+    Number_event_logs: list
     Number_traces_per_event_log: list
     Drift_types: list
     Drift_area: list
