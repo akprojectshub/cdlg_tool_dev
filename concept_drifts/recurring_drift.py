@@ -10,14 +10,13 @@ def recurring_drift_new(tree_one, tree_two, nu_traces, number_of_seasonal_change
     log_2 = semantics.generate_log(tree_two, num_trace_per_sublog)
     event_log_with_recurring_drift = combine_two_logs(EventLog(), log_1)
 
-    for i in range(number_of_seasonal_changes):
+    for i in range(number_of_seasonal_changes-1):
         if i % 2 == 0:
             event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
         else:
             event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_2)
 
     return event_log_with_recurring_drift
-
 
 
 def recurring_drift(tree_one, tree_two, nu_traces, number_of_seasonal_changes, proportion_first, start_point,
