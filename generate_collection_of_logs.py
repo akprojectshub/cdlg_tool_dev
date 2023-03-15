@@ -67,6 +67,7 @@ def generate_logs(file_path_to_own_models=None):
             event_log, deleted_acs, added_acs, moved_acs, tree_list = result
         else:
             event_log = no_drift(tree=tree_one, nu_traces=num_traces)
+            drift = None
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
         add_duration_to_log(event_log,
@@ -74,10 +75,7 @@ def generate_logs(file_path_to_own_models=None):
                             select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
                             select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
-        # EXTRACT DRIFT TIMESTAMPS
-        drift_times = extract_change_moments_to_list(event_log)
-
-        # ADD NOISE
+        # ADD NOISE and CREATE NOISE INFO INSTANCE
         if par.Noise:
             event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
             noise_instance = NoiseInfo(log_id, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
@@ -85,13 +83,13 @@ def generate_logs(file_path_to_own_models=None):
             event_log.attributes["noise:info"] = noise_instance.noise_info_to_dict()
 
         # CREATE DRIFT INFO INSTANCE
-        drift_input = [log_id, 1, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
-        drift_instance = initialize_drift_instance_from_list(drift_input)
-        # TODO@Zied: it looks like the drift info is not added to the log! Please check it out.
-        event_log.attributes["drift:info"] = drift_instance.drift_info_to_dict()
-        collection.add_drift(drift_instance)
-
-
+        if drift:
+            drift_times = extract_change_moments_to_list(event_log)
+            drift_input = [log_id, 1, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
+            drift_instance = initialize_drift_instance_from_list(drift_input)
+            # TODO@Zied: it looks like the drift info is not added to the log! Please check it out.
+            event_log.attributes["drift:info"] = drift_instance.drift_info_to_dict()
+            collection.add_drift(drift_instance)
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(log_id) + ".xes"))
