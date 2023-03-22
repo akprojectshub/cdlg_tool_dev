@@ -167,7 +167,6 @@ class LogDriftInfo:
         dict_nested = dict()
         for drift in self.drifts:
             for attr, value in vars(drift).items():
-                print(attr, value)
                 if attr != 'log_id' and attr != 'drift_id':
                     if isinstance(value, list):
                         temp_dict = {}
