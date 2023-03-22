@@ -95,7 +95,7 @@ def generate_logs(file_path_to_own_models=None):
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, "log_" + str(log_id) + ".xes"))
-
+    collection._temp_save_drift_info_to_csv_file(path=out_folder)
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
 
 
