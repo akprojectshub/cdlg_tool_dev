@@ -45,6 +45,8 @@ def generate_logs(file_path_to_own_models=None):
         num_traces = select_random(par.Number_traces_per_event_log, option='uniform_int')
         tree_one, complexity = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
         drift = select_random(par.Drift_types, option='random')
+        noise = select_random(par.Noise, option='random')
+
         drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
         ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
 
@@ -76,7 +78,7 @@ def generate_logs(file_path_to_own_models=None):
                             select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
         # ADD NOISE and CREATE NOISE INFO INSTANCE
-        if par.Noise:
+        if noise:
             event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
             noise_instance = NoiseInfo(log_id, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
             collection.add_noise(noise_instance)

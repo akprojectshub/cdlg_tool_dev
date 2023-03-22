@@ -15,7 +15,7 @@ def load_event_log_names():
                 list_of_files[filename] = os.sep.join([dir_path])
 
     if not list_of_files:
-        raise ValueError("Event logs genereated via a terminal mode are not found")
+        raise ValueError("Event logs generated via a terminal mode are not found")
 
     return list_of_files
 
