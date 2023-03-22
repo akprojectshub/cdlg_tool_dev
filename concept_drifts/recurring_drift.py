@@ -12,9 +12,9 @@ def recurring_drift_new(tree_one, tree_two, nu_traces, number_of_seasonal_change
 
     for i in range(number_of_seasonal_changes):
         if i % 2 == 0:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
-        else:
             event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_2)
+        else:
+            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
 
     return event_log_with_recurring_drift
 
