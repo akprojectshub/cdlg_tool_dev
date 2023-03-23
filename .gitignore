@@ -9,3 +9,4 @@ __pycache__/
 *.pyc
 drift_info_xes_file.py
 test.py
+automated_evaluation.py
