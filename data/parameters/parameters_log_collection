@@ -1,12 +1,12 @@
 Process_tree_complexity: simple, middle, complex
 Process_tree_evolution_proportion: 0.1-0.4
-Number_event_logs: 3
+Number_event_logs: 5
 Number_traces_per_event_log: 4000-5000
-Drift_types: sudden, gradual, recurring, incremental
+Drift_types: incremental
 Drift_area: 0.2-0.8
-Noise: True
-Noisy_trace_prob: 0.1
-Noisy_event_prob: 0.1
+Noise: False
+Noisy_trace_prob: 0.0
+Noisy_event_prob: 0.0
 Timestamp_first_trace: 2020/08/01 08:00:00
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
