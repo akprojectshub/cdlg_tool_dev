@@ -49,35 +49,34 @@ def generate_logs(file_path_to_own_models=None):
         tree_list = [tree_initial]
 
 
-
-        drift_instance = DriftInfo()
-        drift_instance.set_log_id(log_name)
-        drift_instance.add_process_tree(tree_initial)
-
-
-
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
         for drift_id in range(1, drift_n+1):
+            drift_type = select_random(par.Drift_types, option='random')
+            # Set drift info instance
+            drift_instance = DriftInfo()
+            drift_instance.set_log_id(log_name)
             drift_instance.set_drift_id(drift_id)
+            drift_instance.set_drift_type(drift_type)
+            drift_instance.add_process_tree(tree_initial)
 
             tree_previous = copy.deepcopy(tree_list[-1])
-            drift = select_random(par.Drift_types, option='random')
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
-            if drift == DriftTypes.sudden.value:
-                result, drift_instance = add_sudden_change(event_log, drift_instance, par)
-            elif drift == DriftTypes.gradual.value:
-                result = add_gradual_change(event_log, tree_previous, par)
-                event_log, deleted_acs, added_acs, moved_acs, tree_new = result
-            elif drift == DriftTypes.recurring.value:
+            if drift_type == DriftTypes.sudden.value:
+                event_log, drift_instance = add_sudden_change(event_log, drift_instance, par)
+            elif drift_type == DriftTypes.gradual.value:
+                event_log, drift_instance = add_gradual_change(event_log, drift_instance, par)
+            elif drift_type == DriftTypes.recurring.value:
+                # TODO: update the recurring drift to be similar to the sudden and gradual
                 result = add_recurring_drift(event_log, tree_previous, par)
                 event_log, deleted_acs, added_acs, moved_acs, tree_new = result
-            elif drift == DriftTypes.incremental.value:
+            elif drift_type == DriftTypes.incremental.value:
+                # TODO: update the incremental drift to be similar to the sudden and gradual
                 result = add_incremental_drift(event_log, tree_previous, par)
                 event_log, deleted_acs, added_acs, moved_acs, tree_list = result
             else:
                 event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
                 added_acs, deleted_acs, moved_acs = [], [], []
-                drift = None
+                drift_type = None
 
             # ADD TIME PERSPECTIVE TO EVENT LOG
             add_duration_to_log(event_log,
@@ -85,15 +84,16 @@ def generate_logs(file_path_to_own_models=None):
                                 select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
                                 select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
+            # ADD DRIFT INFO TO COLLECTION
+            collection.add_drift(drift_instance)
+
             # CREATE DRIFT INFO INSTANCE
-            if drift:
-                drift_times = extract_change_moments_to_list(event_log)
-                drift_input = [log_name, drift_id, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
-                drift_instance = initialize_drift_instance_from_list(drift_input)
-                event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
-                collection.add_drift(drift_instance)
-
-
+            # if drift_type:
+            #     drift_times = extract_change_moments_to_list(event_log)
+            #     drift_input = [log_name, drift_id, 'control-flow', drift_type, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
+            #     drift_instance = initialize_drift_instance_from_list(drift_input)
+            #     event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
+            #     collection.add_drift(drift_instance)
 
 
         # # ADD NOISE and CREATE NOISE INFO INSTANCE

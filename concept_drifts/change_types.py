@@ -33,7 +33,7 @@ def add_sudden_change(log, drift_instance, paremeters):
     return log_extended, drift_instance
 
 
-def add_gradual_change(event_log, tree_previous, paremeters):
+def add_gradual_change(event_log, drift_instance, paremeters):
     """ Generation of an event log with a gradual drift
 
     :param tree_one: initial version of the process tree
@@ -44,8 +44,12 @@ def add_gradual_change(event_log, tree_previous, paremeters):
     :param distribution_type: type of distribution of the traces during the drift (linear, exponential)
     :return: event log with gradual drift
     """
+
+
     gradual_type = select_random(paremeters.Gradual_drift_type, option='random')
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
+    # TODO: each trace should be associated with a process tree id. Then, previous tree is based on the last trace
+    tree_previous = drift_instance.get_previous_process_tree()
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
     log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
@@ -55,7 +59,16 @@ def add_gradual_change(event_log, tree_previous, paremeters):
     log_transition = distribute_traces(tree_previous, tree_new, gradual_type, num_traces_gradual_phase)
     log_with_transition = combine_two_logs(event_log, log_transition)
     log_extended = combine_two_logs(log_with_transition, log_two)
-    return log_extended, deleted_acs, added_acs, moved_acs, tree_new
+
+    # Update drift infos
+    drift_instance.add_process_tree(tree_new)
+    change_trace_index = [len(event_log) + 1, len(log_with_transition) +1]
+    drift_instance.add_change_info(change_trace_index,
+                                   ChangeTypes.gradual.value,
+                                   tree_previous, tree_new,
+                                   deleted_acs, added_acs, moved_acs)
+
+    return log_extended, drift_instance
 
 
 def distribute_traces(tree_one, tree_two, distribute_type, nu_traces):

@@ -29,6 +29,10 @@ class DriftInfo:
         self.drift_id = drift_id
         return None
 
+    def set_drift_type(self, drift_type):
+        self.drift_type = drift_type
+        return None
+
     def add_process_tree(self, process_tree):
         process_tree_id = str(len(self.process_trees))
         self.process_trees[process_tree_id] = deepcopy(process_tree)
