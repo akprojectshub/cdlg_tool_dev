@@ -1,23 +1,6 @@
 from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
 from controllers.input_controller import input_int, input_percentage, input_end, input_yes_no, input_season
-from copy import deepcopy
-
-def recurring_drift_new(tree_one, tree_two, nu_traces, number_of_seasonal_changes):
-
-    num_trace_per_sublog = int(round(nu_traces / number_of_seasonal_changes, -1))
-    log_1 = semantics.generate_log(tree_one, num_trace_per_sublog)
-    log_2 = semantics.generate_log(tree_two, num_trace_per_sublog)
-    event_log_with_recurring_drift = combine_two_logs(EventLog(), log_1)
-
-    for i in range(number_of_seasonal_changes):
-        if i % 2 == 0:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_2)
-        else:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
-
-    return event_log_with_recurring_drift
-
 
 
 def recurring_drift(tree_one, tree_two, nu_traces, number_of_seasonal_changes, proportion_first, start_point,

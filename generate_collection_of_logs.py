@@ -9,7 +9,7 @@ from enum import Enum
 from controllers import configurations as config
 from concept_drifts.gradual_drift import gradual_drift
 from concept_drifts.incremental_drift import incremental_drift_gs
-from concept_drifts.recurring_drift import recurring_drift_new
+from concept_drifts.drift_types import add_recurring_drift
 from concept_drifts.sudden_drift import sudden_drift
 from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
@@ -21,7 +21,7 @@ from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from controllers.input_parameters import InputParameters
-from concept_drifts.change_types import add_sudden_change
+from concept_drifts.change_types import add_sudden_change, add_gradual_change
 import time
 
 
@@ -62,15 +62,14 @@ def generate_logs(file_path_to_own_models=None):
 
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
             if drift == DriftTypes.sudden.value:
-                #event_log = sudden_drift(tree_previous, tree_new, num_traces, drift_area_one)
                 event_log = add_sudden_change(event_log, tree_new, num_traces)
-
             elif drift == DriftTypes.gradual.value:
-                gr_type = select_random(par.Gradual_drift_type, option='random')
-                event_log = gradual_drift(tree_previous, tree_new, num_traces, drift_area_one, drift_area_two, gr_type)
+                gradual_type = select_random(par.Gradual_drift_type, option='random')
+                #event_log = gradual_drift(tree_previous, tree_new, num_traces, drift_area_one, drift_area_two, gr_type)
+                event_log = add_gradual_change(event_log, tree_previous, tree_new, num_traces, num_traces/2, gradual_type)
             elif drift == DriftTypes.recurring.value:
                 number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
-                event_log = recurring_drift_new(tree_previous, tree_new, num_traces, number_of_seasonal_changes)
+                event_log = add_recurring_drift(event_log, tree_previous, tree_new, num_traces, number_of_seasonal_changes)
             elif drift == DriftTypes.incremental.value:
                 # TODO: rewrite the incremental drift generation function (focus on simplification)
                 num_models = select_random(par.Incremental_drift_number, option='random')
