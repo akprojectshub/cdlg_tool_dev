@@ -2,9 +2,11 @@ from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
 from controllers.input_controller import input_percentage, input_int, input_end
 import math
+from controllers.utilities import select_random
+from controllers.control_flow_controller import evolve_tree_randomly
 
 
-def add_sudden_change(log, process_tree, num_traces):
+def add_sudden_change(log, tree_previous, paremeters):
     """ Include an additional sudden drift to an event log
     :param log: initial event log
     :param process_tree: evolved tree version used to generate the next process model version
@@ -12,13 +14,16 @@ def add_sudden_change(log, process_tree, num_traces):
     :return: event log with added additional sudden drift
     """
 
-    log_two = semantics.generate_log(process_tree, num_traces)
+    ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
+    tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+    num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
+    log_two = semantics.generate_log(tree_new, num_traces)
     log_extended = combine_two_logs(log, log_two)
 
-    return log_extended
+    return log_extended, deleted_acs, added_acs, moved_acs, tree_new
 
 
-def add_gradual_change(log, log_process_tree, new_process_tree, new_num_traces, num_traces_transition, distribution_type):
+def add_gradual_change(event_log, tree_previous, paremeters):
     """ Generation of an event log with a gradual drift
 
     :param tree_one: initial version of the process tree
@@ -29,25 +34,17 @@ def add_gradual_change(log, log_process_tree, new_process_tree, new_num_traces, 
     :param distribution_type: type of distribution of the traces during the drift (linear, exponential)
     :return: event log with gradual drift
     """
-
-    log_two = semantics.generate_log(new_process_tree, new_num_traces)
+    gradual_type = select_random(paremeters.Gradual_drift_type, option='random')
+    ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
+    tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+    num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
+    log_two = semantics.generate_log(tree_new, num_traces)
     # TODO: keep track of all trace ids
-    log_transition = distribute_traces(log_process_tree, new_process_tree, distribution_type,
-                                                num_traces_transition)
-    log_with_transition = combine_two_logs(log, log_transition)
+    # TODO: make controllable the number of traces in the gradual transition change type
+    log_transition = distribute_traces(tree_previous, tree_new, gradual_type, int(num_traces/2))
+    log_with_transition = combine_two_logs(event_log, log_transition)
     log_extended = combine_two_logs(log_with_transition, log_two)
-
-
-    # log_before_drift_traces = int(round((start_point * nu_traces) + 0.0001))
-    # log_after_drift_traces = int(round(((1-end_point)*nu_traces)+0.0001))
-    # nu_traces_for_drift = nu_traces - log_before_drift_traces - log_after_drift_traces
-    # log_before_drift = semantics.generate_log(tree_one, log_before_drift_traces)
-    # log_after_drift = semantics.generate_log(tree_two, log_after_drift_traces)
-    # log_combined_with_drift = distribute_traces(tree_one, tree_two, distribution_type,
-    #                                             nu_traces_for_drift)
-    # log_be_one = combine_two_logs(log_before_drift, log_combined_with_drift)
-    # logs_combined = combine_two_logs(log_be_one, log_after_drift)
-    return log_extended
+    return log_extended, deleted_acs, added_acs, moved_acs, tree_new
 
 
 def distribute_traces(tree_one, tree_two, distribute_type, nu_traces):

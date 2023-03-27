@@ -11,26 +11,43 @@ from pm4py.objects.process_tree import semantics
 from controllers.process_tree_controller import generate_tree, visualise_tree
 from pm4py import play_out
 from pm4py.algo.simulation.playout.process_tree.variants.topbottom import Parameters
+from controllers.control_flow_controller import evolve_tree_randomly
+from controllers.utilities import select_random
 
 
-def add_recurring_drift(event_log, tree_one, tree_two, nu_traces, number_of_seasonal_changes):
+def add_recurring_drift(event_log, tree_previous, par):
 
+
+    number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
     # TODO: make this parameter controllable by a user through the parameter file
-    num_trace_per_sublog = randint(int(nu_traces*0.5), nu_traces)
+    num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
+    num_trace_per_sublog = randint(int(num_traces*0.5), num_traces)
     #num_trace_per_sublog = int(round(nu_traces / number_of_seasonal_changes, -1))
+    ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
+    tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+    log_2 = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
+    log_1 = play_out(tree_previous, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
 
+    event_log_with_added_recurring_drift = combine_two_logs(event_log, log_2)
 
-    log_1 = semantics.generate_log(tree_one, num_trace_per_sublog)
-    log_2 = semantics.generate_log(tree_two, num_trace_per_sublog)
-    event_log_with_recurring_drift = combine_two_logs(event_log, log_1)
-
-    for i in range(number_of_seasonal_changes):
+    for i in range(2, number_of_seasonal_changes + 1):
         if i % 2 == 0:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_2)
+            event_log_with_recurring_drift = combine_two_logs(event_log_with_added_recurring_drift, log_2)
         else:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
+            event_log_with_recurring_drift = combine_two_logs(event_log_with_added_recurring_drift, log_1)
 
-    return event_log_with_recurring_drift
+
+    # log_1 = semantics.generate_log(tree_one, num_trace_per_sublog)
+    # log_2 = semantics.generate_log(tree_two, num_trace_per_sublog)
+    # event_log_with_recurring_drift = combine_two_logs(event_log, log_1)
+    #
+    # for i in range(number_of_seasonal_changes):
+    #     if i % 2 == 0:
+    #         event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_2)
+    #     else:
+    #         event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
+
+    return event_log_with_recurring_drift, deleted_acs, added_acs, moved_acs, tree_ev
 
 
 
@@ -62,4 +79,4 @@ def add_incremental_drift(event_log, log_process_tree, nu_traces, number_increme
         #log_add = semantics.generate_log(tree_ev, nu_traces)
         event_log_ext = combine_two_logs(event_log, log_add)
 
-    return [event_log_ext, deleted_acs, added_acs, moved_acs, trees]
+    return event_log_ext, deleted_acs, added_acs, moved_acs, trees
