@@ -65,7 +65,7 @@ class NoiseInfo:
     """
         Object for keeping information about added noise to a generated event log
     """
-    log_id: int = np.NAN
+    log_id: str = str
     noisy_trace_prob: float = np.NAN
     noisy_event_prob: float = np.NAN
 
