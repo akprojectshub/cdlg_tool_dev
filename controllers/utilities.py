@@ -1,3 +1,4 @@
+from enum import Enum
 from random import uniform, randint
 
 
@@ -18,3 +19,20 @@ def select_random(data: list, option: str = 'random') -> any:
         data_selected = round(data_selected, 2)
 
     return data_selected
+
+
+class InfoTypes(Enum):
+    drift_info = "drift:info"
+    noise_info = "noise:info"
+
+
+class DriftTypes(Enum):
+    sudden = 'sudden'
+    gradual = 'gradual'
+    recurring = 'recurring'
+    incremental = 'incremental'
+
+
+class ChangeTypes(Enum):
+    sudden = 'sudden'
+    gradual = 'gradual'
