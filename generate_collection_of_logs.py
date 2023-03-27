@@ -80,6 +80,15 @@ def generate_logs(file_path_to_own_models=None):
                 event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
                 drift = None
 
+            # CREATE DRIFT INFO INSTANCE
+            if drift:
+                drift_times = extract_change_moments_to_list(event_log)
+                drift_input = [log_name, drift_id, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
+                drift_instance = initialize_drift_instance_from_list(drift_input)
+                event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
+                collection.add_drift(drift_instance)
+
+
         # ADD TIME PERSPECTIVE TO EVENT LOG
         add_duration_to_log(event_log,
                             select_random(par.Timestamp_first_trace),
@@ -94,13 +103,7 @@ def generate_logs(file_path_to_own_models=None):
         #     collection.add_noise(noise_instance)
         #     event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
         #
-        # # CREATE DRIFT INFO INSTANCE
-        # if drift:
-        #     drift_times = extract_change_moments_to_list(event_log)
-        #     drift_input = [log_name, 1, 'control-flow', drift, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
-        #     drift_instance = initialize_drift_instance_from_list(drift_input)
-        #     event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
-        #     collection.add_drift(drift_instance)
+
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
