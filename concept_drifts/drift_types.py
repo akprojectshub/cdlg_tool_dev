@@ -53,7 +53,7 @@ def add_recurring_drift(event_log, tree_previous, par):
 
 
 
-def add_incremental_drift(event_log, log_process_tree, nu_traces, number_incremental_changes, proportion_random_evolution):
+def add_incremental_drift(event_log, tree_previous, par):
     """ Generation of an event log with an incremental drift for gold standard generation
 
     :param ran_in_evolve: proportion of the process model version to be evolved
@@ -64,17 +64,23 @@ def add_incremental_drift(event_log, log_process_tree, nu_traces, number_increme
     :param number_incremental_changes: number of intermediate models
     :return: event log with incremental drift
     """
+
+    num_models = select_random(par.Incremental_drift_number, option='random')
+    ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
+    tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+    num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
+
     deleted_acs = []
     added_acs = []
     moved_acs = []
     trees = []
-    for i in range(1, number_incremental_changes+1):
-        tree_ev, deleted_ac, added_ac, moved_ac = evolve_tree_randomly(log_process_tree, proportion_random_evolution)
+    for i in range(1, num_models+1):
+        tree_ev, deleted_ac, added_ac, moved_ac = evolve_tree_randomly(tree_ev, ran_evolve)
         deleted_acs.extend(deleted_ac)
         added_acs.extend(added_ac)
         moved_acs.extend(moved_ac)
         trees.append(tree_ev)
-        log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: nu_traces})
+        log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_traces})
         # Justus' implementation
         #log_add = semantics.generate_log(tree_ev, nu_traces)
         event_log_ext = combine_two_logs(event_log, log_add)
