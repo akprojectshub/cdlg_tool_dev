@@ -9,7 +9,7 @@ from enum import Enum
 from controllers import configurations as config
 from concept_drifts.gradual_drift import gradual_drift
 from concept_drifts.incremental_drift import incremental_drift_gs
-from concept_drifts.drift_types import add_recurring_drift
+from concept_drifts.drift_types import add_recurring_drift, add_incremental_drift
 from concept_drifts.sudden_drift import sudden_drift
 from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
@@ -73,11 +73,19 @@ def generate_logs(file_path_to_own_models=None):
             elif drift == DriftTypes.incremental.value:
                 # TODO: rewrite the incremental drift generation function (focus on simplification)
                 num_models = select_random(par.Incremental_drift_number, option='random')
-                result = incremental_drift_gs(tree_previous, drift_area_one, drift_area_two, num_traces, num_models, ran_evolve)
+                #result = incremental_drift_gs(tree_previous, drift_area_one, drift_area_two, num_traces, num_models, ran_evolve)
+                #event_log, deleted_acs, added_acs, moved_acs, tree_list = result
+                result = add_incremental_drift(event_log, tree_previous, num_traces, num_models, ran_evolve)
                 event_log, deleted_acs, added_acs, moved_acs, tree_list = result
             else:
                 event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
                 drift = None
+
+            # ADD TIME PERSPECTIVE TO EVENT LOG
+            add_duration_to_log(event_log,
+                                select_random(par.Timestamp_first_trace),
+                                select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
+                                select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
             # CREATE DRIFT INFO INSTANCE
             if drift:
@@ -88,11 +96,7 @@ def generate_logs(file_path_to_own_models=None):
                 collection.add_drift(drift_instance)
 
 
-        # ADD TIME PERSPECTIVE TO EVENT LOG
-        add_duration_to_log(event_log,
-                            select_random(par.Timestamp_first_trace),
-                            select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
-                            select_random(par.Task_exp_duration_sec, option='uniform_int'))
+
 
         # # ADD NOISE and CREATE NOISE INFO INSTANCE
         # noise = select_random(par.Noise, option='random')
