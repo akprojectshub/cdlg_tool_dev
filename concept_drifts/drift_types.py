@@ -2,6 +2,15 @@ from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree import semantics
 from random import randint
 from controllers.event_log_controller import combine_two_logs
+import copy
+from controllers.control_flow_controller import change_tree_on_control_flow_incremental, \
+    change_tree_on_control_flow_incremental_random, evolve_tree_randomly
+from controllers.input_controller import input_int, input_ra_ch, input_int_hun, input_percentage, input_end
+from controllers.event_log_controller import *
+from pm4py.objects.process_tree import semantics
+from controllers.process_tree_controller import generate_tree, visualise_tree
+from pm4py import play_out
+from pm4py.algo.simulation.playout.process_tree.variants.topbottom import Parameters
 
 
 def add_recurring_drift(event_log, tree_one, tree_two, nu_traces, number_of_seasonal_changes):
@@ -22,3 +31,35 @@ def add_recurring_drift(event_log, tree_one, tree_two, nu_traces, number_of_seas
             event_log_with_recurring_drift = combine_two_logs(event_log_with_recurring_drift, log_1)
 
     return event_log_with_recurring_drift
+
+
+
+
+
+def add_incremental_drift(event_log, log_process_tree, nu_traces, number_incremental_changes, proportion_random_evolution):
+    """ Generation of an event log with an incremental drift for gold standard generation
+
+    :param ran_in_evolve: proportion of the process model version to be evolved
+    :param process_tree: initial model
+    :param start_point: starting point for the incremental drift
+    :param end_point: ending point for the incremental drift
+    :param nu_traces: number traces in event log
+    :param number_incremental_changes: number of intermediate models
+    :return: event log with incremental drift
+    """
+    deleted_acs = []
+    added_acs = []
+    moved_acs = []
+    trees = []
+    for i in range(1, number_incremental_changes+1):
+        tree_ev, deleted_ac, added_ac, moved_ac = evolve_tree_randomly(log_process_tree, proportion_random_evolution)
+        deleted_acs.extend(deleted_ac)
+        added_acs.extend(added_ac)
+        moved_acs.extend(moved_ac)
+        trees.append(tree_ev)
+        log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: nu_traces})
+        # Justus' implementation
+        #log_add = semantics.generate_log(tree_ev, nu_traces)
+        event_log_ext = combine_two_logs(event_log, log_add)
+
+    return [event_log_ext, deleted_acs, added_acs, moved_acs, trees]
