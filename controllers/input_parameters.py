@@ -10,7 +10,7 @@ class InputParameters:
     Process_tree_complexity: list
     Process_tree_evolution_proportion: list
     Number_event_logs: list
-    Number_traces_per_event_log: list
+    Number_traces_per_process_model_version: list
     Drift_types: list
     Number_drifts_per_log: list
     Noise: list

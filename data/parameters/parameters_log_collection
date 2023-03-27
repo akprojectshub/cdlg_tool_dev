@@ -1,9 +1,9 @@
 Process_tree_complexity: simple, middle, complex
 Process_tree_evolution_proportion: 0.1-0.4
-Number_event_logs: 2
-Number_traces_per_event_log: 3000-4000
-Drift_types: incremental
-Number_drifts_per_log: 3
+Number_event_logs: 4
+Number_traces_per_process_model_version: 1000-3000
+Drift_types: recurring, gradual, incremental, sudden
+Number_drifts_per_log: 4
 Noise: False
 Noisy_trace_prob: 0.0
 Noisy_event_prob: 0.0

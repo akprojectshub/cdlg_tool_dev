@@ -2,27 +2,24 @@ import copy
 import datetime
 import os
 import sys
-from random import randint, uniform
+from random import uniform
 import ast
 from datetime import datetime
 from enum import Enum
 from controllers import configurations as config
-from concept_drifts.gradual_drift import gradual_drift
-from concept_drifts.incremental_drift import incremental_drift_gs
 from concept_drifts.drift_types import add_recurring_drift, add_incremental_drift
-from concept_drifts.sudden_drift import sudden_drift
 from concept_drifts.without_drift import no_drift
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import add_duration_to_log
-from controllers.noise_controller_new import insert_noise
 from controllers.drift_info_collection import DriftInfo, extract_change_moments_to_list
-from controllers.drift_info_collection import NoiseInfo
 from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from controllers.input_parameters import InputParameters
 from concept_drifts.change_types import add_sudden_change, add_gradual_change
 import time
+
+from controllers.utilities import select_random
 
 
 # TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree
@@ -50,29 +47,31 @@ def generate_logs(file_path_to_own_models=None):
         log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
         tree_one, complexity = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
         tree_list = [tree_one]
-        num_traces = select_random(par.Number_traces_per_event_log, option='uniform_int')
+        num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
         event_log = no_drift(tree=tree_one, nu_traces=num_traces)
 
 
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
         for drift_id in range(1, drift_n+1):
+            drift_instance = DriftInfo()
+
             tree_previous = copy.deepcopy(tree_list[-1])
             drift = select_random(par.Drift_types, option='random')
             ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
             tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
-            num_traces = select_random(par.Number_traces_per_event_log, option='uniform_int')
+            num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
             tree_list.append(tree_new)
 
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
             if drift == DriftTypes.sudden.value:
-                event_log = add_sudden_change(event_log, tree_new, num_traces)
+                result = add_sudden_change(event_log, tree_previous, par)
+                event_log, deleted_acs, added_acs, moved_acs, tree_new = result
             elif drift == DriftTypes.gradual.value:
-                gradual_type = select_random(par.Gradual_drift_type, option='random')
-                #event_log = gradual_drift(tree_previous, tree_new, num_traces, drift_area_one, drift_area_two, gr_type)
-                event_log = add_gradual_change(event_log, tree_previous, tree_new, num_traces, num_traces/2, gradual_type)
+                result = add_gradual_change(event_log, tree_previous, par)
+                event_log, deleted_acs, added_acs, moved_acs, tree_new = result
             elif drift == DriftTypes.recurring.value:
-                number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
-                event_log = add_recurring_drift(event_log, tree_previous, tree_new, num_traces, number_of_seasonal_changes)
+                result = add_recurring_drift(event_log, tree_previous, par)
+                event_log, deleted_acs, added_acs, moved_acs, tree_new = result
             elif drift == DriftTypes.incremental.value:
                 num_models = select_random(par.Incremental_drift_number, option='random')
                 result = add_incremental_drift(event_log, tree_previous, num_traces, num_models, ran_evolve)
@@ -144,25 +143,6 @@ def generate_initial_tree(complexity_options_list: list, file_path_to_own_models
     else:
         generated_process_tree = generate_tree_from_file(file_path_to_own_models)
     return generated_process_tree, complexity
-
-
-def select_random(data: list, option: str = 'random') -> any:
-    if len(data) == 1:
-        data_selected = data[0]
-    elif len(data) == 2 and option == 'uniform':
-        data_selected = uniform(data[0], data[1])
-    elif len(data) == 2 and option == 'uniform_int':
-        data_selected = randint(data[0], data[1])
-    elif option == 'random':
-        data_selected = data[randint(0, len(data) - 1)]
-    else:
-        data_selected = None
-        Warning(f"Check function 'select_random' call: {data, option, data_selected}")
-
-    if isinstance(data, float):
-        data_selected = round(data_selected, 2)
-
-    return data_selected
 
 
 def creat_output_folder(path: str = config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR):
