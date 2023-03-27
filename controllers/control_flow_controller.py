@@ -1,6 +1,6 @@
 import copy
 from random import randint
-
+from copy import deepcopy
 import numpy as nmp
 
 from controllers.input_controller import input_int, input_ac, input_type_cf, input_ops, input_yes_no, input_cft_ac, \
@@ -276,14 +276,15 @@ def evolve_tree_randomly_terminal(drift_tree, evolution_stage):
     return drift_tree, deleted_acs, added_acs, moved_acs
 
 
-def evolve_tree_randomly(drift_tree, evolution_stage):
+def evolve_tree_randomly(previous_process_tree, evolution_stage):
     """ Random change of the process tree
 
-    :param drift_tree: tree to be changed
+    :param new_process_tree: tree to be changed
     :param evolution_stage: percentage of activities to be affected by the change
     :return: randomly evolved process tree version
     """
-    acs = count_real_acs(drift_tree._get_leaves())
+    new_process_tree = deepcopy(previous_process_tree)
+    acs = count_real_acs(new_process_tree._get_leaves())
     changed_acs = []
     added_acs = []
     deleted_acs = []
@@ -300,39 +301,39 @@ def evolve_tree_randomly(drift_tree, evolution_stage):
         if i == 1:
             ran = randint(1, rounds - i)
         if ran == 1:
-            happen_be, worked, count = randomize_tree_one(drift_tree, happen_be, changed_acs, count)
+            happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
             while not worked:
-                happen_be, worked, count = randomize_tree_one(drift_tree, happen_be, changed_acs, count)
+                happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
         elif ran == 2:
-            happen_be, worked, count = randomize_tree_two(drift_tree, happen_be, changed_acs, count)
+            happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
             while not worked:
-                happen_be, worked, count = randomize_tree_two(drift_tree, happen_be, changed_acs, count)
+                happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
         elif ran == 3:
-            happen_be, worked, count = randomize_tree_three(drift_tree, happen_be, ran, changed_acs, count)
+            happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
             while not worked:
                 ran = randint(1, rounds - i)
                 if ran == 1:
                     ran = randint(1, rounds - i)
                 if ran == 1:
-                    happen_be, worked, count = randomize_tree_one(drift_tree, happen_be, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
                 elif ran == 2:
-                    happen_be, worked, count = randomize_tree_two(drift_tree, happen_be, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
                 else:
-                    happen_be, worked, count = randomize_tree_three(drift_tree, happen_be, ran, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
         else:
-            happen_be, worked, count = randomize_tree_more(drift_tree, happen_be, ran, changed_acs, count)
+            happen_be, worked, count = randomize_tree_more(new_process_tree, happen_be, ran, changed_acs, count)
             while not worked:
                 ran = randint(1, rounds - i)
                 if ran == 1:
                     ran = randint(1, rounds - i)
                 if ran == 1:
-                    happen_be, worked, count = randomize_tree_one(drift_tree, happen_be, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
                 elif ran == 2:
-                    happen_be, worked, count = randomize_tree_two(drift_tree, happen_be, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
                 elif ran == 3:
-                    happen_be, worked, count = randomize_tree_three(drift_tree, happen_be, ran, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
                 else:
-                    happen_be, worked, count = randomize_tree_more(drift_tree, happen_be, ran, changed_acs, count)
+                    happen_be, worked, count = randomize_tree_more(new_process_tree, happen_be, ran, changed_acs, count)
         happen_spl = happen_be.split(";")
         last = len(happen_spl)
         happen = happen + happen_spl[last - 2] + "; "
@@ -352,4 +353,4 @@ def evolve_tree_randomly(drift_tree, evolution_stage):
             moved_acs.extend(changed_acs[len(changed_acs)-ran:len(changed_acs)-1])
         else:
             moved_acs.extend(changed_acs[len(changed_acs)-ran:len(changed_acs)])
-    return drift_tree, deleted_acs, added_acs, moved_acs
+    return new_process_tree, deleted_acs, added_acs, moved_acs
