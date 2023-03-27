@@ -25,6 +25,10 @@ from concept_drifts.change_types import add_sudden_change, add_gradual_change
 import time
 
 
+# TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree
+
+
+
 def generate_logs(file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
@@ -54,7 +58,6 @@ def generate_logs(file_path_to_own_models=None):
         for drift_id in range(1, drift_n+1):
             tree_previous = copy.deepcopy(tree_list[-1])
             drift = select_random(par.Drift_types, option='random')
-            drift_area_one, drift_area_two = drift_area_selection(par.Drift_area)
             ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
             tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
             num_traces = select_random(par.Number_traces_per_event_log, option='uniform_int')
@@ -71,12 +74,12 @@ def generate_logs(file_path_to_own_models=None):
                 number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
                 event_log = add_recurring_drift(event_log, tree_previous, tree_new, num_traces, number_of_seasonal_changes)
             elif drift == DriftTypes.incremental.value:
-                # TODO: rewrite the incremental drift generation function (focus on simplification)
                 num_models = select_random(par.Incremental_drift_number, option='random')
-                #result = incremental_drift_gs(tree_previous, drift_area_one, drift_area_two, num_traces, num_models, ran_evolve)
-                #event_log, deleted_acs, added_acs, moved_acs, tree_list = result
                 result = add_incremental_drift(event_log, tree_previous, num_traces, num_models, ran_evolve)
                 event_log, deleted_acs, added_acs, moved_acs, tree_list = result
+                #result = incremental_drift_gs(tree_previous, drift_area_one, drift_area_two, num_traces, num_models, ran_evolve)
+                #event_log, deleted_acs, added_acs, moved_acs, tree_list = result
+
             else:
                 event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
                 drift = None

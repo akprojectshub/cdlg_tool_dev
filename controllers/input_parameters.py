@@ -13,7 +13,6 @@ class InputParameters:
     Number_traces_per_event_log: list
     Drift_types: list
     Number_drifts_per_log: list
-    Drift_area: list
     Noise: list
     Noisy_trace_prob: list
     Noisy_event_prob: list

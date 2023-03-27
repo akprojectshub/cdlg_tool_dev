@@ -4,7 +4,6 @@ Number_event_logs: 2
 Number_traces_per_event_log: 3000-4000
 Drift_types: incremental
 Number_drifts_per_log: 3
-Drift_area: 0.2-0.8
 Noise: False
 Noisy_trace_prob: 0.0
 Noisy_event_prob: 0.0
