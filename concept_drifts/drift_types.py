@@ -28,9 +28,10 @@ def add_recurring_drift(event_log, drift_instance, par):
 
     drift_instance.add_process_tree(tree_ev)
 
-
-    log_2 = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
-    log_1 = play_out(tree_previous, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
+    log_2 = semantics.generate_log(tree_ev, num_trace_per_sublog)
+    log_1 = semantics.generate_log(tree_previous, num_trace_per_sublog)
+    #log_2 = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
+    #log_1 = play_out(tree_previous, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
 
     event_log_with_added_recurring_drift = combine_two_logs(event_log, log_2)
     change_trace_index = len(event_log) + 1
@@ -81,7 +82,9 @@ def add_incremental_drift(event_log, drift_instance, par):
         ran_evolve = select_random([0.05, 0.2], option='uniform')
         # ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
         tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_ev, ran_evolve)
-        log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_traces})
+        #log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_traces})
+        log_add = semantics.generate_log(tree_ev, num_traces)
+
         drift_instance.add_process_tree(tree_ev)
         change_trace_index = len(event_log) + 1
         drift_instance.add_change_info(change_trace_index,
@@ -89,6 +92,7 @@ def add_incremental_drift(event_log, drift_instance, par):
                                        tree_previous, tree_ev,
                                        deleted_acs, added_acs, moved_acs)
         event_log = combine_two_logs(event_log, log_add)
+        tree_previous = deepcopy(tree_ev)
 
     return event_log, drift_instance
 

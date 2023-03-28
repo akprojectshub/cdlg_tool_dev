@@ -19,7 +19,8 @@ def add_sudden_change(log, drift_instance, paremeters):
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
-    log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
+    #log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
+    log_two = semantics.generate_log(tree_new, num_traces)
     log_extended = combine_two_logs(log, log_two)
 
     # Update drift infos
@@ -52,8 +53,8 @@ def add_gradual_change(event_log, drift_instance, paremeters):
     tree_previous = drift_instance.get_previous_process_tree()
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
-    log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
-    #log_two = semantics.generate_log(tree_new, num_traces)
+    #log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
+    log_two = semantics.generate_log(tree_new, num_traces)
     num_traces_gradual_phase = select_random(paremeters.Number_traces_for_gradual_change, option='uniform_int')
     # TODO: keep track of all trace ids
     log_transition = distribute_traces(tree_previous, tree_new, gradual_type, num_traces_gradual_phase)
