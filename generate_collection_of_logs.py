@@ -23,7 +23,6 @@ from controllers.utilities import select_random, InfoTypes, DriftTypes
 # TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree
 
 
-
 def generate_logs(file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
@@ -47,14 +46,15 @@ def generate_logs(file_path_to_own_models=None):
         num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
         event_log = no_drift(tree=tree_initial, nu_traces=num_traces)
 
-
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
-        for drift_id in range(1, drift_n+1):
+        for drift_id in range(1, drift_n + 1):
             drift_type = select_random(par.Drift_types, option='random')
             # Set drift info instance
             drift_instance = DriftInfo()
             drift_instance.set_log_id(log_name)
             drift_instance.set_drift_id(drift_id)
+            drift_instance.set_process_perspective('control-flow')
+
             drift_instance.set_drift_type(drift_type)
             drift_instance.add_process_tree(tree_initial)
 
@@ -70,22 +70,19 @@ def generate_logs(file_path_to_own_models=None):
             else:
                 drift_type = None
 
-            # ADD TIME PERSPECTIVE TO EVENT LOG
-            add_duration_to_log(event_log,
-                                select_random(par.Timestamp_first_trace),
-                                select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
-                                select_random(par.Task_exp_duration_sec, option='uniform_int'))
+            collection.add_drift(drift_instance)
 
-            # CREATE DRIFT INFO INSTANCE
-            if drift_type:
-                drift_instance.convert_change_trace_index_into_timestamp()
-                drift_times = extract_change_moments_to_list(event_log)
-                drift_input = [log_name, drift_id, 'control-flow', drift_type, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
-                drift_instance = initialize_drift_instance_from_list(drift_input)
-                event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
-                collection.add_drift(drift_instance)
+        # ADD TIME PERSPECTIVE TO EVENT LOG
+        add_duration_to_log(event_log,
+                            select_random(par.Timestamp_first_trace),
+                            select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
+                            select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
+        collection.convert_change_trace_index_into_timestamp(event_log)
+        event_log = collection.add_drift_info_to_log(event_log, log_name)
 
+        #event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
+        # TODO: add noise info to log and to collection
         # # ADD NOISE and CREATE NOISE INFO INSTANCE
         # noise = select_random(par.Noise, option='random')
         # if noise:

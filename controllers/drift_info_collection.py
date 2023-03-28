@@ -7,6 +7,8 @@ import pandas as pd
 import pm4py
 from collections import defaultdict
 from copy import deepcopy
+from controllers.utilities import InfoTypes
+
 
 @dataclass
 class DriftInfo:
@@ -31,6 +33,10 @@ class DriftInfo:
 
     def set_drift_type(self, drift_type):
         self.drift_type = drift_type
+        return None
+
+    def set_process_perspective(self, process_perspective):
+        self.process_perspective = process_perspective
         return None
 
     def add_process_tree(self, process_tree):
@@ -204,7 +210,8 @@ class LogDriftInfo:
                     loaded_event_logs[filename] = os.sep.join([dir_path])
         return loaded_event_logs
 
-    def _temp_save_drift_info_to_csv_file(self, path):
+
+    def _old_temp_save_drift_info_to_csv_file(self, path):
         # TODO: this is a temporal function that needs to be revised and checked
         dict_nested = dict()
         for drift in self.drifts:
@@ -229,6 +236,80 @@ class LogDriftInfo:
         df.to_csv(f"{path}/aggregated_drift_info.csv", index=False)
 
         return None
+
+
+    def _temp_save_drift_info_to_csv_file(self, path):
+        # TODO: this is a temporal function that needs to be revised and checked
+        dict_nested = dict()
+        for drift in self.drifts:
+            for attr_key, attr_value in vars(drift).items():
+                if isinstance(attr_value, dict):
+                    for attr, value in attr_value.items():
+                        if isinstance(value, dict):
+                            for a, v in value.items():
+                                dict_nested[drift.log_id, drift.drift_id, attr_key] = value
+                        else:
+                            dict_nested[drift.log_id, drift.drift_id, attr_key] = {attr: value}
+                else:
+                    dict_nested[drift.log_id, drift.drift_id, attr_key] = {'1': attr_value}
+
+        flat_file = []
+        for key, values in dict_nested.items():
+            for k, v in values.items():
+                data = list(key)
+                data.extend([k, v])
+                flat_file.append(data)
+
+        df = pd.DataFrame(flat_file, columns=['log_name', 'drift_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
+        df.to_csv(f"{path}/aggregated_drift_info.csv", index=False)
+
+        return None
+    def convert_change_trace_index_into_timestamp(self, event_log):
+
+        for drift in self.drifts:
+            print(vars(drift))
+            change_info_new = deepcopy(drift.change_info)
+            for change_id, change_data in drift.change_info.items():
+                for change_attr, attr_value in change_data.items():
+                    if change_attr == 'change_trace_index':
+                        if isinstance(attr_value, list) and len(attr_value) == 2:
+                            change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0]['time:timestamp']
+                            change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0]['time:timestamp']
+                        elif isinstance(attr_value, int):
+                            change_info_new[change_id]['change_start'] = event_log[attr_value][0]['time:timestamp']
+                            change_info_new[change_id]['change_end'] = event_log[attr_value][0]['time:timestamp']
+                        else:
+                            Warning("Something is wrong!")
+            drift.change_info = change_info_new
+        return None
+
+    def add_drift_info_to_log(self, event_log, log_name):
+
+        output_dict_all_drifts = {'value': 'temp', 'children': {}}
+        for drift in self.drifts:
+            if drift.log_id == log_name:
+                output_dict_drift = dict()
+                output_dict_drift.update({'value': drift.drift_id, 'children': {}})
+                # TODO: improve the line below: make it dynamic
+                attr_for_export = ['process_perspective', 'drift_type', 'process_trees', 'change_info']
+                for key, value in vars(drift).items():
+                    if key in attr_for_export:
+                        if isinstance(value, dict):
+                            if key == 'change_info':
+                                output_dict_drift['children']['change_info'] = {'value': 'temp', 'children': {}}
+                                for k, v in value.items():
+
+                                    output_dict_drift['children']['change_info'].update({'value': k, 'children': v})
+                        else:
+                            output_dict_drift['children'].update({key: value})
+
+                output_dict_all_drifts['children']['drift_' + str(drift.drift_id)] = output_dict_drift
+
+
+        event_log.attributes[InfoTypes.drift_info.value] = output_dict_all_drifts
+
+        return event_log
+
 
 
 def extract_change_moments_to_dict(created_log):
