@@ -66,13 +66,10 @@ def generate_logs(file_path_to_own_models=None):
             elif drift_type == DriftTypes.gradual.value:
                 event_log, drift_instance = add_gradual_change(event_log, drift_instance, par)
             elif drift_type == DriftTypes.recurring.value:
-                # TODO: update the recurring drift to be similar to the sudden and gradual
-                result = add_recurring_drift(event_log, tree_previous, par)
-                event_log, deleted_acs, added_acs, moved_acs, tree_new = result
+                event_log, drift_instance = add_recurring_drift(event_log, drift_instance, par)
             elif drift_type == DriftTypes.incremental.value:
                 # TODO: update the incremental drift to be similar to the sudden and gradual
-                result = add_incremental_drift(event_log, tree_previous, par)
-                event_log, deleted_acs, added_acs, moved_acs, tree_list = result
+                event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
             else:
                 event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
                 added_acs, deleted_acs, moved_acs = [], [], []
@@ -84,16 +81,14 @@ def generate_logs(file_path_to_own_models=None):
                                 select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
                                 select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
-            # ADD DRIFT INFO TO COLLECTION
-            collection.add_drift(drift_instance)
-
             # CREATE DRIFT INFO INSTANCE
-            # if drift_type:
-            #     drift_times = extract_change_moments_to_list(event_log)
-            #     drift_input = [log_name, drift_id, 'control-flow', drift_type, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
-            #     drift_instance = initialize_drift_instance_from_list(drift_input)
-            #     event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
-            #     collection.add_drift(drift_instance)
+            if drift_type:
+                drift_instance.convert_change_trace_index_into_timestamp()
+                drift_times = extract_change_moments_to_list(event_log)
+                drift_input = [log_name, drift_id, 'control-flow', drift_type, drift_times, added_acs, deleted_acs, moved_acs, tree_list]
+                drift_instance = initialize_drift_instance_from_list(drift_input)
+                event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
+                collection.add_drift(drift_instance)
 
 
         # # ADD NOISE and CREATE NOISE INFO INSTANCE
@@ -104,7 +99,6 @@ def generate_logs(file_path_to_own_models=None):
         #     collection.add_noise(noise_instance)
         #     event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
         #
-
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, log_name))

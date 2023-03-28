@@ -3,7 +3,7 @@ Process_tree_evolution_proportion: 0.1-0.4
 Number_event_logs: 4
 Number_traces_per_process_model_version: 1000-3000
 Number_traces_for_gradual_change: 300-500
-Drift_types: gradual
+Drift_types: incremental
 Number_drifts_per_log: 4
 Noise: False
 Noisy_trace_prob: 0.0
