@@ -46,7 +46,6 @@ def generate_logs(file_path_to_own_models=None):
         tree_initial = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
         num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
         event_log = no_drift(tree=tree_initial, nu_traces=num_traces)
-        tree_list = [tree_initial]
 
 
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
@@ -59,7 +58,6 @@ def generate_logs(file_path_to_own_models=None):
             drift_instance.set_drift_type(drift_type)
             drift_instance.add_process_tree(tree_initial)
 
-            tree_previous = copy.deepcopy(tree_list[-1])
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
             if drift_type == DriftTypes.sudden.value:
                 event_log, drift_instance = add_sudden_change(event_log, drift_instance, par)
@@ -68,11 +66,8 @@ def generate_logs(file_path_to_own_models=None):
             elif drift_type == DriftTypes.recurring.value:
                 event_log, drift_instance = add_recurring_drift(event_log, drift_instance, par)
             elif drift_type == DriftTypes.incremental.value:
-                # TODO: update the incremental drift to be similar to the sudden and gradual
                 event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
             else:
-                event_log = no_drift(tree=tree_previous, nu_traces=num_traces)
-                added_acs, deleted_acs, moved_acs = [], [], []
                 drift_type = None
 
             # ADD TIME PERSPECTIVE TO EVENT LOG
