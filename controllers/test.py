@@ -1,5 +1,5 @@
 from controllers.drift_info_collection import DriftInfo
-from controllers.drift_info_collection import NoiseInfo
+from controllers.noise_info import NoiseInfo
 from controllers.drift_info_collection import LogDriftInfo
 from dataclasses import dataclass
 
