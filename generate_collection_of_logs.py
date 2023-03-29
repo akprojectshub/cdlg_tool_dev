@@ -1,4 +1,3 @@
-import copy
 import datetime
 import os
 import sys
@@ -7,9 +6,8 @@ import ast
 from datetime import datetime
 from controllers import configurations as config
 from concept_drifts.drift_types import add_recurring_drift, add_incremental_drift
-from concept_drifts.without_drift import no_drift
 from controllers.event_log_controller import add_duration_to_log
-from controllers.drift_info_collection import DriftInfo, extract_change_moments_to_list
+from controllers.drift_info_collection import DriftInfo, NoiseInfo
 from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
@@ -17,7 +15,7 @@ from controllers.input_parameters import InputParameters
 from concept_drifts.change_types import add_sudden_change, add_gradual_change
 import time
 from pm4py.objects.process_tree import semantics
-
+from controllers.noise_controller_new import insert_noise
 from controllers.utilities import select_random, InfoTypes, DriftTypes
 
 
@@ -80,16 +78,13 @@ def generate_logs(file_path_to_own_models=None):
         # collection.convert_change_trace_index_into_timestamp(event_log)
         event_log = collection.add_drift_info_to_log(event_log, log_name)
 
-        # event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
-        # TODO: add noise info to log and to collection
-        # # ADD NOISE and CREATE NOISE INFO INSTANCE
-        # noise = select_random(par.Noise, option='random')
-        # if noise:
-        #     event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
-        #     noise_instance = NoiseInfo(log_name, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
-        #     collection.add_noise(noise_instance)
-        #     event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
-        #
+        # ADD NOISE and CREATE NOISE INFO INSTANCE
+        noise = select_random(par.Noise, option='random')
+        if noise:
+            event_log = insert_noise(event_log, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
+            noise_instance = NoiseInfo(log_name, par.Noisy_trace_prob[0], par.Noisy_event_prob[0])
+            collection.add_noise(noise_instance)
+            event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
 
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
