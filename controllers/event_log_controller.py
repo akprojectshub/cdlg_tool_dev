@@ -109,6 +109,7 @@ def add_duration_to_log(log, log_start_timestamp: datetime.datetime(2023, 1, 1, 
 
 
 
+
 def add_duration_to_log_old(log, datestamp, min_duration, max_duration):
     """ Adding duration to the activities in the event log
 
