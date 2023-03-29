@@ -16,6 +16,7 @@ from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from controllers.input_parameters import InputParameters
 from concept_drifts.change_types import add_sudden_change, add_gradual_change
 import time
+from pm4py.objects.process_tree import semantics
 
 from controllers.utilities import select_random, InfoTypes, DriftTypes
 
@@ -44,20 +45,17 @@ def generate_logs(file_path_to_own_models=None):
         log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
         tree_initial = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
         num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
-        event_log = no_drift(tree=tree_initial, nu_traces=num_traces)
-
+        event_log = semantics.generate_log(tree_initial, num_traces)
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
         for drift_id in range(1, drift_n + 1):
-            drift_type = select_random(par.Drift_types, option='random')
             # Set drift info instance
             drift_instance = DriftInfo()
             drift_instance.set_log_id(log_name)
             drift_instance.set_drift_id(drift_id)
             drift_instance.set_process_perspective('control-flow')
-
+            drift_type = select_random(par.Drift_types, option='random')
             drift_instance.set_drift_type(drift_type)
             drift_instance.add_process_tree(tree_initial)
-
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
             if drift_type == DriftTypes.sudden.value:
                 event_log, drift_instance = add_sudden_change(event_log, drift_instance, par)
@@ -68,8 +66,9 @@ def generate_logs(file_path_to_own_models=None):
             elif drift_type == DriftTypes.incremental.value:
                 event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
             else:
-                drift_type = None
+                UserWarning('Specified "drift_type" in the parameter file does not exist')
 
+            drift_instance.convert_change_trace_index_into_timestamp(event_log)
             collection.add_drift(drift_instance)
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
@@ -78,10 +77,10 @@ def generate_logs(file_path_to_own_models=None):
                             select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
                             select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
-        collection.convert_change_trace_index_into_timestamp(event_log)
+        # collection.convert_change_trace_index_into_timestamp(event_log)
         event_log = collection.add_drift_info_to_log(event_log, log_name)
 
-        #event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
+        # event_log.attributes[InfoTypes.drift_info.value] = drift_instance.drift_info_to_dict()
         # TODO: add noise info to log and to collection
         # # ADD NOISE and CREATE NOISE INFO INSTANCE
         # noise = select_random(par.Noise, option='random')
