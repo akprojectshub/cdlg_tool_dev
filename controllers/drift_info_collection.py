@@ -262,6 +262,8 @@ class LogDriftInfo:
                 else:
                     dict_nested[drift.log_id, drift.drift_id, attr_key] = {'1': attr_value}
 
+        print()
+
         flat_file = []
         for key, values in dict_nested.items():
             for k, v in values.items():
@@ -319,7 +321,6 @@ class LogDriftInfo:
         event_log.attributes[InfoTypes.drift_info.value] = output_dict_all_drifts
 
         return event_log
-
 
 
 def extract_change_moments_to_dict(created_log):

@@ -42,12 +42,6 @@ def add_recurring_drift(event_log, drift_instance, par):
             num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
             log_2 = semantics.generate_log(tree_ev, num_traces)
             event_log = combine_two_logs(event_log, log_2)
-        print(f"log length: {len(event_log)}, change_trace_index: {change_trace_index}")
-
-    if change_trace_index > len(event_log):
-        print(drift_instance)
-        print(vars(drift_instance))
-        print('---'*80)
 
     return event_log, drift_instance
 
@@ -82,12 +76,7 @@ def add_incremental_drift(event_log, drift_instance, par):
         log_add = semantics.generate_log(tree_ev, num_traces)
         event_log = combine_two_logs(event_log, log_add)
         tree_previous = deepcopy(tree_ev)
-        print(f"log length: {len(event_log)}, change_trace_index: {change_trace_index}")
 
-    if change_trace_index > len(event_log):
-        print(drift_instance)
-        print(vars(drift_instance))
-        print('---'*80)
     return event_log, drift_instance
 
 

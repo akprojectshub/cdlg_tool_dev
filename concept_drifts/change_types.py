@@ -1,11 +1,9 @@
-from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from controllers.input_controller import input_percentage, input_int, input_end
 import math
 from controllers.utilities import select_random, ChangeTypes
 from controllers.control_flow_controller import evolve_tree_randomly
-from pm4py import play_out
-from pm4py.algo.simulation.playout.process_tree.variants.topbottom import Parameters
+from controllers.input_controller import input_percentage, input_int, input_end
+from controllers.event_log_controller import *
 
 
 def add_sudden_change(log, drift_instance, paremeters):
@@ -19,7 +17,6 @@ def add_sudden_change(log, drift_instance, paremeters):
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
-    #log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
     log_two = semantics.generate_log(tree_new, num_traces)
     log_extended = combine_two_logs(log, log_two)
 
@@ -53,10 +50,8 @@ def add_gradual_change(event_log, drift_instance, paremeters):
     tree_previous = drift_instance.get_previous_process_tree()
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
-    #log_two = play_out(tree_new, parameters={Parameters.NO_TRACES: num_traces})
     log_two = semantics.generate_log(tree_new, num_traces)
     num_traces_gradual_phase = select_random(paremeters.Number_traces_for_gradual_change, option='uniform_int')
-    # TODO: keep track of all trace ids
     log_transition = distribute_traces(tree_previous, tree_new, gradual_type, num_traces_gradual_phase)
     log_with_transition = combine_two_logs(event_log, log_transition)
     log_extended = combine_two_logs(log_with_transition, log_two)
@@ -265,7 +260,25 @@ def get_rest_parameter(nu_traces, distribute_type):
     rounds = []
     nu_drift_model_one = int(round((nu_traces / 2) + 0.0001))
     nu_drift_model_two = nu_traces - nu_drift_model_one
-    if distribute_type.strip() == 'linear':
+
+    if distribute_type.strip() == 'exponential':
+        b = 0.5
+        while b <= 0.8:
+            hel = 0
+            rest_one = 1
+            rest_two = 1
+            round_l = 0
+            while hel + int(round(math.exp((round_l + 1) * b) + 0.0001)) <= nu_drift_model_one:
+                round_l = round_l + 1
+                hel = hel + int(round(math.exp(round_l * b) + 0.0001))
+                rest_one = nu_drift_model_one - hel
+                rest_two = nu_drift_model_two - hel
+            b = b + 0.1
+            rests_one.append(rest_one)
+            rests_two.append(rest_two)
+            rounds.append(round_l)
+    else:
+        # linear distribution type
         b = 2
         while b < 6:
             hel = 0
@@ -284,21 +297,7 @@ def get_rest_parameter(nu_traces, distribute_type):
         return int(round(rests_one[numpy.argmin(rests_one)] + 0.0001)), int(
             round(rests_two[numpy.argmin(rests_one)] + 0.0001)), rounds[numpy.argmin(rests_one)], numpy.argmin(
             rests_one) + 2
-    else:
-        b = 0.5
-        while b <= 0.8:
-            hel = 0
-            rest_one = 1
-            rest_two = 1
-            round_l = 0
-            while hel + int(round(math.exp((round_l + 1) * b) + 0.0001)) <= nu_drift_model_one:
-                round_l = round_l + 1
-                hel = hel + int(round(math.exp(round_l * b) + 0.0001))
-                rest_one = nu_drift_model_one - hel
-                rest_two = nu_drift_model_two - hel
-            b = b + 0.1
-            rests_one.append(rest_one)
-            rests_two.append(rest_two)
-            rounds.append(round_l)
+
+
     return rests_one[numpy.argmin(rests_one)], rests_two[numpy.argmin(rests_one)], rounds[numpy.argmin(rests_one)], (
                 numpy.argmin(rests_one) * 0.1) + 0.5
