@@ -18,46 +18,38 @@ from controllers.utilities import select_random, ChangeTypes
 def add_recurring_drift(event_log, drift_instance, par):
 
     tree_previous = drift_instance.get_previous_process_tree()
-    number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
-    # TODO: make this parameter controllable by a user through the parameter file
-    num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
-    num_trace_per_sublog = randint(int(num_traces*0.5), num_traces)
-    #num_trace_per_sublog = int(round(nu_traces / number_of_seasonal_changes, -1))
     ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
     tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
-
     drift_instance.add_process_tree(tree_ev)
 
-    log_2 = semantics.generate_log(tree_ev, num_trace_per_sublog)
-    log_1 = semantics.generate_log(tree_previous, num_trace_per_sublog)
-    #log_2 = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
-    #log_1 = play_out(tree_previous, parameters={Parameters.NO_TRACES: num_trace_per_sublog})
-
-    event_log_with_added_recurring_drift = combine_two_logs(event_log, log_2)
-    change_trace_index = len(event_log) + 1
-    drift_instance.add_change_info(change_trace_index,
-                                   ChangeTypes.sudden.value,
-                                   tree_previous, tree_ev,
-                                   deleted_acs, added_acs, moved_acs)
-
-
-    for i in range(2, number_of_seasonal_changes + 1):
+    number_of_seasonal_changes = select_random(par.Recurring_drift_number, option='random')
+    for i in range(1, number_of_seasonal_changes + 1):
         if i % 2 == 0:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_added_recurring_drift, log_1)
-            change_trace_index = len(event_log_with_added_recurring_drift) + 1
+            change_trace_index = len(event_log) + 1
             drift_instance.add_change_info(change_trace_index,
                                            ChangeTypes.sudden.value,
                                            tree_ev, tree_previous,
                                            added_acs, deleted_acs, moved_acs)
+            num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
+            log_1 = semantics.generate_log(tree_previous, num_traces)
+            event_log = combine_two_logs(event_log, log_1)
         else:
-            event_log_with_recurring_drift = combine_two_logs(event_log_with_added_recurring_drift, log_2)
-            change_trace_index = len(event_log_with_added_recurring_drift) + 1
+            change_trace_index = len(event_log) + 1
             drift_instance.add_change_info(change_trace_index,
                                            ChangeTypes.sudden.value,
                                            tree_previous, tree_ev,
                                            deleted_acs, added_acs, moved_acs)
+            num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
+            log_2 = semantics.generate_log(tree_ev, num_traces)
+            event_log = combine_two_logs(event_log, log_2)
+        print(f"log length: {len(event_log)}, change_trace_index: {change_trace_index}")
 
-    return event_log_with_recurring_drift, drift_instance
+    if change_trace_index > len(event_log):
+        print(drift_instance)
+        print(vars(drift_instance))
+        print('---'*80)
+
+    return event_log, drift_instance
 
 
 
@@ -76,24 +68,26 @@ def add_incremental_drift(event_log, drift_instance, par):
     """
     tree_previous = drift_instance.get_previous_process_tree()
     num_models = select_random(par.Incremental_drift_number, option='random')
-    tree_ev = deepcopy(tree_previous)
     for i in range(1, num_models+1):
         num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
         ran_evolve = select_random([0.05, 0.2], option='uniform')
         # ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
-        tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_ev, ran_evolve)
-        #log_add = play_out(tree_ev, parameters={Parameters.NO_TRACES: num_traces})
-        log_add = semantics.generate_log(tree_ev, num_traces)
-
+        tree_ev, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
         drift_instance.add_process_tree(tree_ev)
         change_trace_index = len(event_log) + 1
         drift_instance.add_change_info(change_trace_index,
                                        ChangeTypes.sudden.value,
                                        tree_previous, tree_ev,
                                        deleted_acs, added_acs, moved_acs)
+        log_add = semantics.generate_log(tree_ev, num_traces)
         event_log = combine_two_logs(event_log, log_add)
         tree_previous = deepcopy(tree_ev)
+        print(f"log length: {len(event_log)}, change_trace_index: {change_trace_index}")
 
+    if change_trace_index > len(event_log):
+        print(drift_instance)
+        print(vars(drift_instance))
+        print('---'*80)
     return event_log, drift_instance
 
 
