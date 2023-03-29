@@ -1,25 +1,21 @@
-from dataclasses import dataclass, fields, field
-import datetime
-import glob, os
-import pandas as pd
+from dataclasses import dataclass, field
+import os
 import numpy as np
 import pandas as pd
 import pm4py
 from collections import defaultdict
 from copy import deepcopy
+
+from controllers.noise_info import NoiseInfo
 from controllers.utilities import InfoTypes
 
 
 @dataclass
 class DriftInfo:
-    log_id: str = str
+    log_id: str = None
     drift_id: int = np.NAN
-    process_perspective: str = 'none'
-    drift_type: str = 'none'
-    drift_time: list = list
-    activities_added: list = list
-    activities_deleted: list = list
-    activities_moved: list = list
+    process_perspective: str = None
+    drift_type: str = None
     process_trees: dict = field(default_factory=lambda: defaultdict(dict))
     change_info: dict = field(default_factory=lambda: defaultdict(dict))
 
@@ -31,12 +27,12 @@ class DriftInfo:
         self.drift_id = drift_id
         return None
 
-    def set_drift_type(self, drift_type):
-        self.drift_type = drift_type
-        return None
-
     def set_process_perspective(self, process_perspective):
         self.process_perspective = process_perspective
+        return None
+
+    def set_drift_type(self, drift_type):
+        self.drift_type = drift_type
         return None
 
     def add_process_tree(self, process_tree):
@@ -70,8 +66,6 @@ class DriftInfo:
                         change_info_new[change_id]['change_end'] = event_log[attr_value][0]['time:timestamp']
                     else:
                         Warning("Something is wrong!")
-                #if change_attr == 'change_trace_index':
-                #    change_info_new[change_id]['change_moment'] = event_log[attr_value][0]['time:timestamp']
         self.change_info = change_info_new
         return None
 
@@ -79,93 +73,6 @@ class DriftInfo:
         max_process_tree_id = str(max([int(key) for key in self.process_trees.keys()]))
         previous_process_tree = deepcopy(self.process_trees[max_process_tree_id])
         return previous_process_tree
-
-
-def drift_info_to_dict(self):
-    DI = vars(self)
-    keys_list = list(DI.keys())
-    values_list = list(DI.values())
-    # TODO@Zied: please do not use methods starting with _ or __
-    type_list = [type(i).__name__ for i in DI.values()]
-    d = dict()
-    d["value"] = True  ## By default need to add this as a parameter
-
-    d_final = {"value": True, "children": {}}
-
-    for i in range(0, len(type_list)):
-        if type_list[i] == 'list':
-            d[keys_list[i]] = {keys_list[i] + "_" + str(j + 1): values_list[i][j] for j in
-                               range(0, len(values_list[i]))}
-            d_final["children"][keys_list[i]] = {"value": values_list[i], "children": d[keys_list[i]]}
-
-        elif type_list[i] != 'list':
-            d[keys_list[i]] = values_list[i]
-            d_final["children"][keys_list[i]] = values_list[i]
-
-    return d_final
-
-
-@staticmethod
-def extract_info_xes(log):
-    d = dict()
-    xes = log.attributes["drift:info"]["children"]
-
-    for key, value in xes.items():
-        if value == 0 and key != "drift_id":
-            d[key] = []
-        # TODO@Zied: please do not use methods starting with _ or __
-        elif (type(value).__name__ != 'dict'):
-            d[key] = value
-        else:
-            d[key] = list(value["children"].values())
-    return d
-
-
-@dataclass
-class NoiseInfo:
-    """
-        Object for keeping information about added noise to a generated event log
-    """
-    log_id: str = str
-    noisy_trace_prob: float = np.NAN
-    noisy_event_prob: float = np.NAN
-
-    def noise_info_to_dict(self):
-        NI = vars(self)
-        keys_list = list(NI.keys())
-        values_list = list(NI.values())
-        # TODO@Zied: please do not use methods starting with _ or __
-        type_list = [type(i).__name__ for i in NI.values()]
-        d = dict()
-        d["value"] = True  ## By default need to add this as a parameter
-
-        d_final = {"value": True, "children": {}}
-
-        for i in range(0, len(type_list)):
-            if type_list[i] == 'list':
-                d[keys_list[i]] = {keys_list[i] + "_" + str(j): values_list[i][j] for j in
-                                   range(0, len(values_list[i]))}
-                d_final["children"][keys_list[i]] = {"value": len(values_list[i]), "children": d[keys_list[i]]}
-
-            elif type_list[i] != 'list':
-                d[keys_list[i]] = values_list[i]
-                d_final["children"][keys_list[i]] = values_list[i]
-        return d_final
-
-    @staticmethod
-    def extract_info_xes(log):
-        d = dict()
-        xes = log.attributes["noise:info"]["children"]
-
-        for key, value in xes.items():
-            if value == 0 and key != "drift_id":
-                d[key] = []
-            # TODO@Zied: please do not use methods starting with _ or __
-            elif (type(value).__name__ != 'dict'):
-                d[key] = value
-            else:
-                d[key] = list(value["children"].values())
-        return d
 
 
 @dataclass
@@ -247,7 +154,7 @@ class LogDriftInfo:
         return None
 
 
-    def _temp_save_drift_info_to_csv_file(self, path):
+    def export_drfit_and_noise_info_to_flat_file_csv(self, path):
         # TODO: this is a temporal function that needs to be revised and checked
         dict_nested = dict()
         for drift in self.drifts:
@@ -262,7 +169,14 @@ class LogDriftInfo:
                 else:
                     dict_nested[drift.log_id, drift.drift_id, attr_key] = {'1': attr_value}
 
-        print()
+            # Add noise info
+            noise_info_rel = [noise_instance for noise_instance in self.noise if noise_instance.log_id == drift.log_id]
+            for index, noise_instance in enumerate(noise_info_rel):
+                count = 1
+                for attr, value in vars(noise_instance).items():
+                    if attr != 'log_id':
+                        dict_nested[drift.log_id, 'noise', count] = {attr: value}
+                        count += 1
 
         flat_file = []
         for key, values in dict_nested.items():
@@ -321,31 +235,3 @@ class LogDriftInfo:
         event_log.attributes[InfoTypes.drift_info.value] = output_dict_all_drifts
 
         return event_log
-
-
-def extract_change_moments_to_dict(created_log):
-    change_moments = {}
-    current_model_version = created_log[0].attributes['model:version']
-    change_id = 0
-    for trace in created_log:
-        change_moment = trace[0]['time:timestamp']
-        version = trace.attributes['model:version']
-        if version != current_model_version:
-            change_id += 1
-            change_moments['change_' + str(change_id)] = change_moment  # .strftime("%Y-%m-%d, %H:%M:%S")
-            current_model_version = version
-    return {"value": "timestamps", "children": change_moments}
-
-
-def extract_change_moments_to_list(created_log):
-    change_moments = []
-    current_model_version = created_log[0].attributes['model:version']
-    change_id = 0
-    for trace in created_log:
-        change_moment = trace[0]['time:timestamp']
-        version = trace.attributes['model:version']
-        if version != current_model_version:
-            change_id += 1
-            change_moments.append(change_moment)  # .strftime("%Y-%m-%d, %H:%M:%S"))
-            current_model_version = version
-    return change_moments
