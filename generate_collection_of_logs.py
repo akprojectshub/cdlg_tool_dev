@@ -7,7 +7,8 @@ from datetime import datetime
 from controllers import configurations as config
 from concept_drifts.drift_types import add_recurring_drift, add_incremental_drift
 from controllers.event_log_controller import add_duration_to_log
-from controllers.drift_info_collection import DriftInfo, NoiseInfo
+from controllers.drift_info_collection import DriftInfo
+from controllers.noise_info import NoiseInfo
 from controllers.drift_info_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
@@ -89,7 +90,7 @@ def generate_logs(file_path_to_own_models=None):
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
 
-    collection._temp_save_drift_info_to_csv_file(path=out_folder)
+    collection.export_drfit_and_noise_info_to_flat_file_csv(path=out_folder)
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
 
 
