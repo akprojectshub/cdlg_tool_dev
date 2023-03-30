@@ -9,6 +9,7 @@ class InputParameters:
     Number_event_logs: list
     Number_traces_per_process_model_version: list
     Number_traces_for_gradual_change: list
+    Change_type: list
     Drift_types: list
     Number_drifts_per_log: list
     Noise: list

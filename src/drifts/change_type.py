@@ -1,68 +1,85 @@
-from random import random
-from src.utilities import TraceAttributes, select_random
-from src import configurations as config
+from src.utilities import TraceAttributes, select_random, ChangeTypes
 from pm4py.objects.process_tree import semantics
 import math
 import numpy
 import random
 from pm4py.objects.log.obj import EventLog
+from random import randint
 from copy import deepcopy
+from controllers.process_tree_controller import randomize_tree_one, randomize_tree_two,\
+    randomize_tree_three, randomize_tree_more, count_real_acs
+import src.configurations as config
 
 
+def combine_two_logs_with_certain_change_type(event_log, drift_instance, par, axillary: list = []):
 
-def combine_two_logs_with_certain_change_type(log_1: EventLog, log_2: EventLog, paremeters):
-
-    random_int = random()
-    if random_int > config.CHANGE_TYPE_THRESHOLD:
-        combined_log = combine_two_logs_sudden(log_1, log_2)
+    if axillary:
+        tree_previous, tree_new, deleted_acs, added_acs, moved_acs = axillary
     else:
-        gradual_type = select_random(paremeters.Gradual_drift_type, option='random')
-        combined_log = combine_two_logs_gradual(log_1, log_2, gradual_type)
+        # Get settings for the next process tree and change type
+        tree_previous = drift_instance.get_previous_process_tree()
+        ran_evolve = select_random(config.INCREMENTAL_EVOLUTION_SCOPE, option='uniform')
+        tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
 
-    return combined_log
+    change_type = select_random(par.Change_type, option='random')
+    if change_type == ChangeTypes.sudden.value:
+        combined_log = combine_two_logs_sudden(event_log, tree_new, par)
+        change_trace_index = [len(event_log) + 1]
+    else:
+        combined_log, help = combine_two_logs_gradual(event_log, tree_previous, tree_new, par)
+        change_trace_index = [len(event_log) + 1, help]
+
+    drift_instance.add_change_info(change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs)
+
+    combined_log = update_trace_ids(combined_log)
+
+    return combined_log, drift_instance
 
 
-def combine_two_logs_sudden(log_1: EventLog, log_2: EventLog):
+
+def add_log2_to_log1(log_1, log_2):
+
+    log_combined = deepcopy(log_1)
+    log_two = deepcopy(log_2)
+    for trace in log_two:
+        log_combined.append(trace)
+    return log_combined
+
+
+def combine_two_logs_sudden(event_log, tree_new, parameters):
     """ Merging of two event logs
 
     :param log_one: first event log
     :param log_two: second event log
     :return: combined event log
     """
-    log_one = deepcopy(log_1)
-    log_two = deepcopy(log_2)
-    log_combined = EventLog()
 
-
-    last_model_version = 0
-    for trace in log_one:
-        try:
-            last_model_version = trace.attributes[TraceAttributes.model_version.value]
-        except:
-            trace.attributes[TraceAttributes.model_version.value] = last_model_version
-        log_combined.append(trace)
-
-    for trace in log_two:
-        trace.attributes[TraceAttributes.model_version.value] = last_model_version + 1
-        log_combined.append(trace)
-
-    log_combined = update_trace_ids(log_combined)
+    num_traces = select_random(parameters.Number_traces_per_process_model_version, option='uniform_int')
+    log_two = semantics.generate_log(tree_new, num_traces)
+    log_combined = add_log2_to_log1(event_log, log_two)
 
     return log_combined
 
-def combine_two_logs_gradual(log_1: EventLog, log_2: EventLog, option: str = 'linear'):
-    pass
+
+def combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters):
 
     # TODO: write a function that detects the latest id in the log
     # TODO: write a function that assigns an id to all traces in a given event log
     # TODO: use distribute_traces to create
 
+
+    # Generate transition phase
+    num_traces_gradual_phase = select_random(parameters.Number_traces_for_gradual_change, option='uniform_int')
+    gradual_type = select_random(parameters.Gradual_drift_type, option='random')
     log_transition = distribute_traces(tree_previous, tree_new, gradual_type, num_traces_gradual_phase)
+    # Generate added log
+    num_traces = select_random(parameters.Number_traces_per_process_model_version, option='uniform_int')
+    log_two = semantics.generate_log(tree_new, num_traces)
+    # Combine inital log, transition, and log_two
+    log_with_transition = add_log2_to_log1(event_log, log_transition)
+    log_extended = add_log2_to_log1(log_with_transition, log_two)
 
-
-    log_1
-    log_2
-    return None
+    return log_extended, len(log_with_transition)+1
 
 
 def update_trace_ids(log):
@@ -184,3 +201,83 @@ def get_rest_parameter(nu_traces, distribute_type):
 
     return rests_one[numpy.argmin(rests_one)], rests_two[numpy.argmin(rests_one)], rounds[numpy.argmin(rests_one)], (
                 numpy.argmin(rests_one) * 0.1) + 0.5
+
+
+def evolve_tree_randomly(previous_process_tree, evolution_stage):
+    """ Random change of the process tree
+
+    :param new_process_tree: tree to be changed
+    :param evolution_stage: percentage of activities to be affected by the change
+    :return: randomly evolved process tree version
+    """
+    new_process_tree = deepcopy(previous_process_tree)
+    acs = count_real_acs(new_process_tree._get_leaves())
+    changed_acs = []
+    added_acs = []
+    deleted_acs = []
+    moved_acs = []
+    rounds = int(round(acs * evolution_stage + 0.001))
+    if rounds == 0:
+        rounds = int(numpy.ceil(acs * evolution_stage))
+    i = 0
+    count = 1
+    happen = ""
+    while i < rounds:
+        happen_be = ""
+        ran = randint(1, rounds - i)
+        if i == 1:
+            ran = randint(1, rounds - i)
+        if ran == 1:
+            happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
+            while not worked:
+                happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
+        elif ran == 2:
+            happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
+            while not worked:
+                happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
+        elif ran == 3:
+            happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
+            while not worked:
+                ran = randint(1, rounds - i)
+                if ran == 1:
+                    ran = randint(1, rounds - i)
+                if ran == 1:
+                    happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
+                elif ran == 2:
+                    happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
+                else:
+                    happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
+        else:
+            happen_be, worked, count = randomize_tree_more(new_process_tree, happen_be, ran, changed_acs, count)
+            while not worked:
+                ran = randint(1, rounds - i)
+                if ran == 1:
+                    ran = randint(1, rounds - i)
+                if ran == 1:
+                    happen_be, worked, count = randomize_tree_one(new_process_tree, happen_be, changed_acs, count)
+                elif ran == 2:
+                    happen_be, worked, count = randomize_tree_two(new_process_tree, happen_be, changed_acs, count)
+                elif ran == 3:
+                    happen_be, worked, count = randomize_tree_three(new_process_tree, happen_be, ran, changed_acs, count)
+                else:
+                    happen_be, worked, count = randomize_tree_more(new_process_tree, happen_be, ran, changed_acs, count)
+        happen_spl = happen_be.split(";")
+        last = len(happen_spl)
+        happen = happen + happen_spl[last - 2] + "; "
+        i = i + ran
+        happen_ac = happen.split(';')
+        if happen_ac[len(happen_ac)-2].strip() == "activity replaced":
+            deleted_acs.append(changed_acs[len(changed_acs)-2])
+            added_acs.append(changed_acs[len(changed_acs)-1])
+        elif happen_ac[len(happen_ac)-2].strip() == "activity deleted":
+            deleted_acs.append(changed_acs[len(changed_acs)-1])
+        elif happen_ac[len(happen_ac)-2].strip() == "tree fragment deleted":
+            deleted_acs.extend(changed_acs[len(changed_acs)-ran:len(changed_acs)])
+        elif happen_ac[len(happen_ac)-2].strip() == "activity added":
+            added_acs.append(changed_acs[len(changed_acs)-1])
+        elif happen_ac[len(happen_ac)-2].strip() == "activity and operator added":
+            added_acs.append(changed_acs[len(changed_acs)-1])
+            moved_acs.extend(changed_acs[len(changed_acs)-ran:len(changed_acs)-1])
+        else:
+            moved_acs.extend(changed_acs[len(changed_acs)-ran:len(changed_acs)])
+    return new_process_tree, deleted_acs, added_acs, moved_acs

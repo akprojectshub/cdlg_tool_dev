@@ -14,7 +14,6 @@ DEFAULT_LOG_COLLECTION_OUTPUT_DIR = os.path.join('data/generated_collections')
 PAR_LOG_COLLECTION = 'parameters_log_collection'
 
 
-###################################################################
-# Change type threshold value for sudden and gradual changes
-###################################################################
-CHANGE_TYPE_THRESHOLD = 0.5
+
+# Incremental evolution parameters
+INCREMENTAL_EVOLUTION_SCOPE = [0.05, 0.15]

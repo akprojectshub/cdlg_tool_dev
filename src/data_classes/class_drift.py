@@ -34,8 +34,11 @@ class DriftInfo:
         self.process_trees[process_tree_id] = deepcopy(process_tree)
         return None
 
-    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs,
-                        moved_acs):
+
+
+    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs):
+
+        self.add_process_tree(tree_new)
         change_id = str(len(self.change_info)+1)
         self.change_info[change_id] = {'change_type': change_type,
                                        'change_trace_index': change_trace_index,

@@ -1,3 +1,4 @@
+import random
 from enum import Enum
 from random import uniform, randint
 
@@ -10,7 +11,8 @@ def select_random(data: list, option: str = 'random') -> any:
     elif len(data) == 2 and option == 'uniform_int':
         data_selected = randint(data[0], data[1])
     elif option == 'random':
-        data_selected = data[randint(0, len(data) - 1)]
+        #data_selected = data[randint(0, len(data) - 1)]
+        data_selected = random.choice(data)
     else:
         data_selected = None
         Warning(f"Check function 'select_random' call: {data, option, data_selected}")
