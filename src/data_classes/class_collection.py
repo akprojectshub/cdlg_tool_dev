@@ -89,19 +89,20 @@ class Collection:
         return None
 
 
-    def export_drfit_and_noise_info_to_flat_file_csv(self, path):
+    def export_drift_and_noise_info_to_flat_file_csv(self, path):
         # TODO: this is a temporal function that needs to be revised and checked
         dict_nested = dict()
         for drift in self.drifts:
             for attr_key, attr_value in vars(drift).items():
                 drift_label = 'drift_' + str(drift.drift_id)
                 if isinstance(attr_value, dict):
+                    count = 1
                     for attr, value in attr_value.items():
                         if isinstance(value, dict):
-                            for a, v in value.items():
-                                dict_nested[drift.log_id, drift_label, attr_key] = value
+                            dict_nested[drift.log_id, drift_label, attr_key + '_' + str(count)] = value
                         else:
-                            dict_nested[drift.log_id, drift_label, attr_key] = {attr: value}
+                            dict_nested[drift.log_id, drift_label, attr_key+ '_' + str(count)] = {attr: value}
+                        count += 1
                 else:
                     dict_nested[drift.log_id, drift_label, attr_key] = {'1': attr_value}
 

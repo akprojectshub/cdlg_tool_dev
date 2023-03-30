@@ -72,10 +72,6 @@ def generate_logs(file_path_to_own_models=None):
         # ADD TIME PERSPECTIVE TO EVENT LOG
         add_duration_to_log(event_log, par)
 
-        collection.convert_change_trace_index_into_timestamp(event_log, log_name)
-        # collection.convert_change_trace_index_into_timestamp(event_log)
-        event_log = collection.add_drift_info_to_log(event_log, log_name)
-
         # ADD NOISE and CREATE NOISE INFO INSTANCE
         noise = select_random(par.Noise, option='random')
         if noise:
@@ -86,10 +82,13 @@ def generate_logs(file_path_to_own_models=None):
             collection.add_noise(noise_instance)
             event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
 
+        collection.convert_change_trace_index_into_timestamp(event_log, log_name)
+        event_log = collection.add_drift_info_to_log(event_log, log_name)
+
         # EXPORT GENERATED LOG
         xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
 
-    collection.export_drfit_and_noise_info_to_flat_file_csv(path=out_folder)
+    collection.export_drift_and_noise_info_to_flat_file_csv(path=out_folder)
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
 
 
