@@ -61,36 +61,10 @@ class Collection:
                     loaded_event_logs[filename] = os.sep.join([dir_path])
         return loaded_event_logs
 
-
-    def _old_temp_save_drift_info_to_csv_file(self, path):
-        # TODO: this is a temporal function that needs to be revised and checked
-        dict_nested = dict()
-        for drift in self.drifts:
-            for attr, value in vars(drift).items():
-                if attr != 'log_id' and attr != 'drift_id':
-                    if isinstance(value, list):
-                        temp_dict = {}
-                        for i, v in enumerate(value):
-                            temp_dict[str(i + 1)] = v
-                        dict_nested[drift.log_id, drift.drift_id, attr] = temp_dict
-                    else:
-                        dict_nested[drift.log_id, drift.drift_id, attr] = {'1': value}
-
-        flat_file = []
-        for key, values in dict_nested.items():
-            for k, v in values.items():
-                data = list(key)
-                data.extend([k, v])
-                flat_file.append(data)
-
-        df = pd.DataFrame(flat_file, columns=['log_name', 'drift_id', 'attribute', 'attribute_value', 'value'])
-        df.to_csv(f"{path}/aggregated_drift_info.csv", index=False)
-
         return None
 
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
-        # TODO: this is a temporal function that needs to be revised and checked
         dict_nested = dict()
         for drift in self.drifts:
             for attr_key, attr_value in vars(drift).items():

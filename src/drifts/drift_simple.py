@@ -81,7 +81,6 @@ def add_gradual_change(event_log, drift_instance, paremeters):
 
     gradual_type = select_random(paremeters.Gradual_drift_type, option='random')
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
-    # TODO: each trace should be associated with a process tree id. Then, previous tree is based on the last trace
     tree_previous = drift_instance.get_previous_process_tree()
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')

@@ -1,7 +1,6 @@
 import datetime
 import os
 import sys
-from random import uniform
 import ast
 from datetime import datetime
 from src import configurations as config
@@ -29,6 +28,7 @@ def generate_logs(file_path_to_own_models=None):
     out_folder = creat_output_folder(config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR)
 
     # READE PARAMETERS FROM A FILE
+    # TODO: integrate into the input data class
     par = get_parameters(config.PAR_LOG_COLLECTION)
 
     # MAIN LOOP
@@ -44,6 +44,7 @@ def generate_logs(file_path_to_own_models=None):
         drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
         for drift_id in range(1, drift_n + 1):
             # Set drift info instance
+            # TODO: integrate
             drift_instance = DriftInfo()
             drift_instance.set_log_id(log_name)
             drift_instance.set_drift_id(drift_id)
@@ -69,7 +70,7 @@ def generate_logs(file_path_to_own_models=None):
         add_duration_to_log(event_log, par)
 
         # ADD NOISE and CREATE NOISE INFO INSTANCE
-        # TODO: modularization and integration of the noise related lines below
+        # TODO: integrate the noise related lines below
         noise = select_random(par.Noise, option='random')
         if noise:
             noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')
@@ -111,14 +112,6 @@ def creat_output_folder(path: str = config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR):
     return out_folder
 
 
-def drift_area_selection(data: list, option: float = 0.2) -> any:
-    data_length = data[1] - data[0]
-    drift_area_one = round(uniform(data[0], (data[0] + (1 - option) * data_length)), 2)
-    drift_area_two = round(uniform(drift_area_one + data_length * option, data[1]), 2)
-
-    return drift_area_one, drift_area_two
-
-
 def create_dict_with_input_parameters(par_file_name: str):
     """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
     :return: parameters for the generation of a set of event logs
@@ -146,24 +139,6 @@ def create_dict_with_input_parameters(par_file_name: str):
             parameters_dict[par] = value
 
     return parameters_dict
-
-
-def initialize_drift_instance_from_list(input: list):
-    log_id, drift_id, perspective, drift_type, drift_time, added, deleted, moved, trees = input
-
-    drift_instance = DriftInfo()
-    if drift_type:
-        drift_instance.log_id = log_id
-        drift_instance.drift_id = drift_id
-        drift_instance.process_perspective = perspective
-        drift_instance.drift_type = drift_type
-        drift_instance.drift_time = drift_time
-        drift_instance.activities_added = added
-        drift_instance.activities_deleted = deleted
-        drift_instance.activities_moved = moved
-        drift_instance.process_trees = trees
-
-    return drift_instance
 
 
 def main():

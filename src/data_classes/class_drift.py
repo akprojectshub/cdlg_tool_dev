@@ -71,3 +71,19 @@ class DriftInfo:
         return previous_process_tree
 
 
+def initialize_drift_instance_from_list(input: list):
+    log_id, drift_id, perspective, drift_type, drift_time, added, deleted, moved, trees = input
+
+    drift_instance = DriftInfo()
+    if drift_type:
+        drift_instance.log_id = log_id
+        drift_instance.drift_id = drift_id
+        drift_instance.process_perspective = perspective
+        drift_instance.drift_type = drift_type
+        drift_instance.drift_time = drift_time
+        drift_instance.activities_added = added
+        drift_instance.activities_deleted = deleted
+        drift_instance.activities_moved = moved
+        drift_instance.process_trees = trees
+
+    return drift_instance

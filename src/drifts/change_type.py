@@ -10,7 +10,6 @@ from controllers.process_tree_controller import randomize_tree_one, randomize_tr
     randomize_tree_three, randomize_tree_more, count_real_acs
 import src.configurations as config
 
-#TODO: keep trace of each trace id, especially, during the gradual drift!!!
 
 def combine_two_logs_with_certain_change_type(event_log, drift_instance, par, axillary: list = []):
 
@@ -89,11 +88,6 @@ def combine_two_logs_sudden(event_log, tree_new, parameters):
 
 def combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters):
 
-    # TODO: write a function that detects the latest id in the log
-    # TODO: write a function that assigns an id to all traces in a given event log
-    # TODO: use distribute_traces to create
-
-
     # Generate transition phase
     num_traces_gradual_phase = select_random(parameters.Number_traces_for_gradual_change, option='uniform_int')
     gradual_type = select_random(parameters.Gradual_drift_type, option='random')
@@ -102,6 +96,7 @@ def combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters):
     num_traces = select_random(parameters.Number_traces_per_process_model_version, option='uniform_int')
     log_two = semantics.generate_log(tree_new, num_traces)
     # Combine initial log, transition, and log_two
+    # TODO: do not assign a new trace id to traces during the transition phase
     log_with_transition = add_log2_to_log1(event_log, log_transition)
     log_extended = add_log2_to_log1(log_with_transition, log_two)
 
