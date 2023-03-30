@@ -3,9 +3,10 @@ import copy
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from controllers.input_controller import input_percentage, input_no, input_no_yes, input_per_not_null, input_yes_no, input_per_half, \
+from controllers.input_controller import input_percentage, input_no, input_no_yes, input_per_not_null, input_per_half, \
     input_percentage_end
 from controllers.process_tree_controller import generate_tree
+from src.utilities import add_duration_to_log
 
 
 def add_noise_randomized_tree(log_total, tree_one):

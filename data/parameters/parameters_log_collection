@@ -9,7 +9,6 @@ Number_drifts_per_log: 2-4
 Noise: True
 Noisy_trace_prob: 0.1-0.7
 Noisy_event_prob: 0.1-0.7
-Timestamp_first_trace: 2020/08/01 08:00:00
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
 Gradual_drift_type: linear, exponential

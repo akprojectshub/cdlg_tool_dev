@@ -15,7 +15,6 @@ class InputParameters:
     Noise: list
     Noisy_trace_prob: list
     Noisy_event_prob: list
-    Timestamp_first_trace: list
     Trace_exp_arrival_sec: list
     Task_exp_duration_sec: list
     Gradual_drift_type: list
