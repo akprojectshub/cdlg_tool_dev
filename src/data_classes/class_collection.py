@@ -11,7 +11,7 @@ from src.data_classes.class_noise import NoiseInfo
 
 
 @dataclass
-class LogDriftInfo:
+class Collection:
     """
     Object for keeping information about added drift and noise instances for a generated event log
     """

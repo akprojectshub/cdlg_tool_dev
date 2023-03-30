@@ -5,15 +5,15 @@ from random import uniform
 import ast
 from datetime import datetime
 from src import configurations as config
-from src.drifts.drift_types import add_recurring_drift, add_incremental_drift
+from src.drifts.drift_complex import add_recurring_drift, add_incremental_drift
 from controllers.event_log_controller import add_duration_to_log
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
-from src.data_classes.class_collection import LogDriftInfo
+from src.data_classes.class_collection import Collection
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from src.data_classes.class_input import InputParameters
-from src.drifts.change_types import add_sudden_change, add_gradual_change
+from src.drifts.drift_simple import add_sudden_change, add_gradual_change
 import time
 from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
@@ -38,7 +38,7 @@ def generate_logs(file_path_to_own_models=None):
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
     print('Generating', number_of_logs, 'logs')
-    collection = LogDriftInfo()
+    collection = Collection()
     for log_id in range(1, number_of_logs + 1):
         # SELECT PARAMETERS FOR THE CURRENT LOG
         log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
