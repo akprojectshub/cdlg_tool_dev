@@ -82,8 +82,8 @@ def generate_logs(file_path_to_own_models=None):
         # ADD NOISE and CREATE NOISE INFO INSTANCE
         noise = select_random(par.Noise, option='random')
         if noise:
-            noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform')
-            noisy_event_prob = select_random(par.Noisy_event_prob, option='uniform')
+            noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')
+            noisy_event_prob = select_random(par.Noisy_event_prob, option='uniform_step')
             noise_instance = NoiseInfo(log_name, noisy_trace_prob, noisy_event_prob)
             event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob)
             collection.add_noise(noise_instance)
