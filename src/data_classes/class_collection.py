@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from dataclasses import dataclass
-
+from collections import defaultdict
 import pandas as pd
 import pm4py
 
@@ -101,7 +101,7 @@ class Collection:
                         if isinstance(value, dict):
                             dict_nested[drift.log_id, drift_label, attr_key + '_' + str(count)] = value
                         else:
-                            dict_nested[drift.log_id, drift_label, attr_key+ '_' + str(count)] = {attr: value}
+                            dict_nested[drift.log_id, drift_label, attr_key + '_' + str(count)] = {attr: value}
                         count += 1
                 else:
                     dict_nested[drift.log_id, drift_label, attr_key] = {'1': attr_value}
@@ -148,7 +148,6 @@ class Collection:
         return None
 
     def add_drift_info_to_log(self, event_log, log_name):
-
         output_dict_all_drifts = {'value': 'temp', 'children': {}}
         for drift in self.drifts:
             if drift.log_id == log_name:
@@ -160,10 +159,10 @@ class Collection:
                     if key in attr_for_export:
                         if isinstance(value, dict):
                             if key == 'change_info':
-                                output_dict_drift['children']['change_info'] = {'value': 'temp', 'children': {}}
+                                output_dict_drift['children']['change_info'] = {'value': len(value), 'children': {}}
                                 for k, v in value.items():
-
-                                    output_dict_drift['children']['change_info'].update({'value': k, 'children': v})
+                                    #for kk, vv in v.items():
+                                    output_dict_drift['children']['change_info']['children'].update( {'change_id_' + str(k): {'value': 'info', 'children': v}})
                         else:
                             output_dict_drift['children'].update({key: value})
 

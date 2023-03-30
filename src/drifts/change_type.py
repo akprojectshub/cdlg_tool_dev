@@ -37,8 +37,33 @@ def combine_two_logs_with_certain_change_type(event_log, drift_instance, par, ax
     return combined_log, drift_instance
 
 
+def extract_next_process_model_version(log):
+
+    try:
+        last_model_version_id = log[-1].attributes[TraceAttributes.model_version.value]
+    except:
+        last_model_version_id = 0
+
+    next_process_model_version = last_model_version_id + 1
+    return next_process_model_version
+
+
+def add_process_model_version(log, model_version):
+
+    for trace in log:
+        trace.attributes[TraceAttributes.model_version.value] = model_version
+    return log
+
+
 
 def add_log2_to_log1(log_1, log_2):
+
+    next_model_version_id = extract_next_process_model_version(log_1)
+    if next_model_version_id == 1:
+        log_1 = add_process_model_version(log_1, next_model_version_id)
+        log_2 = add_process_model_version(log_2, next_model_version_id+1)
+    else:
+        log_2 = add_process_model_version(log_2, next_model_version_id)
 
     log_combined = deepcopy(log_1)
     log_two = deepcopy(log_2)
@@ -76,7 +101,7 @@ def combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters):
     # Generate added log
     num_traces = select_random(parameters.Number_traces_per_process_model_version, option='uniform_int')
     log_two = semantics.generate_log(tree_new, num_traces)
-    # Combine inital log, transition, and log_two
+    # Combine initial log, transition, and log_two
     log_with_transition = add_log2_to_log1(event_log, log_transition)
     log_extended = add_log2_to_log1(log_with_transition, log_two)
 
