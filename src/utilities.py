@@ -9,6 +9,8 @@ def select_random(data: list, option: str = 'random') -> any:
         data_selected = uniform(data[0], data[1])
     elif len(data) == 2 and option == 'uniform_int':
         data_selected = randint(data[0], data[1])
+    elif len(data) == 2 and option == 'uniform_step':
+        data_selected = round(uniform(data[0], data[1]), 1)
     elif option == 'random':
         data_selected = data[randint(0, len(data) - 1)]
     else:
