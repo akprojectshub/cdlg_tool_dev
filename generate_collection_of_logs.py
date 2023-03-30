@@ -4,20 +4,20 @@ import sys
 from random import uniform
 import ast
 from datetime import datetime
-from controllers import configurations as config
-from concept_drifts.drift_types import add_recurring_drift, add_incremental_drift
+from src import configurations as config
+from src.drifts.drift_types import add_recurring_drift, add_incremental_drift
 from controllers.event_log_controller import add_duration_to_log
-from controllers.drift_info_collection import DriftInfo
-from controllers.noise_info import NoiseInfo
-from controllers.drift_info_collection import LogDriftInfo
+from src.data_classes.class_drift import DriftInfo
+from src.data_classes.class_noise import NoiseInfo
+from src.data_classes.class_collection import LogDriftInfo
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
-from controllers.input_parameters import InputParameters
-from concept_drifts.change_types import add_sudden_change, add_gradual_change
+from src.data_classes.class_input import InputParameters
+from src.drifts.change_types import add_sudden_change, add_gradual_change
 import time
 from pm4py.objects.process_tree import semantics
-from controllers.noise_controller_new import insert_noise
-from controllers.utilities import select_random, InfoTypes, DriftTypes
+from src.noise_controller_new import insert_noise
+from src.utilities import select_random, InfoTypes, DriftTypes
 
 
 # TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree

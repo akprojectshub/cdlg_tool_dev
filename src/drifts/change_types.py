@@ -1,6 +1,6 @@
 from pm4py.objects.process_tree import semantics
 import math
-from controllers.utilities import select_random, ChangeTypes
+from src.utilities import select_random, ChangeTypes
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.input_controller import input_percentage, input_int, input_end
 from controllers.event_log_controller import *

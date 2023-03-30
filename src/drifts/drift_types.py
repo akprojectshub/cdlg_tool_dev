@@ -1,18 +1,7 @@
-from pm4py.objects.log.obj import EventLog
-from pm4py.objects.process_tree import semantics
-from random import randint
-from controllers.event_log_controller import combine_two_logs
-import copy
-from controllers.control_flow_controller import change_tree_on_control_flow_incremental, \
-    change_tree_on_control_flow_incremental_random, evolve_tree_randomly
-from controllers.input_controller import input_int, input_ra_ch, input_int_hun, input_percentage, input_end
 from controllers.event_log_controller import *
 from pm4py.objects.process_tree import semantics
-from controllers.process_tree_controller import generate_tree, visualise_tree
-from pm4py import play_out
-from pm4py.algo.simulation.playout.process_tree.variants.topbottom import Parameters
 from controllers.control_flow_controller import evolve_tree_randomly
-from controllers.utilities import select_random, ChangeTypes
+from src.utilities import select_random, ChangeTypes
 
 
 def add_recurring_drift(event_log, drift_instance, par):
