@@ -1,9 +1,28 @@
 from pm4py.objects.process_tree import semantics
 import math
-from src.utilities import select_random, ChangeTypes
+from src.utilities import select_random, ChangeTypes, DriftTypes
 from controllers.control_flow_controller import evolve_tree_randomly
 from controllers.input_controller import input_percentage, input_int, input_end
 from controllers.event_log_controller import *
+from src.drifts.change_type import combine_two_logs_sudden, combine_two_logs_gradual
+
+def add_simple_drift(event_log, drift_instance, parameters, change_type: str):
+
+
+    tree_previous = drift_instance.get_previous_process_tree()
+    ran_evolve = select_random(parameters.Process_tree_evolution_proportion, option='uniform')
+    tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+
+    if change_type == DriftTypes.gradual.value:
+        log_extended, help = combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters)
+        change_trace_index = [len(event_log) + 1, help]
+    else:
+        log_extended = combine_two_logs_sudden(event_log, tree_new, parameters)
+        change_trace_index = [len(event_log) + 1]
+    # TODO: each trace should be associated with a process tree id. Then, previous tree is based on the last trace
+    drift_instance.add_change_info(change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs)
+
+    return log_extended, drift_instance
 
 
 def add_sudden_change(log, drift_instance, paremeters):
@@ -16,8 +35,15 @@ def add_sudden_change(log, drift_instance, paremeters):
     tree_previous = drift_instance.get_previous_process_tree()
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
+
+
+
+
     num_traces = select_random(paremeters.Number_traces_per_process_model_version, option='uniform_int')
+
     log_two = semantics.generate_log(tree_new, num_traces)
+
+    combine_two_logs_sudden()
     log_extended = combine_two_logs(log, log_two)
 
     # Update drift infos
@@ -27,6 +53,16 @@ def add_sudden_change(log, drift_instance, paremeters):
                                    ChangeTypes.sudden.value,
                                    tree_previous, tree_new,
                                    deleted_acs, added_acs, moved_acs)
+
+    # Update drift infos
+    drift_instance.add_process_tree(tree_new)
+    change_trace_index = [len(event_log) + 1, len(log_with_transition) + 1]
+    drift_instance.add_change_info(change_trace_index,
+                                   ChangeTypes.gradual.value,
+                                   tree_previous, tree_new,
+                                   deleted_acs, added_acs, moved_acs)
+
+
 
     return log_extended, drift_instance
 

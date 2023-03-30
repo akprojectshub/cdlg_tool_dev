@@ -7,13 +7,13 @@ from datetime import datetime
 from src import configurations as config
 from src.drifts.drift_complex import add_recurring_drift, add_incremental_drift
 from controllers.event_log_controller import add_duration_to_log
+from src.drifts.drift_simple import add_simple_drift
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
 from src.data_classes.class_collection import Collection
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from src.data_classes.class_input import InputParameters
-from src.drifts.drift_simple import add_sudden_change, add_gradual_change
 import time
 from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
@@ -57,9 +57,9 @@ def generate_logs(file_path_to_own_models=None):
             drift_instance.add_process_tree(tree_initial)
             # GENERATE LOG WITH A CERTAIN DRIFT TYPE
             if drift_type == DriftTypes.sudden.value:
-                event_log, drift_instance = add_sudden_change(event_log, drift_instance, par)
+                event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
             elif drift_type == DriftTypes.gradual.value:
-                event_log, drift_instance = add_gradual_change(event_log, drift_instance, par)
+                event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
             elif drift_type == DriftTypes.recurring.value:
                 event_log, drift_instance = add_recurring_drift(event_log, drift_instance, par)
             elif drift_type == DriftTypes.incremental.value:
