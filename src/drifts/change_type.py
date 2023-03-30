@@ -10,6 +10,7 @@ from controllers.process_tree_controller import randomize_tree_one, randomize_tr
     randomize_tree_three, randomize_tree_more, count_real_acs
 import src.configurations as config
 
+#TODO: keep trace of each trace id, especially, during the gradual drift!!!
 
 def combine_two_logs_with_certain_change_type(event_log, drift_instance, par, axillary: list = []):
 

@@ -4,8 +4,8 @@ Number_event_logs: 4
 Number_traces_per_process_model_version: 1000-3000
 Number_traces_for_gradual_change: 300-500
 Change_type: sudden, gradual
-Drift_types: sudden, gradual
-Number_drifts_per_log: 0-4
+Drift_types: sudden, gradual, incremental, recurring
+Number_drifts_per_log: 2-4
 Noise: True
 Noisy_trace_prob: 0.1-0.7
 Noisy_event_prob: 0.1-0.7

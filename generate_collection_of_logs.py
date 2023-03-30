@@ -67,7 +67,7 @@ def generate_logs(file_path_to_own_models=None):
             else:
                 UserWarning('Specified "drift_type" in the parameter file does not exist')
 
-            drift_instance.convert_change_trace_index_into_timestamp(event_log)
+            #drift_instance.convert_change_trace_index_into_timestamp(event_log)
             collection.add_drift(drift_instance)
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
@@ -76,6 +76,7 @@ def generate_logs(file_path_to_own_models=None):
                             select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
                             select_random(par.Task_exp_duration_sec, option='uniform_int'))
 
+        collection.convert_change_trace_index_into_timestamp(event_log, log_name)
         # collection.convert_change_trace_index_into_timestamp(event_log)
         event_log = collection.add_drift_info_to_log(event_log, log_name)
 
