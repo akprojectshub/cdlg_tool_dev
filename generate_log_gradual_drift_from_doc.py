@@ -5,7 +5,8 @@ import sys
 
 from concept_drifts.gradual_drift import gradual_drift
 from controllers.control_flow_controller import evolve_tree_randomly
-from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
+from controllers.event_log_controller import get_timestamp_log
+from src.utilities import add_duration_to_log
 from controllers.noise_controller import add_noise_doc
 from controllers.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter

@@ -6,7 +6,6 @@ import ast
 from datetime import datetime
 from src import configurations as config
 from src.drifts.drift_complex import add_recurring_drift, add_incremental_drift
-from controllers.event_log_controller import add_duration_to_log
 from src.drifts.drift_simple import add_simple_drift
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
@@ -17,7 +16,7 @@ from src.data_classes.class_input import InputParameters
 import time
 from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
-from src.utilities import select_random, InfoTypes, DriftTypes
+from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log
 
 
 # TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree
@@ -71,10 +70,7 @@ def generate_logs(file_path_to_own_models=None):
             collection.add_drift(drift_instance)
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
-        add_duration_to_log(event_log,
-                            select_random(par.Timestamp_first_trace),
-                            select_random(par.Trace_exp_arrival_sec, option='uniform_int'),
-                            select_random(par.Task_exp_duration_sec, option='uniform_int'))
+        add_duration_to_log(event_log, par)
 
         collection.convert_change_trace_index_into_timestamp(event_log, log_name)
         # collection.convert_change_trace_index_into_timestamp(event_log)

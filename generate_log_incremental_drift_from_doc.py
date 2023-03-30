@@ -3,7 +3,8 @@ import os
 import sys
 
 from concept_drifts.incremental_drift import incremental_drift_doc
-from controllers.event_log_controller import add_duration_to_log, get_timestamp_log
+from controllers.event_log_controller import get_timestamp_log
+from src.utilities import add_duration_to_log
 from controllers.noise_controller import add_noise_doc
 from controllers.process_tree_controller import generate_specific_trees, generate_tree_from_file
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
