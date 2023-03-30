@@ -19,9 +19,6 @@ from src.noise_controller_new import insert_noise
 from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log
 
 
-# TODO: improve how added/deleted/moved activities are stored, i.e., should be per change and on top to process tree
-
-
 def generate_logs(file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
@@ -64,15 +61,15 @@ def generate_logs(file_path_to_own_models=None):
             elif drift_type == DriftTypes.incremental.value:
                 event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
             else:
-                UserWarning('Specified "drift_type" in the parameter file does not exist')
+                UserWarning(f'Specified "drift_type" {drift_type} in the parameter file does not exist')
 
-            #drift_instance.convert_change_trace_index_into_timestamp(event_log)
             collection.add_drift(drift_instance)
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
         add_duration_to_log(event_log, par)
 
         # ADD NOISE and CREATE NOISE INFO INSTANCE
+        # TODO: modularization and integration of the noise related lines below
         noise = select_random(par.Noise, option='random')
         if noise:
             noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')

@@ -19,7 +19,6 @@ def add_simple_drift(event_log, drift_instance, parameters, change_type: str):
     else:
         log_extended = combine_two_logs_sudden(event_log, tree_new, parameters)
         change_trace_index = [len(event_log) + 1]
-    # TODO: each trace should be associated with a process tree id. Then, previous tree is based on the last trace
     drift_instance.add_change_info(change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs)
 
     return log_extended, drift_instance
