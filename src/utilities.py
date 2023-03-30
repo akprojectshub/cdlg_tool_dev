@@ -36,3 +36,10 @@ class DriftTypes(Enum):
 class ChangeTypes(Enum):
     sudden = 'sudden'
     gradual = 'gradual'
+
+
+class TraceAttributes(Enum):
+
+    concept_name = "concept:name"
+    timestamp = "time:timestamp"
+    model_version = "model_version:id"
