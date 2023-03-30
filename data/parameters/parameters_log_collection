@@ -6,8 +6,8 @@ Number_traces_for_gradual_change: 300-500
 Drift_types: sudden, gradual, incremental, recurring
 Number_drifts_per_log: 0-4
 Noise: True
-Noisy_trace_prob: 0.3
-Noisy_event_prob: 0.3
+Noisy_trace_prob: 0.1-0.7
+Noisy_event_prob: 0.1-0.7
 Timestamp_first_trace: 2020/08/01 08:00:00
 Trace_exp_arrival_sec: 40000
 Task_exp_duration_sec: 500000
