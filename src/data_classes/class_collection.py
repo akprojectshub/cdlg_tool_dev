@@ -97,7 +97,7 @@ class Collection:
                 flat_file.append(data)
 
         df = pd.DataFrame(flat_file, columns=['log_name', 'drift_or_noise_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
-        df.to_csv(f"{path}/aggregated_drift_info.csv", index=False)
+        df.to_csv(f"{path}/drift_info.csv", index=False)
 
         return None
     def convert_change_trace_index_into_timestamp(self, event_log, log_name):

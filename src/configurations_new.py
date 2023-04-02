@@ -13,16 +13,13 @@ DEFAULT_PARAMETER_DIR = os.path.join('src/input_parameters/')
 ###################################################################
 PAR_LOG_COLLECTION = 'default'
 
-# First time stamp of each event log
-FIRST_TIMESTAMP = '2020/01/01 08:00:00'
-
 # Incremental evolution parameters
 INCREMENTAL_EVOLUTION_SCOPE = [0.05, 0.15]
 
-paths = dict(
-    input_folder=os.path.join('data/parameters'),
-    output_folder=os.path.join('data/parameters'),
-    input_configurations=os.path.join('data/parameters')
+folders = dict(
+    input=os.path.join('data/parameters'),
+    output=os.path.join('data/parameters'),
+    input_parameters=os.path.join('data/parameters')
 )
 
 drifts = dict(
@@ -30,4 +27,12 @@ drifts = dict(
     gradual='',
     incremental='',
     recurring=''
+)
+
+other = dict(
+    first_timestamp = '2020/01/01 08:00:00',
+)
+
+file_name = dict(
+    drift_info_csv = 'drift_info_summary'
 )

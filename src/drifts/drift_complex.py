@@ -4,7 +4,7 @@ from controllers.control_flow_controller import evolve_tree_randomly
 from src.utilities import select_random, ChangeTypes
 from src.drifts.change_type import combine_two_logs_with_certain_change_type
 from src.drifts.drift_simple import combine_two_logs
-import src.configurations as config
+import src.input_parameters as config
 
 def add_recurring_drift(event_log, drift_instance, par):
 
