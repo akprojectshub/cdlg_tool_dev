@@ -18,6 +18,7 @@ from src.noise_controller_new import insert_noise
 from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log
 
 
+
 def generate_logs(file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
@@ -113,7 +114,7 @@ def creat_output_folder(path: str = config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR):
 
 
 def create_dict_with_input_parameters(par_file_name: str):
-    """ Getting parameters from the text file 'parameters_log_collection' placed in the folder 'Data/parameters'
+    """ Getting parameters from the text file 'default' placed in the folder 'Data/parameters'
     :return: parameters for the generation of a set of event logs
     """
 

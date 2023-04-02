@@ -48,14 +48,14 @@ def add_noise_randomized_tree(log_total, tree_one):
 
 
 def add_noise_to_log(log, tree, datestamp, min_duration, max_duration):
-    """ Introduces noise and sets the time configurations
+    """ Introduces noise and sets the time input_parameters
 
     :param log: event log
     :param tree: process tree for noise generation
     :param datestamp: starting date of event log
     :param min_duration: minimum duration of activities
     :param max_duration: maximum duration of activities
-    :return: event log with time configurations and noise, if desired
+    :return: event log with time input_parameters and noise, if desired
     """
     str_noise = input_no_yes("Do you want to add noise to the event log [yes, no]? ")
     if str_noise == 'yes':
