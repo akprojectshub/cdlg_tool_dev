@@ -15,7 +15,7 @@ from src.data_classes.class_input import InputParameters
 import time
 from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
-from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log
+from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log, add_unique_trace_ids
 
 
 
@@ -69,6 +69,8 @@ def generate_logs(file_path_to_own_models=None):
 
         # ADD TIME PERSPECTIVE TO EVENT LOG
         add_duration_to_log(event_log, par)
+        # ADD UNIQUE TRACE IDs
+        add_unique_trace_ids(event_log)
 
         # ADD NOISE and CREATE NOISE INFO INSTANCE
         # TODO: integrate the noise related lines below

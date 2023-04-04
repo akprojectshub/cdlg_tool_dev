@@ -94,3 +94,11 @@ def add_duration_to_log(log, par):
                         print(f"Index: {index_event}, and event: {event}")
                         ValueError("Error")
     return None
+
+
+def add_unique_trace_ids(log):
+    trace_id = 1
+    for trace in log:
+        trace.attributes[TraceAttributes.concept_name.value] = str(trace_id)
+        trace_id += 1
+    return None

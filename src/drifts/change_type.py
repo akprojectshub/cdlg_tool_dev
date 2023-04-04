@@ -2,7 +2,6 @@ from src.utilities import TraceAttributes, select_random, ChangeTypes
 from pm4py.objects.process_tree import semantics
 import math
 import numpy
-import random
 from pm4py.objects.log.obj import EventLog
 from random import randint
 from copy import deepcopy
@@ -30,8 +29,6 @@ def combine_two_logs_with_certain_change_type(event_log, drift_instance, par, ax
         change_trace_index = [len(event_log) + 1, help]
 
     drift_instance.add_change_info(change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs)
-
-    combined_log = update_trace_ids(combined_log)
 
     return combined_log, drift_instance
 
@@ -101,15 +98,6 @@ def combine_two_logs_gradual(event_log, tree_previous, tree_new, parameters):
     log_extended = add_log2_to_log1(log_with_transition, log_two)
 
     return log_extended, len(log_with_transition)+1
-
-
-def update_trace_ids(log):
-    trace_id = 0
-    for trace in log:
-        trace.attributes[TraceAttributes.concept_name.value] = str(trace_id)
-        trace_id += 1
-    return log
-
 
 
 def distribute_traces(tree_one, tree_two, distribute_type, nu_traces):
