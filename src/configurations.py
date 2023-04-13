@@ -5,7 +5,8 @@ import os
 ###################################################################
 DEFAULT_OUTPUT_DIR = os.path.join('output')
 DEFAULT_PARAMETER_DIR = os.path.join('src/input_parameters/')
-PARAMETER_NAME = 'default'
+#PARAMETER_NAME = 'default'
+PARAMETER_NAME = 'cdd_eval'
 
 ###################################################################
 # FILE NAMES
