@@ -61,7 +61,6 @@ class Collection:
                     loaded_event_logs[filename] = os.sep.join([dir_path])
         return loaded_event_logs
 
-        return None
 
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
@@ -112,8 +111,6 @@ class Collection:
                                 change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0][TraceAttributes.timestamp.value]
                                 change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0][TraceAttributes.timestamp.value]
                             elif isinstance(attr_value, int):
-                                print(vars(drift))
-                                print(len(event_log), attr_value)
                                 change_info_new[change_id]['change_start'] = event_log[attr_value][0][TraceAttributes.timestamp.value]
                                 change_info_new[change_id]['change_end'] = event_log[attr_value][0][TraceAttributes.timestamp.value]
                             else:
@@ -141,7 +138,6 @@ class Collection:
                             output_dict_drift['children'].update({key: value})
 
                 output_dict_all_drifts['children']['drift_' + str(drift.drift_id)] = output_dict_drift
-
 
         event_log.attributes[InfoTypes.drift_info.value] = output_dict_all_drifts
 
