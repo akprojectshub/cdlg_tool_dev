@@ -110,9 +110,10 @@ class Collection:
                             if isinstance(attr_value, list) and len(attr_value) == 2:
                                 change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0][TraceAttributes.timestamp.value]
                                 change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0][TraceAttributes.timestamp.value]
-                            elif isinstance(attr_value, int):
-                                change_info_new[change_id]['change_start'] = event_log[attr_value][0][TraceAttributes.timestamp.value]
-                                change_info_new[change_id]['change_end'] = event_log[attr_value][0][TraceAttributes.timestamp.value]
+                            elif isinstance(attr_value, list) and len(attr_value) == 1:
+                                change_timestamp = event_log[attr_value[0]][0][TraceAttributes.timestamp.value]
+                                change_info_new[change_id]['change_start'] = change_timestamp
+                                change_info_new[change_id]['change_end'] = change_timestamp
                             else:
                                 Warning("Something is wrong!")
                 drift.change_info = change_info_new
