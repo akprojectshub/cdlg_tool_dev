@@ -26,11 +26,11 @@ def generate_logs(file_path_to_own_models=None):
     """
 
     # CREATE DIR TO STORE GENERATED LOGS
-    out_folder = creat_output_folder(config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR)
+    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR)
 
     # READE PARAMETERS FROM A FILE
     # TODO: integrate into the input data class
-    par = get_parameters(config.PAR_LOG_COLLECTION)
+    par = get_parameters(config.PARAMETER_NAME)
 
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
@@ -93,7 +93,7 @@ def generate_logs(file_path_to_own_models=None):
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
 
 
-def get_parameters(path: str = config.PAR_LOG_COLLECTION):
+def get_parameters(path: str = config.PARAMETER_NAME):
     parameters_dict = create_dict_with_input_parameters(path)
     parameters = InputParameters(**parameters_dict)
     return parameters
@@ -108,7 +108,7 @@ def generate_initial_tree(complexity_options_list: list, file_path_to_own_models
     return generated_process_tree
 
 
-def creat_output_folder(path: str = config.DEFAULT_LOG_COLLECTION_OUTPUT_DIR):
+def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR):
     out_folder = os.path.join(path, str(int(time.time())))
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
