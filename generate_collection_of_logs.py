@@ -26,7 +26,7 @@ def generate_logs(file_path_to_own_models=None):
     """
 
     # CREATE DIR TO STORE GENERATED LOGS
-    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR)
+    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, config.PARAMETER_NAME)
 
     # READE PARAMETERS FROM A FILE
     # TODO: integrate into the input data class
@@ -108,8 +108,8 @@ def generate_initial_tree(complexity_options_list: list, file_path_to_own_models
     return generated_process_tree
 
 
-def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR):
-    out_folder = os.path.join(path, str(int(time.time())))
+def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR, folder_name: str = config.PARAMETER_NAME):
+    out_folder = os.path.join(path, folder_name + '_' + str(int(time.time())))
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
     return out_folder
