@@ -117,9 +117,12 @@ def break_down_tree_fully(tree):
 
 def generate_specific_trees(str_clp):
     if str_clp == 'simple':
-        parameters = {'mode': 10, 'min': 8, 'max': 12, 'sequence': 0.25, 'choice': 0.25, 'parallel': 0.25, 'loop': 0.2,
+        # parameters = {'mode': 10, 'min': 8, 'max': 12, 'sequence': 0.25, 'choice': 0.25, 'parallel': 0.25, 'loop': 0.2,
+        #               'or': 0, 'silent': 0, 'duplicate': 0, 'lt_dependency': 0, 'infrequent': 0.25, 'no_models': 10,
+        #               'unfold': 10, 'max_repeat': 10}
+        parameters = {'mode': 6, 'min': 4, 'max': 12, 'sequence': 0.7, 'choice': 0.1, 'parallel': 0.15, 'loop': 0.05,
                       'or': 0, 'silent': 0, 'duplicate': 0, 'lt_dependency': 0, 'infrequent': 0.25, 'no_models': 10,
-                      'unfold': 10, 'max_repeat': 10}
+                      'unfold': 0, 'max_repeat': 0}
         tree_ran = generate_tree(parameters)
     elif str_clp == 'middle':
         parameters = {'mode': 18, 'min': 14, 'max': 20, 'sequence': 0.25, 'choice': 0.3, 'parallel': 0.25, 'loop': 0.25,
