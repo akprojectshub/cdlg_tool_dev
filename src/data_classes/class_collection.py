@@ -1,6 +1,6 @@
 import os
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from collections import defaultdict
 import pandas as pd
 import pm4py
@@ -13,10 +13,10 @@ from src.utilities import TraceAttributes
 @dataclass
 class Collection:
     """
-    Object for keeping information about added drift and noise instances for a generated event log
+    Object for keeping information about added drift and noise instances for a generated event log collection
     """
-    drifts = list()
-    noise = list()
+    drifts: list = field(default_factory=list)
+    noise: list = field(default_factory=list)
     number_of_drifts: int = 0
     number_of_noises: int = 0
 
