@@ -18,7 +18,6 @@ from src.noise_controller_new import insert_noise
 from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log, add_unique_trace_ids
 
 
-
 def generate_logs(par, file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
@@ -30,7 +29,7 @@ def generate_logs(par, file_path_to_own_models=None):
 
     # READE PARAMETERS FROM A FILE
     # TODO: integrate into the input data class
-    #par = get_parameters(config.PARAMETER_NAME)
+    # par = get_parameters(config.PARAMETER_NAME)
 
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
@@ -145,18 +144,20 @@ def create_dict_with_input_parameters(par_file_name: str):
 
 
 def main(par):
-
     if len(sys.argv) == 1:
         generate_logs(par)
     elif len(sys.argv) == 2:
         generate_logs(par, sys.argv[1])
 
 
-if __name__ == '__main__':
-    par = get_parameters(config.PARAMETER_NAME)
-    #n_noise = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
-    n_noise = [0.6, 0.7, 0.8, 0.9]
-    n_drifts = [1, 2, 3, 4, 5]
+def multiple_collection_generator(par, n_noise=[], n_drifts=[]):
+    if not n_noise:
+        n_noise = [0.0]
+        # n_noise = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    if not n_drifts:
+        n_drifts = [1]
+        # n_drifts = [1, 2, 3, 4, 5]
+
     for n_drift in n_drifts:
         for noise in n_noise:
             suffix = '_drifts_' + str(n_drift) + '_noise_' + str(noise)
@@ -166,3 +167,10 @@ if __name__ == '__main__':
             par.Number_drifts_per_log = [n_drift]
             print(par.Parameter_name)
             main(par)
+
+    return None
+
+
+if __name__ == '__main__':
+    par = get_parameters(config.PARAMETER_NAME)
+    multiple_collection_generator(par, n_drifts=[1, 2, 3, 4, 5])
