@@ -8,7 +8,7 @@ from src.drifts.change_type import combine_two_logs_sudden, combine_two_logs_gra
 
 def add_simple_drift(event_log, drift_instance, parameters, change_type: str):
 
-
+    # TODO: check if the correct previous tree is extracted!
     tree_previous = drift_instance.get_previous_process_tree()
     ran_evolve = select_random(parameters.Process_tree_evolution_proportion, option='uniform')
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
