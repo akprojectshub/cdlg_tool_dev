@@ -19,18 +19,18 @@ from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_
 
 
 
-def generate_logs(file_path_to_own_models=None):
+def generate_logs(par, file_path_to_own_models=None):
     """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
     :param file_path_to_own_models: file path to own process model, if desired to be used
     :return: collection of event logs with drifts saved in out_folder
     """
 
     # CREATE DIR TO STORE GENERATED LOGS
-    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, config.PARAMETER_NAME)
+    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, par.Parameter_name)
 
     # READE PARAMETERS FROM A FILE
     # TODO: integrate into the input data class
-    par = get_parameters(config.PARAMETER_NAME)
+    #par = get_parameters(config.PARAMETER_NAME)
 
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
@@ -144,12 +144,25 @@ def create_dict_with_input_parameters(par_file_name: str):
     return parameters_dict
 
 
-def main():
+def main(par):
+
     if len(sys.argv) == 1:
-        generate_logs()
+        generate_logs(par)
     elif len(sys.argv) == 2:
-        generate_logs(sys.argv[1])
+        generate_logs(par, sys.argv[1])
 
 
 if __name__ == '__main__':
-    main()
+    par = get_parameters(config.PARAMETER_NAME)
+    #n_noise = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5]
+    n_noise = [0.6, 0.7, 0.8, 0.9]
+    n_drifts = [1, 2, 3, 4, 5]
+    for n_drift in n_drifts:
+        for noise in n_noise:
+            suffix = '_drifts_' + str(n_drift) + '_noise_' + str(noise)
+            par.Parameter_name = config.PARAMETER_NAME + suffix
+            par.Noisy_trace_prob = [noise]
+            par.Noisy_event_prob = [noise]
+            par.Number_drifts_per_log = [n_drift]
+            print(par.Parameter_name)
+            main(par)
