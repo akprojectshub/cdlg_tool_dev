@@ -143,3 +143,29 @@ class Collection:
         event_log.attributes[InfoTypes.drift_info.value] = output_dict_all_drifts
 
         return event_log
+
+
+    def evaluate(self):
+        pass
+
+        return None
+
+    def extract_change_moments(self):
+        pass
+
+        return None
+
+    def matching(self):
+        pass
+
+        return None
+
+    def check_latency(self):
+        pass
+
+        return None
+
+    def check_drift_type(self):
+        pass
+
+        return None
