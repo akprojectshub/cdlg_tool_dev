@@ -25,7 +25,7 @@ def generate_logs(par, file_path_to_own_models=None):
     """
 
     # CREATE DIR TO STORE GENERATED LOGS
-    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, par.Parameter_name)
+    out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, par.Folder_name)
 
     # READE PARAMETERS FROM A FILE
     # TODO: integrate into the input data class
@@ -140,6 +140,8 @@ def create_dict_with_input_parameters(par_file_name: str):
                 pass
             parameters_dict[par] = value
 
+    parameters_dict['Folder_name'] = config.PARAMETER_NAME
+
     return parameters_dict
 
 
@@ -150,22 +152,23 @@ def main(par):
         generate_logs(par, sys.argv[1])
 
 
-def multiple_collection_generator(par, n_noise=[], n_drifts=[]):
-    if not n_noise:
+def multiple_collection_generator(par, n_noise=None, n_drifts=None):
+    # TODO: make sure the function works if n_noise and n_drifts are None
+    if n_noise is None:
         n_noise = [0.0]
-        # n_noise = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-    if not n_drifts:
-        n_drifts = [1]
-        # n_drifts = [1, 2, 3, 4, 5]
+
+    if n_drifts is None:
+        label = str(par.Number_drifts_per_log[0]) +'-'+ str(par.Number_drifts_per_log[-1])
+        n_drifts = [label]
 
     for n_drift in n_drifts:
         for noise in n_noise:
             suffix = '_drifts_' + str(n_drift) + '_noise_' + str(noise)
-            par.Parameter_name = config.PARAMETER_NAME + suffix
+            par.Folder_name = config.PARAMETER_NAME + suffix
             par.Noisy_trace_prob = [noise]
             par.Noisy_event_prob = [noise]
             par.Number_drifts_per_log = [n_drift]
-            print(par.Parameter_name)
+            print(par.Folder_name)
             main(par)
 
     return None
@@ -173,4 +176,9 @@ def multiple_collection_generator(par, n_noise=[], n_drifts=[]):
 
 if __name__ == '__main__':
     par = get_parameters(config.PARAMETER_NAME)
-    multiple_collection_generator(par, n_drifts=[1, 2, 3, 4, 5])
+    # n_noise = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    # n_drifts = [1, 2, 3, 4, 5]
+    #multiple_collection_generator(par, n_drifts=n_drifts, n_noise=n_noise)
+    #multiple_collection_generator(par)
+    main(par)
+
