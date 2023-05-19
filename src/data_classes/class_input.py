@@ -20,7 +20,9 @@ class InputParameters:
     Gradual_drift_type: list
     Incremental_drift_number: list
     Recurring_drift_number: list
-    Parameter_name: str
+    Folder_name: str
+
+
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
