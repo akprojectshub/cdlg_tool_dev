@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 import numpy as np
 from collections import defaultdict
 from copy import deepcopy
+import re
+
 
 
 @dataclass
@@ -21,6 +23,7 @@ class DriftInfo:
         self.drift_id = drift_id
         return None
 
+
     def set_process_perspective(self, process_perspective):
         self.process_perspective = process_perspective
         return None
@@ -36,7 +39,7 @@ class DriftInfo:
 
 
 
-    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs):
+    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs,change_start,change_end): #Question: Shouldn't we also store the start and end time if a drift ?
 
         self.add_process_tree(tree_new)
         change_id = str(len(self.change_info)+1)
@@ -46,7 +49,9 @@ class DriftInfo:
                                        'process_tree_after': tree_new,
                                        'activities_deleted': deleted_acs,
                                        'activities_added': added_acs,
-                                       'activities_moved': moved_acs}
+                                       'activities_moved': moved_acs,
+                                       'change_start': change_start,
+                                       'change_end':change_end}
         return None
 
     def convert_change_trace_index_into_timestamp(self, event_log):
@@ -69,6 +74,36 @@ class DriftInfo:
         max_process_tree_id = str(max([int(key) for key in self.process_trees.keys()]))
         previous_process_tree = deepcopy(self.process_trees[max_process_tree_id])
         return previous_process_tree
+
+
+    def extract_info_xes(self,log, log_name):
+        l = []
+        for k in list(log.attributes["drift:info"]["children"].keys()): #parses through the drifts: k takes k, drift_2 ...
+            log_ID = re.findall("(\d+)", log_name)[1]
+            self.set_log_id(log_ID)
+            self.set_drift_id(k)
+            self.set_process_perspective(log.attributes["drift:info"]["children"][k]["children"]["process_perspective"])
+            self.set_drift_type(log.attributes["drift:info"]["children"][k]["children"]["drift_type"])
+            for c in list(log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"].keys()):
+                self.add_change_info(log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_trace_index"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_type"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["process_tree_before"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["process_tree_after"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["activities_deleted"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["activities_added"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["activities_moved"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_start"],
+                                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_end"])
+            x = deepcopy(self)
+            l.append(x)
+        return l #should be an isntance of the class itself
+        #extract info xes should return an istance of the class drift_info
+        #the variable drifts later on should return contain list of drifts class instances
+
+
+
+
+
 
 
 def initialize_drift_instance_from_list(input: list):
