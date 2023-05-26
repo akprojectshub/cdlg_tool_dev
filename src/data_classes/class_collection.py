@@ -4,11 +4,13 @@ from dataclasses import dataclass, field
 from collections import defaultdict
 import pandas as pd
 import pm4py
+import copy
 
 from src.utilities import InfoTypes
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
 from src.utilities import TraceAttributes
+
 
 @dataclass
 class Collection:
@@ -34,20 +36,20 @@ class Collection:
     def increase_noise_count(self):
         self.number_of_noises += 1
 
-    def fill_drift_log(
-            self):  # This method is used to store the dictionary with log attribute levels in the log (xes file)
+    def fill_drift_log(self):
+        # This method is used to store the dictionary with log attribute levels in the log (xes file)
         param_drift = vars(DriftInfo)
 
     def extract_drift_and_noise_info(self, path):
-
         loaded_event_logs = self.load_log_names_and_paths(path)
+        print(loaded_event_logs)
         for log_name, log_folder in loaded_event_logs.items():
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
-            DI = DriftInfo.extract_info_xes(log)
-            NI = NoiseInfo.extract_info_xes(log)
+            DI = DriftInfo().extract_info_xes(log,log_name)
+            #NI = NoiseInfo.extract_info_xes(os.path.join(log_folder, log_name),log)
             self.drifts.append(DI)
-            self.increase_drift_count()
-            self.noise.append(NI)
+            self.increase_drift_count() # Question:Should drift count be incremented here (doesn't take into account multiple drifts per log ?
+            #self.noise.append(NI)
             self.increase_noise_count()
 
         return self
@@ -145,27 +147,77 @@ class Collection:
         return event_log
 
 
-    def evaluate(self):
-        pass
 
-        return None
+    def evaluate(self,Coll_det):
+        TP = 0
+        FN = 0
+        FP = 0
+        type_cm_det_all  = [j for i in Coll_det.drifts for j in self.extract_change_moments(i)]
+        type_cm_act_all = [j for i in self.drifts for j in self.extract_change_moments(i)]#stores the type and change moment of all drifts in the collection
 
-    def extract_change_moments(self):
-        pass
 
-        return None
+        for i in type_cm_act_all:
+            drift_type_act = list(i.keys())[0]
+            cms_det = [i for i in type_cm_det_all if list(i.keys())[0]==drift_type_act] ##cms_det contains all the drift_type:change_moments in the collection with drift_type= drift_type_act
+            if (self.matching(i,cms_det)[1] =="TP"):
+                del type_cm_det_all[self.matching(i,cms_det)[0]]
+                TP+=1
+            elif(self.matching(i,cms_det)[1] == "FN"):
+                FN+=1
+        FP = len( type_cm_det_all)
 
-    def matching(self):
-        pass
 
-        return None
+        return {"TP":TP,"FN":FN,"FP":FP}
 
-    def check_latency(self):
-        pass
 
-        return None
+    @staticmethod
+    def extract_change_moments(d):
+        l = list()
+        for i in d: #is a list containing all the drift instances of a single log
+            l = list()
+            for v in list(i.change_info.values()):
+                if v["change_type"] == "gradual":
+                    l.append({i.drift_type:v["change_start"]})
+                    l.append({i.drift_type:v["change_end"]})
+                elif v["change_type"] == "sudden":
+                    l.append({i.drift_type:v["change_start"]})
 
-    def check_drift_type(self):
-        pass
+        return l # l stores data in this format [{"drift_type1":"CM1"},{"drift_type1":"CM2"},{"drift_type2":"CM1"}]
 
-        return None
+
+    def matching(self,cm_act, cms_det:list):
+        r = [None, None] # this is the list returned by the matching method ["index of the change moment to delete in the  type_cm_det_all", "TP or
+        index_min_diff = [abs(list(i.values())[0]-list(cm_act.values())[0]) for i in cms_det].index(min([abs(list(i.values())[0]-list(cm_act.values())[0]) for i in list(cms_det)]))
+        if self.check_latency(cm_act, cms_det[index_min_diff], 12) == True and self.check_drift_type(cm_act, cms_det[index_min_diff])== True:
+            r = [index_min_diff, "TP"]
+        elif self.check_latency(cm_act, cms_det[index_min_diff], 12) == False or self.check_drift_type(cm_act, cms_det[index_min_diff])== False:
+            r =  [None,"FN"]
+        return r
+
+
+    @staticmethod
+    def check_latency(cm_act, cm_det, alpha):
+        if ((abs(list(cm_act.values())[0]- list(cm_det.values())[0])).days <=alpha):
+            return True
+        else:
+            return False
+
+
+    @staticmethod
+    def check_drift_type(cm_act, cm_det):
+        if (list(cm_act.keys())[0] == list(cm_det.keys())[0]):
+            return True
+        else:
+            return False
+
+
+
+
+
+
+actual = Collection().extract_drift_and_noise_info("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1684672207_actual")
+
+detected = Collection().extract_drift_and_noise_info("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1684672207_detected")
+
+print(actual.evaluate(detected))
+
