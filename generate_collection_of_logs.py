@@ -78,7 +78,7 @@ def generate_logs(par, file_path_to_own_models=None):
             noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')
             noisy_event_prob = select_random(par.Noisy_event_prob, option='uniform_step')
             noise_instance = NoiseInfo(log_name, noisy_trace_prob, noisy_event_prob)
-            event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob)
+            event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob, par.Task_exp_duration_sec)
             collection.add_noise(noise_instance)
             event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
 
@@ -181,4 +181,3 @@ if __name__ == '__main__':
     #multiple_collection_generator(par, n_drifts=n_drifts, n_noise=n_noise)
     #multiple_collection_generator(par)
     main(par)
-
