@@ -197,10 +197,7 @@ class Collection:
         return event_log
 
 
-
-
-
-    def evaluate_new(self,Col_det):
+    def evaluate(self,Col_det):
         drift_ids_act = [DI_act[0].log_id for DI_act in self.drifts]
         drift_ids_det = [DI_det[0].log_id for DI_det in Col_det.drifts]
 
@@ -212,7 +209,7 @@ class Collection:
                 change_mom_det = Col_det.extract_change_moments(Col_det.drifts[pos_drift_to_match])
                 drift_ids_det_left.remove(drift_ids_act[drift_pos])
                 for change_inf_act in change_mom_act:
-                    change_mom_det = self.matching_new(change_inf_act, change_mom_det)
+                    change_mom_det = self.matching(change_inf_act, change_mom_det)
 
             elif drift_ids_act[drift_pos] not in drift_ids_det:
                 self.FN += len(self.extract_change_moments(self.drifts[drift_pos]))  # if there is no log in the detected drift with the same ID as in the actual drift then increase the FN by the number of drifts in the actual drift
@@ -237,9 +234,9 @@ class Collection:
 
 
 
-    def matching_new(self,change_inf_act,change_mom_det):
+    def matching(self,change_inf_act,change_mom_det):
 
-        change_mom_det_filtered = [change_inf_det for change_inf_det in change_mom_det if change_inf_det[1] == change_inf_act[1]] #return the change moments in the change_moment_det that match the drift type of the actual change moment
+        change_mom_det_filtered = self.check_drift_type(change_inf_act, change_mom_det) #return the change moments in the change_moment_det that match the drift type of the actual change moment
         if len(change_mom_det_filtered) > 0:
             change_mom_diff = [abs(cm[2]-change_inf_act[2])for cm in change_mom_det_filtered]
             lowest_change_mom_diff_index = change_mom_diff.index(min(change_mom_diff))
@@ -263,43 +260,7 @@ class Collection:
 
 
     @staticmethod
-    def check_drift_type(cm_act, cm_det):
-        if (list(cm_act.keys())[0] == list(cm_det.keys())[0]):
-            return True
-        else:
-            return False
-
-
-
-#Test
-"""
-Col_act = Collection()
-Col_det = Collection()
-
-Col_act.Generate_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
-Col_det.Generate_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_detected")
-
-
-
-
-Col_act.evaluate_new(Col_det)
-
-print(Col_act.TP)
-print(Col_act.FN)
-print(Col_act.FP)
-"""
-
-
-#####################################################################
-#Thnings to DO:
-#Change the parameters names
-#specify a class that contains the parameter names ("children","change_info"...)
-#make sure the function evaluate now works with a list of tupple ans input and that the comparision is done for logs with the same ID (DONE)
-#make sure that process_tree stored in DriftInfo returns the correct result (sudden should retunr two process trees)
-
-
-#Things I changed:
-# I changed the command add drift so that it takes into account multiple drifts per log
-# I changed the method add_change_info in the class_drift added change_start and change_end as parameters ---> Because of this generate collection of logs do not work anymore
+    def check_drift_type(change_inf_act, change_mom_det):
+        return [change_inf_det for change_inf_det in change_mom_det if change_inf_det[1] == change_inf_act[1]]
 
 
