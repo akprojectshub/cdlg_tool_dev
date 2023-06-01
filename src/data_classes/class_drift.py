@@ -4,6 +4,7 @@ from collections import defaultdict
 from copy import deepcopy
 import re
 
+import pm4py
 
 
 @dataclass
@@ -39,7 +40,7 @@ class DriftInfo:
 
 
 
-    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs,change_start,change_end): #Question: Shouldn't we also store the start and end time if a drift ?
+    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs): #Question: Shouldn't we also store the start and end time if a drift ?
 
         self.add_process_tree(tree_new)
         change_id = str(len(self.change_info)+1)
@@ -49,16 +50,14 @@ class DriftInfo:
                                        'process_tree_after': tree_new,
                                        'activities_deleted': deleted_acs,
                                        'activities_added': added_acs,
-                                       'activities_moved': moved_acs,
-                                       'change_start': change_start,
-                                       'change_end':change_end}
+                                       'activities_moved': moved_acs}
         return None
 
     def convert_change_trace_index_into_timestamp(self, event_log):
-
         change_info_new = deepcopy(self.change_info)
         for change_id, change_data in self.change_info.items():
             for change_attr, attr_value in change_data.items():
+
                 if change_attr == 'change_trace_index':
                     change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0]['time:timestamp']
                     if isinstance(attr_value, list) and len(attr_value) == 2:
@@ -93,3 +92,5 @@ def initialize_drift_instance_from_list(input: list):
         drift_instance.process_trees = trees
 
     return drift_instance
+
+

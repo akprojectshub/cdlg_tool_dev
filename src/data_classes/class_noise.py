@@ -34,6 +34,18 @@ class NoiseInfo:
                 d_final["children"][keys_list[i]] = values_list[i]
         return d_final
 
+    def set_log_id(self, log_name):
+        self.log_id = log_name
+        return None
+
+    def set_noisy_trace_prob(self,noise_trace_prob):
+        self.noisy_trace_prob = noise_trace_prob
+        return None
+
+    def set_noisy_event_prob(self,noise_event_prob):
+        self.noisy_event_prob = noise_event_prob
+        return None
+
     @staticmethod
     def extract_info_xes(log):
         d = dict()
@@ -48,3 +60,4 @@ class NoiseInfo:
             else:
                 d[key] = list(value["children"].values())
         return d
+

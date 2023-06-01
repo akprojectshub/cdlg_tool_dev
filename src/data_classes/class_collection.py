@@ -11,6 +11,7 @@ from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
 from src.utilities import TraceAttributes
 import datetime
+import re
 
 @dataclass
 class Collection:
@@ -25,16 +26,16 @@ class Collection:
     FP: int = 0
     FN: int = 0
 
-    def add_drift(self, List_DriftInfo: list):
-        self.drifts.append(List_DriftInfo)
-        self.increase_drift_count(len(List_DriftInfo))
+    def add_drift(self, instance: DriftInfo):
+        self.drifts.append(instance)
+        self.increase_drift_count()
 
     def add_noise(self, instance: NoiseInfo):
         self.noise.append(instance)
         self.increase_noise_count()
 
-    def increase_drift_count(self, nbr_drift_per_log):
-        self.number_of_drifts += nbr_drift_per_log
+    def increase_drift_count(self):
+        self.number_of_drifts += 1
 
     def increase_noise_count(self):
         self.number_of_noises += 1
@@ -43,32 +44,19 @@ class Collection:
         # This method is used to store the dictionary with log attribute levels in the log (xes file)
         param_drift = vars(DriftInfo)
 
-    def extract_drift_and_noise_info(self, path):
-        loaded_event_logs = self.load_log_names_and_paths(path)
-        for log_name, log_folder in loaded_event_logs.items():
-            log = pm4py.read_xes(os.path.join(log_folder, log_name))
-            DI = DriftInfo().extract_info_xes(log,log_name)
-            #NI = NoiseInfo.extract_info_xes(os.path.join(log_folder, log_name),log)
-            self.drifts.append(DI)
-            self.increase_drift_count() # Question:Should drift count be incremented here (doesn't take into account multiple drifts per log ?
-            #self.noise.append(NI)
-            self.increase_noise_count()
-
-        return self
 
     def extract_drift_info_from_log(self,log,log_name):
-        drift_info_list = []
-
         for k in list(log.attributes["drift:info"]["children"].keys()):  # parses through the drifts: k takes k, drift_2 ...
+            drift_info_list = []
             DI = DriftInfo()
             DI.set_log_id(log_name)
             DI.set_drift_id(k)
             DI.set_process_perspective(log.attributes["drift:info"]["children"][k]["children"]["process_perspective"])
             DI.set_drift_type(log.attributes["drift:info"]["children"][k]["children"]["drift_type"])
             for c in list(log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"].keys()):
+
                 DI.add_change_info(
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["change_trace_index"],
+                    [int(i) for i in re.findall(r'\d+',log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_trace_index"])],
                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
                         "children"]["change_type"],
                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
@@ -80,20 +68,30 @@ class Collection:
                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
                         "children"]["activities_added"],
                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["activities_moved"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["change_start"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["change_end"])
-            x = deepcopy(DI) # Should find a solution to avoid doing this
-            drift_info_list.append(x)
-        self.add_drift(drift_info_list)
+                        "children"]["activities_moved"])
+                DI.convert_change_trace_index_into_timestamp(log)
+                DI_copy = deepcopy(DI) #TODO Should find a solution to avoid doing this
+                #drift_info_list.append(DI_copy)
+                self.add_drift(DI_copy)
 
-        return drift_info_list  # should be an isntance of the class itself
+        return None
         # extract info xes should return an istance of the class drift_info
         # the variable drifts later on should return contain list of drifts class instances
 
-    #def extract_drift_info_from_log_collection(self,collection_folder_path):
+    def extract_noise_info_from_log(self,log):
+        NI = NoiseInfo()
+        for attr, val in log.attributes["noise:info"]["children"].items():
+            if attr == "log_id":
+                NI.set_log_id(val)
+            elif attr == "noisy_trace_prob":
+                NI.set_noisy_trace_prob(val)
+            elif attr == "noisy_event_prob":
+                NI.set_noisy_event_prob(val)
+        self.add_noise(NI)
+        return None
+
+
+
 
 
     @staticmethod
@@ -106,13 +104,10 @@ class Collection:
         return loaded_event_logs
 
 
-    def Generate_collection_of_drifts (self, path):
+    def Extract_collection_of_drifts (self, path):
         for log_name, log_folder in self.load_log_names_and_paths(path).items():
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
             self.extract_drift_info_from_log(log,log_name)
-
-
-
 
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
@@ -152,7 +147,6 @@ class Collection:
         return None
 
     def convert_change_trace_index_into_timestamp(self, event_log, log_name):
-
         for drift in self.drifts:
             if drift.log_id == log_name:
                 change_info_new = deepcopy(drift.change_info)
@@ -198,8 +192,8 @@ class Collection:
 
 
     def evaluate(self,Col_det):
-        drift_ids_act = [DI_act[0].log_id for DI_act in self.drifts]
-        drift_ids_det = [DI_det[0].log_id for DI_det in Col_det.drifts]
+        drift_ids_act = [DI_act.log_id for DI_act in self.drifts]
+        drift_ids_det = [DI_det.log_id for DI_det in Col_det.drifts]
 
         drift_ids_det_left = drift_ids_det.copy()
         for drift_pos in range(0, len(self.drifts)):
@@ -219,12 +213,13 @@ class Collection:
     @staticmethod
     def extract_change_moments(drifts_in_log: list()): #takes a list of drift instances
         drift_moments = list()
-
         for drift_instance in drifts_in_log: #is a list containing all the drift instances of a single log
             change_id = 1
             for change_moment_info in list(drift_instance.change_info.values()):
                 if change_moment_info["change_type"] == "gradual":
-                    drift_moments.append((change_id,drift_instance.drift_type,change_moment_info["change_start"],change_moment_info["change_end"]))
+                    drift_moments.append((change_id,drift_instance.drift_type,change_moment_info["change_start"]))
+                    change_id+=1
+                    drift_moments.append((change_id,drift_instance.drift_type,change_moment_info["change_end"]))
                     change_id+=1
                 elif change_moment_info["change_type"] == "sudden":
                     drift_moments.append((change_id,drift_instance.drift_type,change_moment_info["change_start"]))
@@ -262,5 +257,37 @@ class Collection:
     @staticmethod
     def check_drift_type(change_inf_act, change_mom_det):
         return [change_inf_det for change_inf_det in change_mom_det if change_inf_det[1] == change_inf_act[1]]
+
+
+
+#Test
+
+Col_act = Collection()
+Col_det = Collection()
+
+Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
+Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_detected")
+
+
+Col_act.evaluate(Col_det)
+
+print(Col_act.TP)
+print(Col_act.FN)
+print(Col_act.FP)
+
+
+
+#####################################################################
+#Thnings to DO:
+#Change the parameters names
+#specify a class that contains the parameter names ("children","change_info"...)
+#make sure the function evaluate now works with a list of tupple ans input and that the comparision is done for logs with the same ID (DONE)
+#make sure that process_tree stored in DriftInfo returns the correct result (sudden should retunr two process trees)
+
+
+#Things I changed:
+# I changed the command add drift so that it takes into account multiple drifts per log
+# I changed the method add_change_info in the class_drift added change_start and change_end as parameters ---> Because of this generate collection of logs do not work anymore
+
 
 
