@@ -5,7 +5,7 @@ import numpy as np
 import datetime
 
 
-def insert_noise(log: EventLog, noisy_trace_prob, noisy_event_prob):
+def insert_noise(log: EventLog, noisy_trace_prob, noisy_event_prob, task_exp_duration_sec):
     classes = _get_event_classes(log)
     log_new = EventLog()
     for trace in log:
@@ -20,7 +20,7 @@ def insert_noise(log: EventLog, noisy_trace_prob, noisy_event_prob):
                     if noise_type == 0:
                         _remove_event(trace_cpy)
                     if noise_type == 1:
-                        _insert_event(trace_cpy, classes)
+                        _insert_event(trace_cpy, classes, task_exp_duration_sec)
                     if noise_type == 2:
                         _swap_events(trace_cpy)
                     # flip coin to see if more noise will be inserted
@@ -38,12 +38,12 @@ def _remove_event(trace: Trace):
     return trace2
 
 
-def _insert_event(trace: Trace, tasks):
+def _insert_event(trace: Trace, tasks, task_exp_duration_sec):
 
     # get all timestamps of initial events
     all_timestamps = [e["time:timestamp"] for e in trace]
     # Create a new timestamp and append it to all timestamps
-    task_exp_duration_sec = 500000
+    #task_exp_duration_sec = 500000
     task_duration_sec = np.random.exponential(task_exp_duration_sec)
     new_timestamp = max(all_timestamps) + datetime.timedelta(seconds=task_duration_sec)
     all_timestamps.append(new_timestamp)

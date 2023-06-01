@@ -27,49 +27,42 @@ def generate_logs(par, file_path_to_own_models=None):
     # CREATE DIR TO STORE GENERATED LOGS
     out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, par.Folder_name)
 
-    # READE PARAMETERS FROM A FILE
-    # TODO: integrate into the input data class
-    # par = get_parameters(config.PARAMETER_NAME)
-
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
     print('Generating', number_of_logs, 'logs')
     collection = Collection()
     for log_id in range(1, number_of_logs + 1):
-        # SELECT PARAMETERS FOR THE CURRENT LOG
-        log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
-        tree_initial = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
-        num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
-        event_log = semantics.generate_log(tree_initial, num_traces)
-        drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
-        for drift_id in range(1, drift_n + 1):
-            # Set drift info instance
-            # TODO: integrate
-            drift_instance = DriftInfo()
-            drift_instance.set_log_id(log_name)
-            drift_instance.set_drift_id(drift_id)
-            drift_instance.set_process_perspective('control-flow')
-            drift_type = select_random(par.Drift_types, option='random')
-            drift_instance.set_drift_type(drift_type)
-            drift_instance.add_process_tree(tree_initial)
-            # GENERATE LOG WITH A CERTAIN DRIFT TYPE
-            if drift_type == DriftTypes.sudden.value:
-                event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
-            elif drift_type == DriftTypes.gradual.value:
-                event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
-            elif drift_type == DriftTypes.recurring.value:
-                event_log, drift_instance = add_recurring_drift(event_log, drift_instance, par)
-            elif drift_type == DriftTypes.incremental.value:
-                event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
-            else:
-                UserWarning(f'Specified "drift_type" {drift_type} in the parameter file does not exist')
+        try:
+            # SELECT PARAMETERS FOR THE CURRENT LOG
+            log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
+            tree_initial = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
+            num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
+            event_log = semantics.generate_log(tree_initial, num_traces)
+            drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
+            for drift_id in range(1, drift_n + 1):
+                # Set drift info instance
+                # TODO: integrate
+                drift_instance = DriftInfo()
+                drift_instance.set_log_id(log_name)
+                drift_instance.set_drift_id(drift_id)
+                drift_instance.set_process_perspective('control-flow')
+                drift_type = select_random(par.Drift_types, option='random')
+                drift_instance.set_drift_type(drift_type)
+                drift_instance.add_process_tree(tree_initial)
+                # GENERATE LOG WITH A CERTAIN DRIFT TYPE
+                if drift_type == DriftTypes.sudden.value:
+                    event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
+                elif drift_type == DriftTypes.gradual.value:
+                    event_log, drift_instance = add_simple_drift(event_log, drift_instance, par, drift_type)
+                elif drift_type == DriftTypes.recurring.value:
+                    event_log, drift_instance = add_recurring_drift(event_log, drift_instance, par)
+                elif drift_type == DriftTypes.incremental.value:
+                    event_log, drift_instance = add_incremental_drift(event_log, drift_instance, par)
+                else:
+                    UserWarning(f'Specified "drift_type" {drift_type} in the parameter file does not exist')
 
-            collection.add_drift(drift_instance)
+                collection.add_drift(drift_instance)
 
-        # ADD TIME PERSPECTIVE TO EVENT LOG
-        add_duration_to_log(event_log, par)
-        # ADD UNIQUE TRACE IDs
-        add_unique_trace_ids(event_log)
 
         # ADD NOISE and CREATE NOISE INFO INSTANCE
         # TODO: integrate the noise related lines below
@@ -81,15 +74,34 @@ def generate_logs(par, file_path_to_own_models=None):
             event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob, par.Task_exp_duration_sec)
             collection.add_noise(noise_instance)
             event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
+            # ADD TIME PERSPECTIVE TO EVENT LOG
+            add_duration_to_log(event_log, par)
+            # ADD UNIQUE TRACE IDs
+            add_unique_trace_ids(event_log)
 
-        collection.convert_change_trace_index_into_timestamp(event_log, log_name)
-        event_log = collection.add_drift_info_to_log(event_log, log_name)
+            # ADD NOISE and CREATE NOISE INFO INSTANCE
+            # TODO: integrate the noise related lines below
+            noise = select_random(par.Noise, option='random')
+            if noise:
+                noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')
+                noisy_event_prob = select_random(par.Noisy_event_prob, option='uniform_step')
+                noise_instance = NoiseInfo(log_name, noisy_trace_prob, noisy_event_prob)
+                event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob, par.Task_exp_duration_sec)
+                collection.add_noise(noise_instance)
+                event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
 
-        # EXPORT GENERATED LOG
-        xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
+            collection.convert_change_trace_index_into_timestamp(event_log, log_name)
+            event_log = collection.add_drift_info_to_log(event_log, log_name)
+
+            # EXPORT GENERATED LOG
+            xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
+
+        except:
+            continue
 
     collection.export_drift_and_noise_info_to_flat_file_csv(path=out_folder)
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
+
 
 
 def get_parameters(path: str = config.PARAMETER_NAME):
