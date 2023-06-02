@@ -26,16 +26,16 @@ class Collection:
     FP: int = 0
     FN: int = 0
 
-    def add_drift(self, instance: DriftInfo):
-        self.drifts.append(instance)
-        self.increase_drift_count()
+    def add_drift(self, list_drift_per_log: list):
+        self.drifts.append(list_drift_per_log)
+        self.increase_drift_count(list_drift_per_log)
 
     def add_noise(self, instance: NoiseInfo):
         self.noise.append(instance)
         self.increase_noise_count()
 
-    def increase_drift_count(self):
-        self.number_of_drifts += 1
+    def increase_drift_count(self, list_drift_per_log):
+        self.number_of_drifts += len(list_drift_per_log)
 
     def increase_noise_count(self):
         self.number_of_noises += 1
@@ -46,8 +46,8 @@ class Collection:
 
 
     def extract_drift_info_from_log(self,log,log_name):
+        drift_info_list = []
         for k in list(log.attributes["drift:info"]["children"].keys()):  # parses through the drifts: k takes k, drift_2 ...
-            drift_info_list = []
             DI = DriftInfo()
             DI.set_log_id(log_name)
             DI.set_drift_id(k)
@@ -70,9 +70,9 @@ class Collection:
                     log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
                         "children"]["activities_moved"])
                 DI.convert_change_trace_index_into_timestamp(log)
-                DI_copy = deepcopy(DI) #TODO Should find a solution to avoid doing this
-                #drift_info_list.append(DI_copy)
-                self.add_drift(DI_copy)
+
+            drift_info_list.append(DI)
+        self.add_drift(drift_info_list)
 
         return None
         # extract info xes should return an istance of the class drift_info
@@ -192,12 +192,14 @@ class Collection:
 
 
     def evaluate(self,Col_det):
-        drift_ids_act = [DI_act.log_id for DI_act in self.drifts]
-        drift_ids_det = [DI_det.log_id for DI_det in Col_det.drifts]
+        drift_ids_act = [DI_act[0].log_id for DI_act in self.drifts]
+        drift_ids_det = [DI_det[0].log_id for DI_det in Col_det.drifts]
 
         drift_ids_det_left = drift_ids_det.copy()
-        for drift_pos in range(0, len(self.drifts)):
+        print("drifts", self.drifts)
+        for drift_pos in range(0, len(self.drifts)): #self.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
             change_mom_act = self.extract_change_moments(self.drifts[drift_pos])
+            print(change_mom_act)
             if drift_ids_act[drift_pos] in drift_ids_det:
                 pos_drift_to_match = drift_ids_det.index(drift_ids_act[drift_pos])
                 change_mom_det = Col_det.extract_change_moments(Col_det.drifts[pos_drift_to_match])
@@ -266,7 +268,10 @@ Col_act = Collection()
 Col_det = Collection()
 
 Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
-Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_detected")
+Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
+
+
+
 
 
 Col_act.evaluate(Col_det)
@@ -291,3 +296,6 @@ print(Col_act.FP)
 
 
 
+#File 1 : change moments 13
+#File 2 : 
+#File 3 :

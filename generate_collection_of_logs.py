@@ -64,16 +64,6 @@ def generate_logs(par, file_path_to_own_models=None):
                 collection.add_drift(drift_instance)
 
 
-        # ADD NOISE and CREATE NOISE INFO INSTANCE
-        # TODO: integrate the noise related lines below
-        noise = select_random(par.Noise, option='random')
-        if noise:
-            noisy_trace_prob = select_random(par.Noisy_trace_prob, option='uniform_step')
-            noisy_event_prob = select_random(par.Noisy_event_prob, option='uniform_step')
-            noise_instance = NoiseInfo(log_name, noisy_trace_prob, noisy_event_prob)
-            event_log = insert_noise(event_log, noise_instance.noisy_trace_prob, noise_instance.noisy_event_prob, par.Task_exp_duration_sec)
-            collection.add_noise(noise_instance)
-            event_log.attributes[InfoTypes.noise_info.value] = noise_instance.noise_info_to_dict()
             # ADD TIME PERSPECTIVE TO EVENT LOG
             add_duration_to_log(event_log, par)
             # ADD UNIQUE TRACE IDs
