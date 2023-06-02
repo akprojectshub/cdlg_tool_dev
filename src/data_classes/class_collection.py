@@ -196,10 +196,9 @@ class Collection:
         drift_ids_det = [DI_det[0].log_id for DI_det in Col_det.drifts]
 
         drift_ids_det_left = drift_ids_det.copy()
-        print("drifts", self.drifts)
         for drift_pos in range(0, len(self.drifts)): #self.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
             change_mom_act = self.extract_change_moments(self.drifts[drift_pos])
-            print(change_mom_act)
+
             if drift_ids_act[drift_pos] in drift_ids_det:
                 pos_drift_to_match = drift_ids_det.index(drift_ids_act[drift_pos])
                 change_mom_det = Col_det.extract_change_moments(Col_det.drifts[pos_drift_to_match])
@@ -209,6 +208,7 @@ class Collection:
 
             elif drift_ids_act[drift_pos] not in drift_ids_det:
                 self.FN += len(self.extract_change_moments(self.drifts[drift_pos]))  # if there is no log in the detected drift with the same ID as in the actual drift then increase the FN by the number of drifts in the actual drift
+
             self.FP += len(change_mom_det)  # All the change moments in the detected drift that didn't match but with the same logid as on log in the actual logs
         self.FP += len([cm for log_id in drift_ids_det_left for cm in Col_det.extract_change_moments(Col_det.drifts[drift_ids_det.index(log_id)])]) #All the log_ids in the dected that are not in the actual
 
@@ -233,15 +233,16 @@ class Collection:
 
     def matching(self,change_inf_act,change_mom_det):
 
+
         change_mom_det_filtered = self.check_drift_type(change_inf_act, change_mom_det) #return the change moments in the change_moment_det that match the drift type of the actual change moment
         if len(change_mom_det_filtered) > 0:
             change_mom_diff = [abs(cm[2]-change_inf_act[2])for cm in change_mom_det_filtered]
             lowest_change_mom_diff_index = change_mom_diff.index(min(change_mom_diff))
-            if self.check_latency(change_inf_act[2],change_mom_det_filtered[lowest_change_mom_diff_index][2], 2) == True:
+            if self.check_latency(change_inf_act[2],change_mom_det_filtered[lowest_change_mom_diff_index][2], 20) == True:
                 self.TP+=1 #the drift is in both the actual and the detected
                 change_mom_det.remove(change_mom_det_filtered[lowest_change_mom_diff_index]) #remove the matching change from the list of change moments in the detected drifts
 
-            elif self.check_latency(change_inf_act[2],change_mom_det_filtered[lowest_change_mom_diff_index][2], 2) == False:
+            elif self.check_latency(change_inf_act[2],change_mom_det_filtered[lowest_change_mom_diff_index][2], 20) == False:
                 self.FN+=1 #The drift is in the actual but not in the detected
 
         elif len(change_mom_det_filtered) == 0:
@@ -260,42 +261,3 @@ class Collection:
     def check_drift_type(change_inf_act, change_mom_det):
         return [change_inf_det for change_inf_det in change_mom_det if change_inf_det[1] == change_inf_act[1]]
 
-
-
-#Test
-
-Col_act = Collection()
-Col_det = Collection()
-
-Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
-Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
-
-
-
-
-
-Col_act.evaluate(Col_det)
-
-print(Col_act.TP)
-print(Col_act.FN)
-print(Col_act.FP)
-
-
-
-#####################################################################
-#Thnings to DO:
-#Change the parameters names
-#specify a class that contains the parameter names ("children","change_info"...)
-#make sure the function evaluate now works with a list of tupple ans input and that the comparision is done for logs with the same ID (DONE)
-#make sure that process_tree stored in DriftInfo returns the correct result (sudden should retunr two process trees)
-
-
-#Things I changed:
-# I changed the command add drift so that it takes into account multiple drifts per log
-# I changed the method add_change_info in the class_drift added change_start and change_end as parameters ---> Because of this generate collection of logs do not work anymore
-
-
-
-#File 1 : change moments 13
-#File 2 : 
-#File 3 :
