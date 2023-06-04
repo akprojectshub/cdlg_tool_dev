@@ -215,7 +215,6 @@ class Collection:
                 self.FP += sum([len(cm) for cm in change_mom_det])  # All the change moments in the detected drift that didn't match but with the same logid as on log in the actual logs
             elif (change_mom_det != []):
                 self.FP += len([cm for drift in Col_det.drifts for cm in Col_det.extract_change_moments(drift) if cm not in change_mom_det_to_del])
-                print(len([cm for log_id in drift_ids_det_left for cm in Col_det.extract_change_moments(Col_det.drifts[drift_ids_det.index(log_id)])]) )
                 self.FP += len([cm for log_id in drift_ids_det_left for cm in Col_det.extract_change_moments(Col_det.drifts[drift_ids_det.index(log_id)])])  # All the log_ids in the dected that are not in the actual
 
     @staticmethod
@@ -268,44 +267,4 @@ class Collection:
 
 
 
-#Test
 
-Col_act = Collection()
-#Col_det = Collection()
-
-Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual")
-#Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_detected")
-
-print(Col_act.load_log_names_and_paths("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/experiments_all_types_v3_1685372669_actual"))
-
-
-#Col_act.evaluate(Col_det)
-
-#print(Col_act.TP)
-#print(Col_act.FN)
-#print(Col_act.FP)
-
-
-
-#####################################################################
-#Thnings to DO:
-#Change the parameters names
-#specify a class that contains the parameter names ("children","change_info"...)
-#make sure the function evaluate now works with a list of tupple ans input and that the comparision is done for logs with the same ID (DONE)
-#make sure that process_tree stored in DriftInfo returns the correct result (sudden should retunr two process trees)
-
-
-#Things I changed:
-# I changed the command add drift so that it takes into account multiple drifts per log
-# I changed the method add_change_info in the class_drift added change_start and change_end as parameters ---> Because of this generate collection of logs do not work anymore
-
-
-
-#File 1 : change moments 13
-#File 2 : 8
-#File 3 : 8
-
-
-#TP: 16
-#FN: 13
-#FP: 0
