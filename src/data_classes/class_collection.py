@@ -197,8 +197,8 @@ class Collection:
         FP_per_log = 0
         drift_ids_det_left = drift_ids_det.copy()
         change_mom_det = []
+        change_mom_det_to_del = list()
         for drift_pos in range(0, len(self.drifts)): #self.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
-            change_mom_det_to_del = list()
             change_mom_act = self.extract_change_moments(self.drifts[drift_pos])
 
             if drift_ids_act[drift_pos] in drift_ids_det:
@@ -210,12 +210,11 @@ class Collection:
             elif drift_ids_act[drift_pos] not in drift_ids_det:
                 self.FN += len(self.extract_change_moments(self.drifts[drift_pos]))  # if there is no log in the detected drift with the same ID as in the actual drift then increase the FN by the number of drifts in the actual drift
 
-            if (change_mom_det == []): ## case where the two collections have completly different log_ids
-                change_mom_det = [Col_det.extract_change_moments(drift) for drift in Col_det.drifts]
-                self.FP += sum([len(cm) for cm in change_mom_det])  # All the change moments in the detected drift that didn't match but with the same logid as on log in the actual logs
-            elif (change_mom_det != []):
-                self.FP += len([cm for drift in Col_det.drifts for cm in Col_det.extract_change_moments(drift) if cm not in change_mom_det_to_del])
-                self.FP += len([cm for log_id in drift_ids_det_left for cm in Col_det.extract_change_moments(Col_det.drifts[drift_ids_det.index(log_id)])])  # All the log_ids in the dected that are not in the actual
+        # FP represent the sum of all reamining change moments in the detected drifts that are not available in the actual drift
+        cm_all_det = list()
+        for cm in Col_det.drifts:
+            cm_all_det.extend(Col_det.extract_change_moments(cm))
+        self.FP = sum([1 if cm not in change_mom_det_to_del else 0 for cm in cm_all_det])
 
     @staticmethod
     def extract_change_moments(drifts_in_log: list()): #takes a list of drift instances
