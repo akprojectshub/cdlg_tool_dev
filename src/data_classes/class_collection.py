@@ -62,6 +62,11 @@ class Collection:
         return loaded_event_logs
 
 
+    def import_drift_and_noise_info_from_flat_file_csv(self, path):
+        pass
+
+        return None
+
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
         dict_nested = dict()
@@ -99,6 +104,9 @@ class Collection:
         df.to_csv(f"{path}/drift_info.csv", index=False)
 
         return None
+
+
+
     def convert_change_trace_index_into_timestamp(self, event_log, log_name):
 
         for drift in self.drifts:
