@@ -26,28 +26,15 @@ class Collection:
     FP: int = 0
     FN: int = 0
 
-
-    def add_drift(self, instance: DriftInfo):
-        self.drifts.append(instance)
-        self.increase_drift_count()
+    def add_drift(self, list_drift_per_log: list):
+        self.drifts.append(list_drift_per_log)
+        self.increase_drift_count(list_drift_per_log)
 
     def add_noise(self, instance: NoiseInfo):
         self.noise.append(instance)
         self.increase_noise_count()
 
-    def increase_drift_count(self):
-        self.number_of_drifts += 1
-
-
-    def add_drift_from_xes_file(self, list_drift_per_log: list):
-        self.drifts.append(list_drift_per_log)
-        self.increase_drift_count_from_xes_file(list_drift_per_log)
-
-    def add_noise_from_xes_file(self, instance: NoiseInfo):
-        self.noise.append(instance)
-        self.increase_noise_count_from_xes_file()
-
-    def increase_drift_count_from_xes_file(self, list_drift_per_log):
+    def increase_drift_count(self, list_drift_per_log):
         self.number_of_drifts += len(list_drift_per_log)
 
     def increase_noise_count(self):
@@ -85,7 +72,7 @@ class Collection:
                 DI.convert_change_trace_index_into_timestamp(log)
 
             drift_info_list.append(DI)
-        self.from_xes_file(drift_info_list)
+        self.add_drift(drift_info_list)
 
         return None
         # extract info xes should return an istance of the class drift_info
@@ -100,8 +87,11 @@ class Collection:
                 NI.set_noisy_trace_prob(val)
             elif attr == "noisy_event_prob":
                 NI.set_noisy_event_prob(val)
-        self.add_noise_from_xes_file(NI)
+        self.add_noise(NI)
         return None
+
+
+
 
 
     @staticmethod
