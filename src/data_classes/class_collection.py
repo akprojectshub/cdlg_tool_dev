@@ -26,7 +26,10 @@ class Collection:
     FP: int = 0
     FN: int = 0
 
-    def add_drift(self, list_drift_per_log: list):
+    def add_drift(self, instance: DriftInfo):
+        self.drifts.append(instance)
+        self.increase_drift_count()
+    def add_drift_from_xes(self, list_drift_per_log: list):
         self.drifts.append(list_drift_per_log)
         self.increase_drift_count(list_drift_per_log)
 
@@ -34,7 +37,10 @@ class Collection:
         self.noise.append(instance)
         self.increase_noise_count()
 
-    def increase_drift_count(self, list_drift_per_log):
+    def increase_drift_count(self):
+        self.number_of_drifts += 1
+
+    def increase_drift_count_from_xes(self, list_drift_per_log):
         self.number_of_drifts += len(list_drift_per_log)
 
     def increase_noise_count(self):
@@ -90,10 +96,6 @@ class Collection:
         self.add_noise(NI)
         return None
 
-
-
-
-
     @staticmethod
     def load_log_names_and_paths(path):
         loaded_event_logs = {}
@@ -108,6 +110,11 @@ class Collection:
         for log_name, log_folder in self.load_log_names_and_paths(path).items():
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
             self.extract_drift_info_from_log(log,log_name)
+
+    def import_drift_and_noise_info_from_flat_file_csv(self, path):
+        pass
+
+        return None
 
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
@@ -143,7 +150,7 @@ class Collection:
                 flat_file.append(data)
 
         df = pd.DataFrame(flat_file, columns=['log_name', 'drift_or_noise_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
-        df.to_csv(f"{path}/drift_info.csv", index=False)
+        df.to_csv(f"{path}/drift_info.csv", index=False, sep=';')
         return None
 
     def convert_change_trace_index_into_timestamp(self, event_log, log_name):
