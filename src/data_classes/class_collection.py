@@ -115,9 +115,6 @@ class Collection:
     def import_drift_and_noise_info_from_flat_file_csv(self, path):
         df = pd.read_csv(path, sep=";")
 
-        DI = DriftInfo()
-        NI = NoiseInfo()
-
         # 1st: extract all distinct log names
         log_names = remove_duplicates([ln.split(",")[0] for ln in df["log_name"]])
 
@@ -140,6 +137,8 @@ class Collection:
                         except:
                             change_start = None
                             change_end = None
+                        DI = DriftInfo()
+                        NI = NoiseInfo()
 
                         DI.set_log_id(log_name)
                         DI.set_drift_id(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_id") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
