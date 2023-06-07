@@ -38,9 +38,22 @@ class DriftInfo:
         self.process_trees[process_tree_id] = deepcopy(process_tree)
         return None
 
+    def add_change_info_from_csv(self,change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs, change_start, change_end):
+        #self.add_process_tree(tree_new)
+        change_id = str(len(self.change_info) + 1)
+        self.change_info[change_id] = {'change_type': change_type,
+                                       'change_trace_index': change_trace_index,
+                                       'process_tree_before': tree_previous,
+                                       'process_tree_after': tree_new,
+                                       'activities_deleted': deleted_acs,
+                                       'activities_added': added_acs,
+                                       'activities_moved': moved_acs,
+                                       'change_start': change_start,
+                                       'change_end':change_end}
+        return None
 
 
-    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs): #Question: Shouldn't we also store the start and end time if a drift ?
+    def add_change_info(self, change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs):
 
         self.add_process_tree(tree_new)
         change_id = str(len(self.change_info)+1)
@@ -92,5 +105,6 @@ def initialize_drift_instance_from_list(input: list):
         drift_instance.process_trees = trees
 
     return drift_instance
+
 
 

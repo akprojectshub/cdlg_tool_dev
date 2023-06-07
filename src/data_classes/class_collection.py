@@ -12,6 +12,7 @@ from src.data_classes.class_noise import NoiseInfo
 from src.utilities import TraceAttributes
 import datetime
 import re
+import pandas as pd
 
 @dataclass
 class Collection:
@@ -112,7 +113,63 @@ class Collection:
             self.extract_drift_info_from_log(log,log_name)
 
     def import_drift_and_noise_info_from_flat_file_csv(self, path):
-        pass
+        df = pd.read_csv(path, sep=";")
+
+        DI = DriftInfo()
+        NI = NoiseInfo()
+
+        # 1st: extract all distinct log names
+        log_names = remove_duplicates([ln.split(",")[0] for ln in df["log_name"]])
+
+        for log_name in log_names:
+
+            sub_df_log = df.loc[df["log_name"] == log_name]
+
+            drift_noise_id = remove_duplicates(sub_df_log["drift_or_noise_id"])
+
+            for id in drift_noise_id:
+
+                sub_df_id = sub_df_log.loc[sub_df_log["drift_or_noise_id"] == id]
+                if (id.split("_")[0] == "drift"):
+                    change_info_id = remove_duplicates(list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
+
+                    for change_id in change_info_id:
+                        try:
+                            change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                            change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                        except:
+                            change_start = None
+                            change_end = None
+
+                        DI.set_log_id(log_name)
+                        DI.set_drift_id(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_id") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_process_perspective(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "process_perspective") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_drift_type(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+
+                        ###############################
+                        #print(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        ##########################
+
+                        DI.add_change_info_from_csv(sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_trace_index") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_type") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_before") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_after") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_deleted") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_added") & (
+                                                    sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_moved") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                                                    change_start,
+                                                    change_end)
+
+                    self.add_drift(DI)
+
+                elif (id.split("_")[0] == "noise"):
+                    NI.set_log_id(log_name)
+                    NI.set_noisy_trace_prob(
+                        sub_df_log["value"].loc[sub_df_log["drift_sub_attribute"] == "noisy_trace_prob"].values[0])
+                    NI.set_noisy_event_prob(
+                        sub_df_log["value"].loc[sub_df_log["drift_sub_attribute"] == "noisy_event_prob"].values[0])
+                    self.add_noise(NI)
 
         return None
 
@@ -273,4 +330,13 @@ class Collection:
 
 
 
+
+def remove_duplicates(strings):
+    seen = set()
+    result = []
+    for string in strings:
+        if string not in seen:
+            seen.add(string)
+            result.append(string)
+    return result
 
