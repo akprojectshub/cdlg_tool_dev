@@ -91,6 +91,16 @@ def add_duration_to_log(log, par):
                         # print(f"Trace: {trace}, trace length: {len(trace)}")
                         # print(f"Index: {index_event}, and event: {event}")
                         # ValueError("Error")
+
+    add_event_lifecycle(log)
+
+    return None
+
+
+def add_event_lifecycle(log):
+    for trace in log:
+        for event in trace:
+            event[DEFAULT_TRANSITION_KEY] = 'complete'
     return None
 
 
