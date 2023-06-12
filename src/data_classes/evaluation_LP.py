@@ -12,7 +12,9 @@ from pulp import LpProblem, LpMinimize, LpMaximize, LpVariable, LpBinary, lpSum,
 
 from src.data_classes.helpers_LP import calcAvgDuration, convertToTimedelta
 
-def getTP_FP(detected:List[int], known:List[int], lag:int, count_duplicate_detections:bool = True)-> Tuple[int,int]:
+
+def getTP_FP(detected: List[int], known: List[int], lag: int, count_duplicate_detections: bool = True) -> Tuple[
+    int, int]:
     """Returns the number of true and false positives, using assign_changepoints to calculate the assignments of detected change point to actual change point.
 
     Args:
@@ -24,23 +26,26 @@ def getTP_FP(detected:List[int], known:List[int], lag:int, count_duplicate_detec
         Tuple[int,int]: Tuple of: (true positives, false positives)
 
     Examples:
-    getTP_FP([1000,1001,2000], [1000,2000], 200, True)
-    (2,1)
+    >>> getTP_FP([1000,1001,2000], [1000,2000], 200, True)
+    >>> (2,1)
 
-    getTP_FP([1000,1001,2000], [1000,2000], 200, False)
-    (2,0)
+    >>> getTP_FP([1000,1001,2000], [1000,2000], 200, False)
+    >>> (2,0)
     """
     assignments = assign_changepoints(detected, known, lag_window=lag)
 
-    TP = len(assignments) # Every assignment is a True Positive, and every detected point is assigned at most once
+    TP = len(assignments)  # Every assignment is a True Positive, and every detected point is assigned at most once
     if count_duplicate_detections:
         FP = len(detected) - TP
     else:
-        true_positive_candidates = [d for d in detected if any((k-lag <= d and d <= k+lag) for k in known)] # Detections that are in range of a 
+        true_positive_candidates = [d for d in detected if any(
+            (k - lag <= d and d <= k + lag) for k in known)]  # Detections that are in range of a
         FP = len(detected) - len(true_positive_candidates)
-    return (TP,FP)
+    return (TP, FP)
 
-def calcPrecisionRecall(detected:List[int], known:List[int], lag:int, zero_division=np.NaN, count_duplicate_detections:bool = True)->Tuple[float, float]:
+
+def calcPrecisionRecall(detected: List[int], known: List[int], lag: int, zero_division=np.NaN,
+                        count_duplicate_detections: bool = True) -> Tuple[float, float]:
     """Calculates the precision and recall, using `get_TP_FP` for True positives and False Negatives, which uses assign_changepoints to calculate the assignments of detected change point to actual change point.
 
     Args:
@@ -55,17 +60,19 @@ def calcPrecisionRecall(detected:List[int], known:List[int], lag:int, zero_divis
     """
 
     TP, FP = getTP_FP(detected, known, lag, count_duplicate_detections)
-    if(TP+FP > 0):
-        precision = TP/(TP+FP)
+    if (TP + FP > 0):
+        precision = TP / (TP + FP)
     else:
         precision = zero_division
-    if(len(known) > 0):
-        recall = TP/len(known)
+    if (len(known) > 0):
+        recall = TP / len(known)
     else:
         recall = zero_division
     return (precision, recall)
 
-def F1_Score(detected:List[int], known: List[int], lag:int, zero_division=np.NaN, verbose:bool=False, count_duplicate_detections:bool=True) -> float:
+
+def F1_Score(detected: List[int], known: List[int], lag: int, zero_division=np.NaN, verbose: bool = False,
+             count_duplicate_detections: bool = True) -> float:
     """ Calculates the F1 Score for a Changepoint Detection Result
 
     - Considering a known changepoint at timepoint t:
@@ -89,21 +96,24 @@ def F1_Score(detected:List[int], known: List[int], lag:int, zero_division=np.NaN
 
     TP, FP = getTP_FP(detected, known, lag, count_duplicate_detections)
     try:
-        precision = TP / (TP+FP)
+        precision = TP / (TP + FP)
         recall = TP / len(known)
 
-        f1_score = (2*precision*recall)/(precision+recall)
+        f1_score = (2 * precision * recall) / (precision + recall)
         return f1_score
     except ZeroDivisionError:
         if verbose:
             print("Calculation of F1-Score resulted in division by 0.")
         return zero_division
 
+
 # Alias for F1_Score
 f1 = F1_Score
 
-def calcTPR_FPR(detected:List[int], known:List[int], lag:int, num_possible_negatives:int=None)->Tuple[float, float]:
-    """Calculates the True-Positive-Rate and the False-Positive-Rate for a given detection. 
+
+def calcTPR_FPR(detected: List[int], known: List[int], lag: int, num_possible_negatives: int = None) -> Tuple[
+    float, float]:
+    """Calculates the True-Positive-Rate and the False-Positive-Rate for a given detection.
 
     Args:
         detected (List[int]): A list of indices of detected change point locations.
@@ -117,19 +127,20 @@ def calcTPR_FPR(detected:List[int], known:List[int], lag:int, num_possible_negat
 
     TP, FP = getTP_FP(detected, known, lag)
     P = len(known)
-    TPR = TP/P
+    TPR = TP / P
     # So many Negative points it wouldnt make sense....
-    FPR = FP/num_possible_negatives if num_possible_negatives is not None else np.NaN
+    FPR = FP / num_possible_negatives if num_possible_negatives is not None else np.NaN
     return (TPR, FPR)
 
 
-def assign_changepoints(detected_changepoints: List[int], actual_changepoints:List[int], lag_window:int=200) -> List[Tuple[int,int]]:
+def assign_changepoints(detected_changepoints: List[int], actual_changepoints: List[int], lag_window: int = 200) -> \
+List[Tuple[int, int]]:
     """Assigns detected changepoints to actual changepoints using a LP.
-    With restrictions: 
+    With restrictions:
 
-    - Detected point must be within `lag_window` of actual point. 
+    - Detected point must be within `lag_window` of actual point.
     - Detected point can only be assigned to one actual point.
-    - Every actual point can have at most one detected point assigned. 
+    - Every actual point can have at most one detected point assigned.
 
         This is done by first optimizing for the number of assignments, finding how many detected change points could be assigned, without minimizing the \
         total lag. Then, the LP is solved again, minimizing the sum of squared lags, while keeping the number of assignments as high as possible.
@@ -140,11 +151,11 @@ def assign_changepoints(detected_changepoints: List[int], actual_changepoints:Li
         lag_window (int, optional): How close must a detected change point be to an actual changepoint to be a true positive. Defaults to 200.
 
     Examples:
-    detected_changepoints = [1050, 934, 2100]
-    actual_changepoints = [1000,1149,2000]
-    assign_changepoints(detected_changepoints, actual_changepoints, lag_window=200)
-    [(1050, 1149), (934, 1000), (2100, 2000)]
-    # Notice how the actual changepoint 1000 gets a further detected changepoint to allow 1149 to also get a changepoint assigned
+    >>> detected_changepoints = [1050, 934, 2100]
+    >>> actual_changepoints = [1000,1149,2000]
+    >>> assign_changepoints(detected_changepoints, actual_changepoints, lag_window=200)
+    >>> [(1050, 1149), (934, 1000), (2100, 2000)]
+    >>> # Notice how the actual changepoint 1000 gets a further detected changepoint to allow 1149 to also get a changepoint assigned
 
     Returns:
         List[Tuple[int,int]]: List of tuples of (detected_changepoint, actual_changepoint) assignments
@@ -157,8 +168,9 @@ def assign_changepoints(detected_changepoints: List[int], actual_changepoints:Li
         prob = LpProblem("Changepoint_Assignment", sense)
 
         # Create a variable for each pair of detected and actual changepoints
-        vars = LpVariable.dicts("x", (detected_changepoints, actual_changepoints), 0, 1, LpBinary) # Assign detected changepoint dp to actual changepoint ap?
-        
+        vars = LpVariable.dicts("x", (detected_changepoints, actual_changepoints), 0, 1,
+                                LpBinary)  # Assign detected changepoint dp to actual changepoint ap?
+
         # Flatten vars into dict of tuples of keys
         x = {
             (dc, ap): vars[dc][ap] for dc in detected_changepoints for ap in actual_changepoints
@@ -182,7 +194,7 @@ def assign_changepoints(detected_changepoints: List[int], actual_changepoints:Li
         for dp in detected_changepoints:
             for ap in actual_changepoints:
                 prob += (
-                    x[dp, ap] * abs(dp - ap).days <= lag_window,
+                    x[dp, ap] * abs(dp - ap) <= lag_window,
                     f"Distance_Within_Lag_Window : {dp}_{ap}"
                 )
         return prob, x
@@ -208,14 +220,13 @@ def assign_changepoints(detected_changepoints: List[int], actual_changepoints:Li
         if prob1_vars[dp, ap].varValue == 1
     ])
 
-
     ### Multi-Objective Optimization: Now minimize the squared distance between assigned changepoints, using this maximal number of assignments
     # Use this number as the number of assignments for second optimization
     prob2, prob2_vars = buildProb_NoObjective(LpMinimize)
     prob2 += (
         lpSum(
             # Minimize the squared distance between assigned changepoints
-            prob2_vars[dp, ap] * pow((dp - ap).days,2)
+            prob2_vars[dp, ap] * pow(dp - ap, 2)
             for dp in detected_changepoints for ap in actual_changepoints
         ),
         "Squared_Distances"
@@ -236,7 +247,8 @@ def assign_changepoints(detected_changepoints: List[int], actual_changepoints:Li
         if prob2_vars[dp, ap].varValue == 1
     ]
 
-def get_avg_lag(detected_changepoints:List[int], actual_changepoints:List[int], lag:int=200)->float:
+
+def get_avg_lag(detected_changepoints: List[int], actual_changepoints: List[int], lag: int = 200) -> float:
     """Calculates the average lag between detected and actual changepoints (Caution: false positives do not affect this metric!)
 
     Args:
@@ -245,25 +257,25 @@ def get_avg_lag(detected_changepoints:List[int], actual_changepoints:List[int], 
         lag (int, optional): How close must a detected change point be to an actual changepoint to be a true positive. Defaults to 200.
 
     Examples:
-    detected_changepoints = [1050, 934, 2100]
-    actual_changepoints = [1000,1149,2000]
-    get_avg_lag(detected_changepoints, actual_changepoints, lag=200)
-    88.33333333333333
+    >>> detected_changepoints = [1050, 934, 2100]
+    >>> actual_changepoints = [1000,1149,2000]
+    >>> get_avg_lag(detected_changepoints, actual_changepoints, lag=200)
+    >>> 88.33333333333333
 
     Returns:
         float: the average distance between detected changepoints and the actual changepoint they get assigned to
     """
     assignments = assign_changepoints(detected_changepoints, actual_changepoints, lag_window=lag)
     avg_lag = 0
-    for (dc,ap) in assignments:
-        avg_lag += abs(dc-ap)
+    for (dc, ap) in assignments:
+        avg_lag += abs(dc - ap)
     try:
-        return avg_lag/len(assignments)
+        return avg_lag / len(assignments)
     except ZeroDivisionError:
         return np.nan;
 
 
-def getROCData(lag:int, df:pd.DataFrame, undefined_equals=0)->List[Tuple[float,float]]:
+def getROCData(lag: int, df: pd.DataFrame, undefined_equals=0) -> List[Tuple[float, float]]:
     """Returns a list of points, as tuples of Recall (TPR) and Precision (Cannot do FPR because negatives are not really defined for concept drift detection/negatives are practically the entire log (`len(log)-len(detected)`))
 
     Args:
@@ -281,32 +293,34 @@ def getROCData(lag:int, df:pd.DataFrame, undefined_equals=0)->List[Tuple[float,f
         for idx, row in win_df.iterrows():
             precisions = []
             recalls = []
-            prec, rec = calcPrecisionRecall(lag, row["Detected Changepoints"], row["Actual Changepoints for Log"], zero_division=undefined_equals)
+            prec, rec = calcPrecisionRecall(lag, row["Detected Changepoints"], row["Actual Changepoints for Log"],
+                                            zero_division=undefined_equals)
             precisions.append(prec)
             recalls.append(rec)
         # Average precision and recall over all logs for this 
-        points.append(  (np.mean(recalls), np.mean(precisions))   )
+        points.append((np.mean(recalls), np.mean(precisions)))
     return points
 
-def plotROC(lag, df:pd.DataFrame, undefined_equals=0)->None:
+
+def plotROC(lag, df: pd.DataFrame, undefined_equals=0) -> None:
     """Plot an ROC Curve (using precision and recall) for the given dataframe and a given lag value for precision and recall evaluation
 
     Args:
         lag (int): The maximal distance a detected change point can have to an actual change point, whilst still counting as a true positive.
         df (pd.DataFrame): The Dataframe containing the detection results of the approach
         undefined_equals (int, optional): The value to assign to undefined F1-Scores. Defaults to 0.
-    """    
-    dat = getROCData(lag,df,undefined_equals)
+    """
+    dat = getROCData(lag, df, undefined_equals)
     recalls, precisions = list(zip(*dat))
-    plt.plot(precisions, recalls) # x is precisions, y is recalls
-    plt.ylim(-0.01,1.01)
-    plt.xlim(-0.01,1.01)
+    plt.plot(precisions, recalls)  # x is precisions, y is recalls
+    plt.ylim(-0.01, 1.01)
+    plt.xlim(-0.01, 1.01)
     plt.xlabel("Precision")
     plt.ylabel("Recall")
     plt.show()
 
 
-def scatter_f1_duration(dfs:List[pd.DataFrame]):
+def scatter_f1_duration(dfs: List[pd.DataFrame]):
     """Make a Scatterplot of the F1 Score versus the Duration of the approaches with the pareto front. Very specific method to be used on the results from running `testAll_MP.py`.
 
     Args:
@@ -314,31 +328,31 @@ def scatter_f1_duration(dfs:List[pd.DataFrame]):
 
     Returns:
         plt.figure: The figure object containing the plot.
-    """    
+    """
 
     # Marker + Color Mapping for algorithms (and "synonymous" algorithm names)
     markers = {
-        "Bose J": "^", # triangle_up
-        "Bose WC": "^", # triangle_up
-        "Martjushev J": "s", # square
-        "Martjushev WC": "s", #square
-        "Martjushev ADWIN J": "s", # square
-        "Martjushev ADWIN WC": "s", #square
+        "Bose J": "^",  # triangle_up
+        "Bose WC": "^",  # triangle_up
+        "Martjushev J": "s",  # square
+        "Martjushev WC": "s",  # square
+        "Martjushev ADWIN J": "s",  # square
+        "Martjushev ADWIN WC": "s",  # square
     }
     colors = {
-        "Bose J": "#add8e6", # Light Blue
-        "Bose WC": "#000080", # Navy Blue
-        "Martjushev J": "#32cd32", # Navy Green
-        "Martjushev WC": "#006400", # Dark Green
-        "Martjushev ADWIN J": "#32cd32", # Navy Green
-        "Martjushev ADWIN WC": "#006400", # Dark Green
-        "ProDrift": "#ff0000", # Red
-        "Maaradji Runs": "#ff0000", # Red
-        "Earth Mover's Distance": "#ffa500", # Orange
-        "Process Graphs": "#ddcd10", # Some dark, rich yellow
-        "Process Graph Metrics": "#ddcd10", # Some dark, rich yellow
-        "Zheng": "#800080", # Purple
-        "Zheng DBSCAN": "#800080" # Purple
+        "Bose J": "#add8e6",  # Light Blue
+        "Bose WC": "#000080",  # Navy Blue
+        "Martjushev J": "#32cd32",  # Navy Green
+        "Martjushev WC": "#006400",  # Dark Green
+        "Martjushev ADWIN J": "#32cd32",  # Navy Green
+        "Martjushev ADWIN WC": "#006400",  # Dark Green
+        "ProDrift": "#ff0000",  # Red
+        "Maaradji Runs": "#ff0000",  # Red
+        "Earth Mover's Distance": "#ffa500",  # Orange
+        "Process Graphs": "#ddcd10",  # Some dark, rich yellow
+        "Process Graph Metrics": "#ddcd10",  # Some dark, rich yellow
+        "Zheng": "#800080",  # Purple
+        "Zheng DBSCAN": "#800080"  # Purple
         # The rest is just whatever it wants to give them
     }
 
@@ -346,29 +360,34 @@ def scatter_f1_duration(dfs:List[pd.DataFrame]):
     for df in dfs:
         # Turn Duration column into minutes
         df_copy = df.copy(deep=True)
-        df_copy["Duration"] = df_copy["Duration"].apply(lambda x: x.seconds/60)
+        df_copy["Duration"] = df_copy["Duration"].apply(lambda x: x.seconds / 60)
         handled_dfs.append(
             df_copy.rename(columns={"Duration": "Duration (Minutes)"}, inplace=False)
         )
 
-    fig = scatter_pareto_front(handled_dfs,  x="Duration (Minutes)", y="F1-Score", figsize=(8,5), lower_is_better_dimensions = ["Duration (Minutes)"], colors=colors, markers=markers)
+    fig = scatter_pareto_front(handled_dfs, x="Duration (Minutes)", y="F1-Score", figsize=(8, 5),
+                               lower_is_better_dimensions=["Duration (Minutes)"], colors=colors, markers=markers)
     plt.ylim(-0.02, 1)
     return fig
 
+
 def _getNameFromDataframe(df, name_column="Algorithm/Options"):
-        # Return the Algorithm/Options of the first entry
-        if name_column in df.columns:
-            return df.iloc[-1][name_column]
-        elif "Algorithm/Options" in df:
-            return df.iloc[-1]["Algorithm/Options"]
-        else:
-            return df.iloc[-1]["Algorithm"]
+    # Return the Algorithm/Options of the first entry
+    if name_column in df.columns:
+        return df.iloc[-1][name_column]
+    elif "Algorithm/Options" in df:
+        return df.iloc[-1]["Algorithm/Options"]
+    else:
+        return df.iloc[-1]["Algorithm"]
+
 
 def _column_is_time(column, df):
     # Check if the column has a time data type
     return pd.core.dtypes.common.is_datetime_or_timedelta_dtype(df[column])
 
-def calculate_scatter_data(dfs: List[pd.DataFrame], dimensions:List[str]=["F1-Score","Duration"], handle_nan_as=0)->List[Tuple[str, Dict[str, Any]]]:
+
+def calculate_scatter_data(dfs: List[pd.DataFrame], dimensions: List[str] = ["F1-Score", "Duration"],
+                           handle_nan_as=0) -> List[Tuple[str, Dict[str, Any]]]:
     """Calculate the points for a Scatterplot. Uses the mean value of each column as the corresponding value.
 
     Args:
@@ -377,16 +396,20 @@ def calculate_scatter_data(dfs: List[pd.DataFrame], dimensions:List[str]=["F1-Sc
 
     Returns:
         List[Tuple[str, Dict[str, Any]]]: List of points for the scatter plot. Points represented as a tuple of the *name* of the algorithm and a dictionary with a value for each dimension.
-    """    
+    """
     # Each approach correspnds to a point that is the mean of each dimension
     points = []
     for df in dfs:
         name = _getNameFromDataframe(df)
-        point = {dim: df[dim].fillna(handle_nan_as, inplace=False).mean() if not _column_is_time(dim, df) else calcAvgDuration(df, dim).seconds for dim in dimensions}
+        point = {dim: df[dim].fillna(handle_nan_as, inplace=False).mean() if not _column_is_time(dim,
+                                                                                                 df) else calcAvgDuration(
+            df, dim).seconds for dim in dimensions}
         points.append((name, point))
     return points
 
-def get_pareto_optimal_points(points: List[Dict[str, Any]], lower_is_better_dimensions: List[str] = [])->List[Tuple[str, Dict[str, Any]]]:
+
+def get_pareto_optimal_points(points: List[Dict[str, Any]], lower_is_better_dimensions: List[str] = []) -> List[
+    Tuple[str, Dict[str, Any]]]:
     """Get the pareto optimal points from a list of points. A pareto optimal point is a point for which no other exists that is better in every dimension.
 
     Args:
@@ -401,16 +424,21 @@ def get_pareto_optimal_points(points: List[Dict[str, Any]], lower_is_better_dime
         (name, point)
         for idx, (name, point) in enumerate(points)
         # If pareto-optimal
-        if all( # For every other point:
-            any( # This point is better or equal in at least one dimension --> the point is not better in *every* dimension
-                other_point[dim] <= point[dim] if not dim in lower_is_better_dimensions else other_point[dim] >= point[dim]
+        if all(  # For every other point:
+            any(
+                # This point is better or equal in at least one dimension --> the point is not better in *every* dimension
+                other_point[dim] <= point[dim] if not dim in lower_is_better_dimensions else other_point[dim] >= point[
+                    dim]
                 for dim in point.keys()
             )
-            for _,other_point in [p for i,p in enumerate(points) if i != idx] # All other points
+            for _, other_point in [p for i, p in enumerate(points) if i != idx]  # All other points
         )
     ]
 
-def scatter_pareto_front(dfs:List[pd.DataFrame],  x:str="Duration", y:str="F1-Score", handle_nan_as:Any=0, figsize:Tuple[int,int]=(8,5), lower_is_better_dimensions: List[str] = [], markers:Dict={}, colors:Dict={})->plt.figure:
+
+def scatter_pareto_front(dfs: List[pd.DataFrame], x: str = "Duration", y: str = "F1-Score", handle_nan_as: Any = 0,
+                         figsize: Tuple[int, int] = (8, 5), lower_is_better_dimensions: List[str] = [],
+                         markers: Dict = {}, colors: Dict = {}) -> plt.figure:
     """Plot the approaches as a scatterplot, considering dimensions `x` and `y`. Additionally, the Pareto front is indicated in the plot. Only two dimensions are supported. 
 
     Args:
@@ -425,11 +453,10 @@ def scatter_pareto_front(dfs:List[pd.DataFrame],  x:str="Duration", y:str="F1-Sc
 
     Returns:
         plt.figure: The figure object containing the plot.
-    """    
-
+    """
 
     # First get the pareto points
-    data = calculate_scatter_data(dfs, [x,y], handle_nan_as)
+    data = calculate_scatter_data(dfs, [x, y], handle_nan_as)
     pareto_points = get_pareto_optimal_points(data, lower_is_better_dimensions=lower_is_better_dimensions)
 
     fig = plt.figure(figsize=figsize)
@@ -441,22 +468,23 @@ def scatter_pareto_front(dfs:List[pd.DataFrame],  x:str="Duration", y:str="F1-Sc
 
     # Plot the pareto front
     pareto_points = sorted(pareto_points, key=lambda point: point[1][x])
-    plt.plot([0,pareto_points[0][1][x]], [0, pareto_points[0][1][y]], "red", linestyle=":", zorder=1)
+    plt.plot([0, pareto_points[0][1][x]], [0, pareto_points[0][1][y]], "red", linestyle=":", zorder=1)
     # Plot a line between the neighboring pareto optimal points
     for idx, (_, point) in enumerate(pareto_points[:-1]):
-        _,point2 = pareto_points[idx+1]
+        _, point2 = pareto_points[idx + 1]
         xs = [point[x], point2[x]]
         ys = [point[y], point2[y]]
         plt.plot(xs, ys, "red", linestyle=":", zorder=1)
     # Plot a line from the last point horizontally off the canvas
     xlim_before = plt.xlim()
-    ub = plt.xlim()[1]*2
-    plt.plot([pareto_points[-1][1][x], ub], [pareto_points[-1][1][y],pareto_points[-1][1][y]], "red", linestyle=":", zorder=1)
+    ub = plt.xlim()[1] * 2
+    plt.plot([pareto_points[-1][1][x], ub], [pareto_points[-1][1][y], pareto_points[-1][1][y]], "red", linestyle=":",
+             zorder=1)
     plt.xlim(xlim_before)
 
     plt.xlabel(f"Mean {x}")
     plt.ylabel(f"Mean {y}")
     plt.grid(True)
 
-    plt.legend(bbox_to_anchor=(1,1), loc="upper left", title="Algorithm")
+    plt.legend(bbox_to_anchor=(1, 1), loc="upper left", title="Algorithm")
     return fig
