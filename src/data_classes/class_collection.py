@@ -32,7 +32,7 @@ class Collection:
         self.increase_drift_count()
     def add_drift_from_xes(self, list_drift_per_log: list):
         self.drifts.append(list_drift_per_log)
-        self.increase_drift_count(list_drift_per_log)
+        self.increase_drift_count_from_xes(list_drift_per_log)
 
     def add_noise(self, instance: NoiseInfo):
         self.noise.append(instance)
@@ -79,7 +79,7 @@ class Collection:
                 DI.convert_change_trace_index_into_timestamp(log)
 
             drift_info_list.append(DI)
-        self.add_drift(drift_info_list)
+        self.add_drift_from_xes(drift_info_list)
 
         return None
         # extract info xes should return an istance of the class drift_info
@@ -117,13 +117,11 @@ class Collection:
 
         # 1st: extract all distinct log names
         log_names = remove_duplicates([ln.split(",")[0] for ln in df["log_name"]])
-
         for log_name in log_names:
-
+            sub_DI = list()
             sub_df_log = df.loc[df["log_name"] == log_name]
-
             drift_noise_id = remove_duplicates(sub_df_log["drift_or_noise_id"])
-
+            format_string = "%Y-%m-%d %H:%M:%S.%f"
             for id in drift_noise_id:
 
                 sub_df_id = sub_df_log.loc[sub_df_log["drift_or_noise_id"] == id]
@@ -131,23 +129,21 @@ class Collection:
                     change_info_id = remove_duplicates(list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
 
                     for change_id in change_info_id:
-                        try:
-                            change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
-                            change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
-                        except:
-                            change_start = None
-                            change_end = None
+                        #try: #Some logs do not contain change_start and change_end !!!!
+                        change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                        change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                        #except:
+                        #    change_start = None
+                        #    change_end = None
+                            #change_start = "0000-00-00 00:00:00"
+                            #change_end = "0000-00-00 00:00:00"
                         DI = DriftInfo()
                         NI = NoiseInfo()
 
                         DI.set_log_id(log_name)
-                        DI.set_drift_id(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_id") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_drift_id(sub_df_id["drift_or_noise_id"].loc[(sub_df_id["drift_attribute"] == "drift_id") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
                         DI.set_process_perspective(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "process_perspective") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
                         DI.set_drift_type(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
-
-                        ###############################
-                        #print(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
-                        ##########################
 
                         DI.add_change_info_from_csv(sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_trace_index") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_type") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
@@ -159,8 +155,10 @@ class Collection:
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_moved") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
                                                     change_start,
                                                     change_end)
+                                                    #datetime.datetime.strptime(change_start,format_string),
+                                                    #datetime.datetime.strptime(change_end,format_string))
+                    sub_DI.append(DI)
 
-                    self.add_drift(DI)
 
                 elif (id.split("_")[0] == "noise"):
                     NI.set_log_id(log_name)
@@ -169,6 +167,8 @@ class Collection:
                     NI.set_noisy_event_prob(
                         sub_df_log["value"].loc[sub_df_log["drift_sub_attribute"] == "noisy_event_prob"].values[0])
                     self.add_noise(NI)
+
+                self.add_drift_from_xes(sub_DI)
 
         return None
 

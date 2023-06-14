@@ -39,7 +39,7 @@ class DriftInfo:
         return None
 
     def add_change_info_from_csv(self,change_trace_index, change_type, tree_previous, tree_new, deleted_acs, added_acs, moved_acs, change_start, change_end):
-        #self.add_process_tree(tree_new)
+        self.add_process_tree(tree_new)
         change_id = str(len(self.change_info) + 1)
         self.change_info[change_id] = {'change_type': change_type,
                                        'change_trace_index': change_trace_index,
