@@ -175,6 +175,20 @@ def multiple_collection_generator(par, n_noise=None, n_drifts=None):
 
     return None
 
+def experiments_multiple_collection_generator(par, complexities: list = []):
+
+    if not complexities:
+        complexities = ['simple']
+
+    for complexity in  complexities:
+        suffix = '_complexity_' + complexity
+        par.Folder_name = config.PARAMETER_NAME + suffix
+        par.Process_tree_complexity = [complexity]
+        print(par.Folder_name)
+        main(par)
+
+    return None
+
 
 if __name__ == '__main__':
     par = get_parameters(config.PARAMETER_NAME)
@@ -182,5 +196,8 @@ if __name__ == '__main__':
     # n_drifts = [1, 2, 3, 4, 5]
     #multiple_collection_generator(par, n_drifts=n_drifts, n_noise=n_noise)
     #multiple_collection_generator(par)
-    main(par)
+    #main(par)
+
+    experiments_multiple_collection_generator(par, complexities=['middle', 'complex'])
+    sys.exit()
 
