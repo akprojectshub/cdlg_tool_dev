@@ -110,31 +110,45 @@ def extract_change_trace_index(drifts_in_log: list()):  # takes a list of drift 
 
 def list_of_change_indexes (drift_change_index:list[tuple]):
     list_of_change_indexes = list()
+    print(drift_change_index)
     for change_index_info in drift_change_index:
         list_of_change_indexes.extend(change_index_info[2])
     return list_of_change_indexes
 
 
+def filter_list_change_indexes(change_index_infos : list(), drift_type):
+    return [ci for ci in change_index_infos if ci[1]==drift_type]
+
+
+
+
 
 def evaluate_lp_method(Col_act,Col_det,lag):
-
-    global TP
-    global FP
+    TP_FP_dict = dict()
 
     log_ids_act = extract_log_ids(Col_act, Col_det)["actual logs"]
     log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
     log_ids_det_left = log_ids_det.copy()
     for drift_pos in range(0,len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
         change_index_act = extract_change_trace_index(Col_act.drifts[drift_pos])
+        TP_FP_dict[log_ids_act[drift_pos]] = {"gradual":{"TP":0,"FP":0},
+                                       "sudden":{"TP":0, "FP":0},
+                                       "incremental":{"TP":0, "FP":0},
+                                       "recurring":{"TP":0, "FP":0}}
         # TODO: Filtering by log type
         if log_ids_act[drift_pos] in log_ids_det:
             pos_drift_to_match = log_ids_det.index(log_ids_act[drift_pos])
             change_index_det = extract_change_trace_index(Col_det.drifts[pos_drift_to_match])
             log_ids_det_left.remove(log_ids_act[drift_pos])
+            act_drift_types = list(set([cindex_det[1] for cindex_det in change_index_act ]))
+            for drift_type in act_drift_types:
+                change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
+                change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
+                TP_FP_dict[log_ids_act[drift_pos]][drift_type]["TP"] += getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0]
 
-            TP += getTP_FP(list_of_change_indexes(change_index_det),list_of_change_indexes(change_index_act),lag)[0]
-            FP += getTP_FP(list_of_change_indexes(change_index_det),list_of_change_indexes(change_index_act),lag) [1]
-    return {"TP":TP,"FP":FP}
+                TP_FP_dict[log_ids_act[drift_pos]][drift_type]["FP"] += getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag) [1]
+
+    return TP_FP_dict
 
 
 
@@ -143,12 +157,10 @@ def evaluate_lp_method(Col_act,Col_det,lag):
 global TP
 global FP
 
-
 def Automated_evaluation (Col_act, Col_det, eval_type): #Eval type returns what type of evaluation is needed (TS or TR)
-    TP = 0
-    FP = 0
+
     if eval_type == "TS":
         return evaluate_using_timestamps(Col_act, Col_det)
     elif eval_type =="TR":
-        return evaluate_lp_method(Col_act,Col_det,20)
+        return evaluate_lp_method(Col_act,Col_det,20) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
 
