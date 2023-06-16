@@ -13,6 +13,7 @@ from src.utilities import TraceAttributes
 import datetime
 import re
 import pandas as pd
+from src.data_classes.util import extract_list_from_string
 
 @dataclass
 class Collection:
@@ -112,6 +113,10 @@ class Collection:
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
             self.extract_drift_info_from_log(log,log_name)
 
+
+
+
+
     def import_drift_and_noise_info_from_flat_file_csv(self, path):
         df = pd.read_csv(path, sep=";")
 
@@ -129,14 +134,16 @@ class Collection:
                     change_info_id = remove_duplicates(list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
 
                     for change_id in change_info_id:
-                        #try: #Some logs do not contain change_start and change_end !!!!
-                        change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
-                        change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
-                        #except:
-                        #    change_start = None
-                        #    change_end = None
-                            #change_start = "0000-00-00 00:00:00"
-                            #change_end = "0000-00-00 00:00:00"
+                        try: #Some logs do not contain change_start and change_end !!!!
+                            change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                            change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                            change_start = datetime.datetime.strptime(change_start, format_string)
+                            change_end = datetime.datetime.strptime(change_end, format_string)
+
+                        except:
+                            change_start = None
+                            change_end = None
+
                         DI = DriftInfo()
                         NI = NoiseInfo()
 
@@ -145,7 +152,7 @@ class Collection:
                         DI.set_process_perspective(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "process_perspective") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
                         DI.set_drift_type(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
 
-                        DI.add_change_info_from_csv(sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_trace_index") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                        DI.add_change_info_from_csv(extract_list_from_string(sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_trace_index") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]),
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_type") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_before") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_after") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
@@ -155,8 +162,7 @@ class Collection:
                                                     sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_moved") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
                                                     change_start,
                                                     change_end)
-                                                    #datetime.datetime.strptime(change_start,format_string),
-                                                    #datetime.datetime.strptime(change_end,format_string))
+
                     sub_DI.append(DI)
 
 
