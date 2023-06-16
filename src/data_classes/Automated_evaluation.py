@@ -1,6 +1,7 @@
 from src.data_classes.evaluation_LP import getTP_FP
 from class_collection import *
-
+from src.data_classes.evaluation_LP import calcPrecisionRecall
+import numpy as np
 
 def extract_change_moments(drifts_in_log: list()):  # takes a list of drift instances
     drift_moments = list()
@@ -125,17 +126,27 @@ def filter_list_change_indexes(change_index_infos : list(), drift_type):
 
 def evaluate_lp_method(Col_act,Col_det,lag):
     TP_FP_dict = dict()
+    Precision_Recall = dict()
 
     log_ids_act = extract_log_ids(Col_act, Col_det)["actual logs"]
     log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
     log_ids_det_left = log_ids_det.copy()
     for drift_pos in range(0,len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
         change_index_act = extract_change_trace_index(Col_act.drifts[drift_pos])
-        TP_FP_dict[log_ids_act[drift_pos]] = {"gradual":{"TP":0,"FP":0},
-                                       "sudden":{"TP":0, "FP":0},
-                                       "incremental":{"TP":0, "FP":0},
-                                       "recurring":{"TP":0, "FP":0}}
-        # TODO: Filtering by log type
+        """TP_FP_dict[log_ids_act[drift_pos]] = {"gradual":{"TP":0,"FP":0},
+                                           "sudden":{"TP":0, "FP":0},
+                                           "incremental":{"TP":0, "FP":0},
+                                           "recurring":{"TP":0, "FP":0}}
+    
+            Precision_Recall[log_ids_act[drift_pos]] = {"gradual":{"Precision":0,"Recall":0},
+                                           "sudden":{"Precision":0, "Recall":0},
+                                           "incremental":{"Precision":0, "Recall":0},
+                                           "recurring":{"Precision":0, "Recall":0}}
+        """
+        TP_FP_dict[log_ids_act[drift_pos]]={}
+        Precision_Recall[log_ids_act[drift_pos]]={}
+
+
         if log_ids_act[drift_pos] in log_ids_det:
             pos_drift_to_match = log_ids_det.index(log_ids_act[drift_pos])
             change_index_det = extract_change_trace_index(Col_det.drifts[pos_drift_to_match])
@@ -144,13 +155,12 @@ def evaluate_lp_method(Col_act,Col_det,lag):
             for drift_type in act_drift_types:
                 change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
-                TP_FP_dict[log_ids_act[drift_pos]][drift_type]["TP"] += getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0]
+                TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
+                                                                  "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1]}
 
-                TP_FP_dict[log_ids_act[drift_pos]][drift_type]["FP"] += getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag) [1]
-
-    return TP_FP_dict
-
-
+                Precision_Recall[log_ids_act[drift_pos]][drift_type] = {"Precision": calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[0],
+                                                                        "Recall":calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[1]}
+    return (TP_FP_dict, Precision_Recall)
 
 
 
