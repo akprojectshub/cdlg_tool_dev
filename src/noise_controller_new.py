@@ -44,7 +44,7 @@ def _insert_event(trace: Trace, tasks, task_exp_duration_sec):
     all_timestamps = [e["time:timestamp"] for e in trace]
     # Create a new timestamp and append it to all timestamps
     #task_exp_duration_sec = 500000
-    task_duration_sec = np.random.exponential(task_exp_duration_sec)
+    task_duration_sec = int(np.random.exponential(task_exp_duration_sec))
     new_timestamp = max(all_timestamps) + datetime.timedelta(seconds=task_duration_sec)
     all_timestamps.append(new_timestamp)
     all_timestamps.sort()
