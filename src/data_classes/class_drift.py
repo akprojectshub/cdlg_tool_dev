@@ -49,22 +49,6 @@ class DriftInfo:
                                        'activities_moved': moved_acs}
         return None
 
-    def convert_change_trace_index_into_timestamp(self, event_log):
-
-        change_info_new = deepcopy(self.change_info)
-        for change_id, change_data in self.change_info.items():
-            for change_attr, attr_value in change_data.items():
-                if change_attr == 'change_trace_index':
-                    change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0]['time:timestamp']
-                    if isinstance(attr_value, list) and len(attr_value) == 2:
-                        change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0]['time:timestamp']
-                    elif isinstance(attr_value, list) and len(attr_value) == 1:
-                        change_info_new[change_id]['change_end'] = change_info_new[change_id]['change_start']
-                    else:
-                        ValueError("Something is wrong!")
-        self.change_info = change_info_new
-        return None
-
     def get_previous_process_tree(self):
         max_process_tree_id = str(max([int(key) for key in self.process_trees.keys()]))
         previous_process_tree = deepcopy(self.process_trees[max_process_tree_id])
