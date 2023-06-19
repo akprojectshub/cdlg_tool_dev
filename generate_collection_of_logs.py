@@ -29,7 +29,7 @@ def generate_logs(par, file_path_to_own_models=None):
 
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
-    print('Generating', number_of_logs, 'logs')
+    print('Generating', number_of_logs, 'logs in', out_folder)
     collection = Collection()
     for log_id in range(1, number_of_logs + 1):
         try:
@@ -87,6 +87,7 @@ def generate_logs(par, file_path_to_own_models=None):
             xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
 
         except:
+            print(f"This was an error in {log_name}!!!")
             continue
 
     collection.export_drift_and_noise_info_to_flat_file_csv(path=out_folder)
@@ -196,8 +197,8 @@ if __name__ == '__main__':
     # n_drifts = [1, 2, 3, 4, 5]
     #multiple_collection_generator(par, n_drifts=n_drifts, n_noise=n_noise)
     #multiple_collection_generator(par)
-    #main(par)
+    main(par)
 
-    experiments_multiple_collection_generator(par, complexities=['middle', 'complex'])
+    #experiments_multiple_collection_generator(par, complexities=['middle', 'complex'])
     sys.exit()
 
