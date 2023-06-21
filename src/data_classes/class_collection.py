@@ -14,12 +14,15 @@ import datetime
 import re
 import pandas as pd
 from src.data_classes.util import extract_list_from_string
+from src.data_classes.param_names import Log_attr_params
+
 
 @dataclass
 class Collection:
     """
     Object for keeping information about added drift and noise instances for a generated event log collection
     """
+
     drifts: list = field(default_factory=list)
     noise: list = field(default_factory=list)
     number_of_drifts: int = 0
@@ -31,6 +34,7 @@ class Collection:
     def add_drift(self, instance: DriftInfo):
         self.drifts.append(instance)
         self.increase_drift_count()
+
     def add_drift_from_xes(self, list_drift_per_log: list):
         self.drifts.append(list_drift_per_log)
         self.increase_drift_count_from_xes(list_drift_per_log)
@@ -52,31 +56,47 @@ class Collection:
         # This method is used to store the dictionary with log attribute levels in the log (xes file)
         param_drift = vars(DriftInfo)
 
-
-    def extract_drift_info_from_log(self,log,log_name):
+    def extract_drift_info_from_log(self, log, log_name):
         drift_info_list = []
-        for k in list(log.attributes["drift:info"]["children"].keys()):  # parses through the drifts: k takes k, drift_2 ...
+        for k in list(log.attributes[Log_attr_params.drift_info][
+                          Log_attr_params.children].keys()):  # parses through the drifts: k takes k, drift_2 ...
             DI = DriftInfo()
             DI.set_log_id(log_name)
             DI.set_drift_id(k)
-            DI.set_process_perspective(log.attributes["drift:info"]["children"][k]["children"]["process_perspective"])
-            DI.set_drift_type(log.attributes["drift:info"]["children"][k]["children"]["drift_type"])
-            for c in list(log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"].keys()):
-
+            DI.set_process_perspective(
+                log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                    Log_attr_params.process_perspective])
+            DI.set_drift_type(
+                log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                    Log_attr_params.drift_type])
+            for c in list(
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][
+                        Log_attr_params.children].keys()):
                 DI.add_change_info(
-                    [int(i) for i in re.findall(r'\d+',log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c]["children"]["change_trace_index"])],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["change_type"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["process_tree_before"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["process_tree_after"], #pb with process tree output
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["activities_deleted"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["activities_added"],
-                    log.attributes["drift:info"]["children"][k]["children"]["change_info"]["children"][c][
-                        "children"]["activities_moved"])
+                    [int(i) for i in re.findall(r'\d+',
+                                                log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][
+                                                    Log_attr_params.children][
+                                                    Log_attr_params.change_info][Log_attr_params.children][c][
+                                                    Log_attr_params.children][Log_attr_params.change_trace_index])],
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.change_type],
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.process_tree_before],
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.process_tree_after],  # pb with process tree output
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.activities_deleted],
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.activities_added],
+                    log.attributes[Log_attr_params.drift_info][Log_attr_params.children][k][Log_attr_params.children][
+                        Log_attr_params.change_info][Log_attr_params.children][c][
+                        Log_attr_params.children][Log_attr_params.activities_moved])
                 DI.convert_change_trace_index_into_timestamp(log)
 
             drift_info_list.append(DI)
@@ -86,7 +106,7 @@ class Collection:
         # extract info xes should return an istance of the class drift_info
         # the variable drifts later on should return contain list of drifts class instances
 
-    def extract_noise_info_from_log(self,log):
+    def extract_noise_info_from_log(self, log):
         NI = NoiseInfo()
         for attr, val in log.attributes["noise:info"]["children"].items():
             if attr == "log_id":
@@ -107,15 +127,10 @@ class Collection:
                     loaded_event_logs[filename] = os.sep.join([dir_path])
         return loaded_event_logs
 
-
-    def Extract_collection_of_drifts (self, path):
+    def Extract_collection_of_drifts(self, path):
         for log_name, log_folder in self.load_log_names_and_paths(path).items():
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
-            self.extract_drift_info_from_log(log,log_name)
-
-
-
-
+            self.extract_drift_info_from_log(log, log_name)
 
     def import_drift_and_noise_info_from_flat_file_csv(self, path):
         df = pd.read_csv(path, sep=";")
@@ -128,15 +143,21 @@ class Collection:
             drift_noise_id = remove_duplicates(sub_df_log["drift_or_noise_id"])
             format_string = "%Y-%m-%d %H:%M:%S.%f"
             for id in drift_noise_id:
-
                 sub_df_id = sub_df_log.loc[sub_df_log["drift_or_noise_id"] == id]
                 if (id.split("_")[0] == "drift"):
-                    change_info_id = remove_duplicates(list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
+                    change_info_id = remove_duplicates(
+                        list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
 
                     for change_id in change_info_id:
-                        try: #Some logs do not contain change_start and change_end !!!!
-                            change_start = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_start") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
-                            change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]
+                        try:  # Some logs do not contain change_start and change_end !!!!
+                            change_start = sub_df_id["value"].loc[
+                                (sub_df_id["drift_sub_attribute"] == "change_start") & (
+                                        sub_df_id["drift_or_noise_id"] == id) & (
+                                        sub_df_id["drift_attribute"] == change_id)].values[0]
+                            change_end = sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_end") & (
+                                    sub_df_id["drift_or_noise_id"] == id) & (sub_df_id[
+                                                                                 "drift_attribute"] == change_id)].values[
+                                0]
                             change_start = datetime.datetime.strptime(change_start, format_string)
                             change_end = datetime.datetime.strptime(change_end, format_string)
 
@@ -146,20 +167,54 @@ class Collection:
 
                         DI = DriftInfo()
                         NI = NoiseInfo()
-
+                        # TODO: change the parameters names
                         DI.set_log_id(log_name)
-                        DI.set_drift_id(sub_df_id["drift_or_noise_id"].loc[(sub_df_id["drift_attribute"] == "drift_id") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
-                        DI.set_process_perspective(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "process_perspective") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
-                        DI.set_drift_type(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_drift_id(sub_df_id["drift_or_noise_id"].loc[
+                                            (sub_df_id["drift_attribute"] == "drift_id") & (
+                                                    sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_process_perspective(sub_df_id["value"].loc[
+                                                       (sub_df_id["drift_attribute"] == "process_perspective") & (
+                                                               sub_df_id["drift_or_noise_id"] == id)].values[0])
+                        DI.set_drift_type(sub_df_id["value"].loc[(sub_df_id["drift_attribute"] == "drift_type") & (
+                                sub_df_id["drift_or_noise_id"] == id)].values[0])
 
-                        DI.add_change_info_from_csv(extract_list_from_string(sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_trace_index") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0]),
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "change_type") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_before") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "process_tree_after") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_deleted") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_added") & (
-                                                    sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
-                                                    sub_df_id["value"].loc[(sub_df_id["drift_sub_attribute"] == "activities_moved") & (sub_df_id["drift_or_noise_id"] == id) & (sub_df_id["drift_attribute"] == change_id)].values[0],
+                        DI.add_change_info_from_csv(extract_list_from_string(sub_df_id["value"].loc[(sub_df_id[
+                                                                                                         "drift_sub_attribute"] == "change_trace_index") & (
+                                                                                                            sub_df_id[
+                                                                                                                "drift_or_noise_id"] == id) & (
+                                                                                                            sub_df_id[
+                                                                                                                "drift_attribute"] == change_id)].values[
+                                                                                 0]),
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "change_type") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "process_tree_before") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "process_tree_after") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "activities_deleted") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "activities_added") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
+                                                    sub_df_id["value"].loc[
+                                                        (sub_df_id["drift_sub_attribute"] == "activities_moved") & (
+                                                                sub_df_id["drift_or_noise_id"] == id) & (
+                                                                sub_df_id["drift_attribute"] == change_id)].values[
+                                                        0],
                                                     change_start,
                                                     change_end)
 
@@ -177,7 +232,6 @@ class Collection:
                 self.add_drift_from_xes(sub_DI)
 
         return None
-
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
         dict_nested = dict()
@@ -201,7 +255,7 @@ class Collection:
                 count = 1
                 for attr, value in vars(noise_instance).items():
                     if attr != 'log_id':
-                        dict_nested[drift.log_id, 'noise_' + str(index+1), 'parameter_' + str(count)] = {attr: value}
+                        dict_nested[drift.log_id, 'noise_' + str(index + 1), 'parameter_' + str(count)] = {attr: value}
                         count += 1
 
         flat_file = []
@@ -211,7 +265,8 @@ class Collection:
                 data.extend([k, v])
                 flat_file.append(data)
 
-        df = pd.DataFrame(flat_file, columns=['log_name', 'drift_or_noise_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
+        df = pd.DataFrame(flat_file,
+                          columns=['log_name', 'drift_or_noise_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
         df.to_csv(f"{path}/drift_info.csv", index=False, sep=';')
         return None
 
@@ -223,8 +278,10 @@ class Collection:
                     for change_attr, attr_value in change_data.items():
                         if change_attr == 'change_trace_index':
                             if isinstance(attr_value, list) and len(attr_value) == 2:
-                                change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0][TraceAttributes.timestamp.value]
-                                change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0][TraceAttributes.timestamp.value]
+                                change_info_new[change_id]['change_start'] = event_log[attr_value[0]][0][
+                                    TraceAttributes.timestamp.value]
+                                change_info_new[change_id]['change_end'] = event_log[attr_value[-1]][0][
+                                    TraceAttributes.timestamp.value]
                             elif isinstance(attr_value, list) and len(attr_value) == 1:
                                 change_timestamp = event_log[attr_value[0]][0][TraceAttributes.timestamp.value]
                                 change_info_new[change_id]['change_start'] = change_timestamp
@@ -248,8 +305,9 @@ class Collection:
                             if key == 'change_info':
                                 output_dict_drift['children']['change_info'] = {'value': len(value), 'children': {}}
                                 for k, v in value.items():
-                                    #for kk, vv in v.items():
-                                    output_dict_drift['children']['change_info']['children'].update( {'change_id_' + str(k): {'value': 'info', 'children': v}})
+                                    # for kk, vv in v.items():
+                                    output_dict_drift['children']['change_info']['children'].update(
+                                        {'change_id_' + str(k): {'value': 'info', 'children': v}})
                         else:
                             output_dict_drift['children'].update({key: value})
 
@@ -260,9 +318,6 @@ class Collection:
         return event_log
 
 
-
-
-
 def remove_duplicates(strings):
     seen = set()
     result = []
@@ -271,4 +326,3 @@ def remove_duplicates(strings):
             seen.add(string)
             result.append(string)
     return result
-

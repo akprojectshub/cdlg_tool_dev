@@ -8,4 +8,8 @@ class Log_attr_params():
     activities_deleted = "activities_deleted"
     activities_added = "activities_added"
     activities_moved = "activities_moved"
+    drift_type = "drift_type"
+    process_perspective = "process_perspective"
+    change_trace_index = "change_trace_index"
+
 
