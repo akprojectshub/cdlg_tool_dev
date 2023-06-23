@@ -5,6 +5,10 @@ import numpy as np
 import csv
 
 
+
+#TODO: NAMING ALWAYS IN LOWER CASES
+
+
 def extract_change_moments(drifts_in_log: list()):  # takes a list of drift instances
     drift_moments = list()
     for drift_instance in drifts_in_log:  # is a list containing all the drift instances of a single log
@@ -142,9 +146,9 @@ def fill_evaluation_row_dic(log_name,drift_type,detected_cp,actual_cp,lag,TP,FP,
                       'TP': TP,
                       'FP': FP,
                       'FN_TP': FN_TP,
-                      'precision': precision,
-                      'recall': recall,
-                      'f1_score': f1_score}
+                      'Precision': precision,
+                      'Recall': recall,
+                      'F1_score': f1_score}
     return evaluation_row
 
 
@@ -163,17 +167,65 @@ def create_evaluation_report_file():
                'TP',
                'FP',
                'FN_TP',
-               'precision',
-               'recall',
-               'f1_score']
+               'Precision',
+               'Recall',
+               'F1_score']
     report = pd.DataFrame(columns=columns)
 
     return report
 
 
+def get_precision(TP, FP):
+    precision = np.where((TP + FP) > 0, np.divide(TP, TP + FP), np.nan)
+    return precision
+
+def get_recall(TP, FN_TP):
+    recall = np.where(FN_TP > 0, np.divide(TP , FN_TP), np.nan)
+    return recall
+
+def get_f1_score(precision, recall):
+    try:
+        f1_score = (2*precision*recall)/(precision+recall)
+        return f1_score
+    except ZeroDivisionError:
+        print("Calculation of F1-Score resulted in division by 0.")
+        f1_score = np.NaN
+
+    return str(f1_score)
+
+def get_total_evaluation_results(evaluation_report):
+    aggregations = {
+        'TP': 'sum',
+        'FP': 'sum',
+        'FN_TP': 'sum'}
+    grouping = ['lag', 'drift_type']
+    evaluation_report_agg = evaluation_report.groupby(grouping).agg(aggregations)
+    #print(evaluation_report_agg['TP'].iloc[1])
+    #print(evaluation_report_agg['FN_TP'])
+    #print("recall1",get_recall(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FN_TP'].iloc[1]))
+    #print("F1 score0 ",get_f1_score(get_precision(evaluation_report_agg['TP'].iloc[0],evaluation_report_agg['FP'].iloc[0])
+    #print("F1 score1 ",get_f1_score(get_precision(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FP'].iloc[1])
+
+    #,get_recall(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FN_TP'].iloc[1])))
+    evaluation_report_agg = evaluation_report_agg.assign(Precision=lambda x: get_precision(x['TP'], x['FP']))
+    evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
+    evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
+
+    print(evaluation_report_agg)
+
+    return evaluation_report_agg
+
 
 
 def evaluate_lp_method(Col_act,Col_det,lag):
+    """
+
+    :param Col_act:
+    :param Col_det:
+    :param lag:
+    :return:
+    """
+    #TODO
     evaluation_report = create_evaluation_report_file()
     TP_FP_dict = dict()
     Precision_Recall_f1score = dict()
@@ -182,7 +234,6 @@ def evaluate_lp_method(Col_act,Col_det,lag):
     log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
     log_ids_det_left = log_ids_det.copy()
     for drift_pos in range(0,len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
-        evaluation_row = dict()
         change_index_act = extract_change_trace_index(Col_act.drifts[drift_pos])
         TP_FP_dict[log_ids_act[drift_pos]]={}
         Precision_Recall_f1score[log_ids_act[drift_pos]]={}
@@ -193,13 +244,12 @@ def evaluate_lp_method(Col_act,Col_det,lag):
             change_index_det = extract_change_trace_index(Col_det.drifts[pos_drift_to_match])
             log_ids_det_left.remove(log_ids_act[drift_pos])
             act_drift_types = list(set([cindex_det[1] for cindex_det in change_index_act ]))
-            print(change_index_act)
             for drift_type in act_drift_types:
                 change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
                 TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
                                                                   "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1]}
-
+                                                                #TODO: add TP_FP
                 Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type] = {"Precision": calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[0],
                                                                                 "Recall":calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[1],
                                                                                 "F1 score":F1_Score(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN)}
@@ -218,21 +268,26 @@ def evaluate_lp_method(Col_act,Col_det,lag):
 
 
                 fill_data_frame_row(evaluation_report,evaluation_row)
-    evaluation_report.to_csv("C:/Users/ziedk/OneDrive/Bureau/test.csv",sep = ";")
+    evaluation_report.to_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports/evaluation_report.csv",sep = ";")
+    evaluation_report_agg = get_total_evaluation_results(evaluation_report)
+    evaluation_report_agg.to_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports/evaluation_report_agg.csv",sep = ",")
 
 
-                #the row in the dataframe should be inserted here
     return (TP_FP_dict, Precision_Recall_f1score)
 
 
 
-global TP
-global FP
+def Automated_evaluation (Col_act, Col_det, eval_type, lag): #Eval type returns what type of evaluation is needed (TS or TR)
+    global TP
+    global FP
+    global output_path
+    output_path = "C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports"
+    # TODO: have a fixed path for the storage of evaluation report (output_path)
 
-def Automated_evaluation (Col_act, Col_det, eval_type): #Eval type returns what type of evaluation is needed (TS or TR)
-
-    if eval_type == "TS":
+    TP = 0
+    FP = 0
+    if eval_type == "TS": #TODO time_based
         return evaluate_using_timestamps(Col_act, Col_det)
-    elif eval_type =="TR":
-        return evaluate_lp_method(Col_act,Col_det,20) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
+    elif eval_type =="TR": #TODO index_based
+        return evaluate_lp_method(Col_act,Col_det,lag) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
 
