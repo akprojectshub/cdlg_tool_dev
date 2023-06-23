@@ -200,13 +200,6 @@ def get_total_evaluation_results(evaluation_report):
         'FN_TP': 'sum'}
     grouping = ['lag', 'drift_type']
     evaluation_report_agg = evaluation_report.groupby(grouping).agg(aggregations)
-    #print(evaluation_report_agg['TP'].iloc[1])
-    #print(evaluation_report_agg['FN_TP'])
-    #print("recall1",get_recall(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FN_TP'].iloc[1]))
-    #print("F1 score0 ",get_f1_score(get_precision(evaluation_report_agg['TP'].iloc[0],evaluation_report_agg['FP'].iloc[0])
-    #print("F1 score1 ",get_f1_score(get_precision(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FP'].iloc[1])
-
-    #,get_recall(evaluation_report_agg['TP'].iloc[1],evaluation_report_agg['FN_TP'].iloc[1])))
     evaluation_report_agg = evaluation_report_agg.assign(Precision=lambda x: get_precision(x['TP'], x['FP']))
     evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
     evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
@@ -248,8 +241,8 @@ def evaluate_lp_method(Col_act,Col_det,lag):
                 change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
                 TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
-                                                                  "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1]}
-                                                                #TODO: add TP_FP
+                                                                  "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1],
+                                                                  "TP_FP":len(change_index_det_filtered)}
                 Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type] = {"Precision": calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[0],
                                                                                 "Recall":calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[1],
                                                                                 "F1 score":F1_Score(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN)}
@@ -268,9 +261,9 @@ def evaluate_lp_method(Col_act,Col_det,lag):
 
 
                 fill_data_frame_row(evaluation_report,evaluation_row)
-    evaluation_report.to_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports/evaluation_report.csv",sep = ";")
+    evaluation_report.to_csv(output_path+"/evaluation_report.csv",sep = ";")
     evaluation_report_agg = get_total_evaluation_results(evaluation_report)
-    evaluation_report_agg.to_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports/evaluation_report_agg.csv",sep = ",")
+    evaluation_report_agg.to_csv(output_path+"/evaluation_report_agg.csv",sep = ",")
 
 
     return (TP_FP_dict, Precision_Recall_f1score)
@@ -286,8 +279,8 @@ def Automated_evaluation (Col_act, Col_det, eval_type, lag): #Eval type returns 
 
     TP = 0
     FP = 0
-    if eval_type == "TS": #TODO time_based
+    if eval_type == "time_based":
         return evaluate_using_timestamps(Col_act, Col_det)
-    elif eval_type =="TR": #TODO index_based
+    elif eval_type =="index_based":
         return evaluate_lp_method(Col_act,Col_det,lag) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
 
