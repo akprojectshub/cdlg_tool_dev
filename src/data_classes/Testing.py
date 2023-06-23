@@ -213,20 +213,19 @@ def evaluate_lp_method(Col_act,Col_det,lag):
 """
 if __name__ == '__main__':
     #Testing loading log collection from CSV file
-    Col1 = Collection()
-    Col1.import_drift_and_noise_info_from_flat_file_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1686145046/drift_info.csv")
+    #Col1 = Collection()
+    #Col1.import_drift_and_noise_info_from_flat_file_csv("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372/drift_info.csv")
 
     Col2 = Collection()
-    Col2.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1686145046")
+    Col2.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372")
 
-    print("Col1")
-    print(Col1.drifts[0][0])
+    #print("Col1")
+    #print(Col1.drifts[0][0]["log_id"])
+    #print(Col1.drifts[0][0])
 
 
     print("Col2")
-    print(Col2.drifts[1][0])
-
-    print(Col1.drifts[0][0] == Col2.drifts[1][0])
+    print(Col2.drifts[0][0])
 """
 
 
@@ -234,15 +233,19 @@ if __name__ == '__main__':
     #Testing: Automated Evaluation
     Col_act = Collection()
     Col_det = Collection()
-    Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/drift_actual")
-    Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/drift_detected")
+    Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
+    Col_det.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 detected")
 
-    print(Col_det.drifts)
+    #print(Col_det.drifts)
 
-    print(Automated_evaluation(Col_act, Col_det, "TS"))
+    #print(Automated_evaluation(Col_act, Col_det, "TS"))
 
-    print(Automated_evaluation(Col_act, Col_det, "TR"))
+    Automated_evaluation(Col_act, Col_det, "TR",100)
 
 
 
-Col = Collection()
+
+
+
+
+#TODO: I have something to do related to the timestamp how the lag is computed
