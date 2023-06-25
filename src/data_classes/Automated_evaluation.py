@@ -204,7 +204,6 @@ def get_total_evaluation_results(evaluation_report):
     evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
     evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
 
-    print(evaluation_report_agg)
 
     return evaluation_report_agg
 
@@ -218,14 +217,15 @@ def evaluate_lp_method(Col_act,Col_det,lag):
     :param lag:
     :return:
     """
-    #TODO
     evaluation_report = create_evaluation_report_file()
     TP_FP_dict = dict()
     Precision_Recall_f1score = dict()
 
     log_ids_act = extract_log_ids(Col_act, Col_det)["actual logs"]
     log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
-    log_ids_det_left = log_ids_det.copy()
+    #print("act ids csv",log_ids_act)
+    #print("det ids",log_ids_det)
+    #log_ids_det_left = log_ids_det.copy()
     for drift_pos in range(0,len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
         change_index_act = extract_change_trace_index(Col_act.drifts[drift_pos])
         TP_FP_dict[log_ids_act[drift_pos]]={}
@@ -233,13 +233,17 @@ def evaluate_lp_method(Col_act,Col_det,lag):
 
 
         if log_ids_act[drift_pos] in log_ids_det:
+            log_ids_act
             pos_drift_to_match = log_ids_det.index(log_ids_act[drift_pos])
             change_index_det = extract_change_trace_index(Col_det.drifts[pos_drift_to_match])
-            log_ids_det_left.remove(log_ids_act[drift_pos])
+
+            #log_ids_det_left.remove(log_ids_act[drift_pos])
             act_drift_types = list(set([cindex_det[1] for cindex_det in change_index_act ]))
             for drift_type in act_drift_types:
                 change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
+
+
                 TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
                                                                   "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1],
                                                                   "TP_FP":len(change_index_det_filtered)}

@@ -148,6 +148,9 @@ class Collection:
                     change_info_id = remove_duplicates(
                         list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
 
+                    DI = DriftInfo()
+                    NI = NoiseInfo()
+
                     for change_id in change_info_id:
                         try:  # Some logs do not contain change_start and change_end !!!!
                             change_start = sub_df_id["value"].loc[
@@ -165,8 +168,6 @@ class Collection:
                             change_start = None
                             change_end = None
 
-                        DI = DriftInfo()
-                        NI = NoiseInfo()
                         # TODO: change the parameters names
                         DI.set_log_id(log_name)
                         DI.set_drift_id(sub_df_id["drift_or_noise_id"].loc[
@@ -218,6 +219,9 @@ class Collection:
                                                     change_start,
                                                     change_end)
 
+                    print("++++++++++++++++++")
+                    print(DI)
+
                     sub_DI.append(DI)
 
 
@@ -229,7 +233,7 @@ class Collection:
                         sub_df_log["value"].loc[sub_df_log["drift_sub_attribute"] == "noisy_event_prob"].values[0])
                     self.add_noise(NI)
 
-                self.add_drift_from_xes(sub_DI)
+            self.add_drift_from_xes(sub_DI)
 
         return None
 
