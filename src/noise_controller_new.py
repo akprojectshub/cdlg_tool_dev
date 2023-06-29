@@ -18,11 +18,11 @@ def insert_noise(log: EventLog, noisy_trace_prob, noisy_event_prob, task_exp_dur
                     # randomly select which kind of noise to insert
                     noise_type = random.randint(0, 2)
                     if noise_type == 0:
-                        _remove_event(trace_cpy)
+                        trace_cpy = _remove_event(trace_cpy)
                     if noise_type == 1:
-                        _insert_event(trace_cpy, classes, task_exp_duration_sec)
+                        trace_cpy = _insert_event(trace_cpy, classes, task_exp_duration_sec)
                     if noise_type == 2:
-                        _swap_events(trace_cpy)
+                        trace_cpy = _swap_events(trace_cpy)
                     # flip coin to see if more noise will be inserted
                     insert_more_noise = (random.random() <= noisy_event_prob)
             log_new.append(trace_cpy)
