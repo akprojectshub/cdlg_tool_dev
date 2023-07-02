@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
     #print(Automated_evaluation(Col_act, Col_det, "TS"))
 
-    Automated_evaluation(Col_act, Col_det, "TR",100)
+    print(Automated_evaluation(Col_act, Col_det,100))
 
 
 

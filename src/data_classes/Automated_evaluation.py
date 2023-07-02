@@ -9,104 +9,40 @@ import csv
 #TODO: NAMING ALWAYS IN LOWER CASES
 
 
-def extract_change_moments(drifts_in_log: list()):  # takes a list of drift instances
-    drift_moments = list()
-    for drift_instance in drifts_in_log:  # is a list containing all the drift instances of a single log
-        change_id = 1
-        for change_moment_info in list(drift_instance.change_info.values()):
-            if change_moment_info["change_type"] == "gradual":
-                drift_moments.append((change_id, drift_instance.drift_type, change_moment_info["change_start"]))
-                change_id += 1
-                drift_moments.append((change_id, drift_instance.drift_type, change_moment_info["change_end"]))
-                change_id += 1
-            elif change_moment_info["change_type"] == "sudden":
-                drift_moments.append((change_id, drift_instance.drift_type, change_moment_info["change_start"]))
-                change_id += 1
-    return drift_moments  # change_moments stores data in this format [(driftID,"drift_type1","TimeStamp1"),driftID,"drift_type1","TimeStamp1"),driftID,"drift_type1","TimeStamp1")]
+def extract_log_ids(col_act, col_det):
+    """Returns a dictionary containing the log ids of the actual and detected collection of logs stored in separate lists
+           Args:
+               col_act(List[DriftInfo]): A list storing all the actual drift instances
+               col_det(List[DriftInfo]): A list storing all the detected drift instances
+
+           Returns:
+               Dict[str,List[str]]: two lists storing the log ids of the actual and detected collection of logs
 
 
-def matching(change_inf_act, change_mom_det):
+           Examples:
+               >>> expected_log_ids([DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_1', process_perspective='control-flow', drift_type='gradual', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'gradual', 'change_trace_index': [2091, 2977], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2022, 8, 16, 19, 23, 34, 675168), 'change_end': datetime.datetime(2023, 10, 18, 22, 5, 57, 264767)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_2', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [5685], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1, Random activity 2]', 'activities_moved': '[]', 'change_start': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904), 'change_end': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_3', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [7086], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320), 'change_end': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320)}}))],
+               >>>[DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_1', process_perspective='control-flow', drift_type='gradual', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'gradual', 'change_trace_index': [2091, 2977], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2022, 8, 16, 19, 23, 34, 675168), 'change_end': datetime.datetime(2023, 10, 18, 22, 5, 57, 264767)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_2', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [5685], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1, Random activity 2]', 'activities_moved': '[]', 'change_start': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904), 'change_end': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_3', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [7086], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320), 'change_end': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320)}}))])
 
-    global TP
-    global FP
+               >>> {'actual logs': ['log_1_1687271372.xes', 'log_2_1687271374.xes'], 'detected logs': ['log_1_1687271372.xes', 'log_2_1687271374.xes']}
+           """
 
-    change_mom_det_filtered = check_drift_type(change_inf_act,change_mom_det)  # return the change moments in the change_moment_det that match the drift type of the actual change moment
-    change_mom_det_to_del = []
-    if len(change_mom_det_filtered) > 0:
-        change_mom_diff = [abs(cm[2] - change_inf_act[2]) for cm in change_mom_det_filtered]
-        lowest_change_mom_diff_index = change_mom_diff.index(min(change_mom_diff))
-        if check_latency(change_inf_act[2], change_mom_det_filtered[lowest_change_mom_diff_index][2], 20) == True:
-            TP += 1  # the drift is in both the actual and the detected
-            change_mom_det_to_del.append(change_mom_det_filtered[
-                                             lowest_change_mom_diff_index])  # remove the matching change from the list of change moments in the detected drifts
-
-    #    elif Col_act.check_latency(change_inf_act[2], change_mom_det_filtered[lowest_change_mom_diff_index][2],
-    #                            20) == False:
-    #        Col_act.FN += 1  # The drift is in the actual but not in the detected
-
-    #elif len(change_mom_det_filtered) == 0:
-    #    Col_act.FN += 1  # there is no drift of the same type in the detected drift
-    return change_mom_det_to_del
-
-
-def check_latency(cm_act, cm_det, lag):
-    if (abs((cm_act - cm_det).days) <= lag):
-        return True
-    else:
-        return False
-
-
-def check_drift_type(change_inf_act, change_mom_det):
-    return [change_inf_det for change_inf_det in change_mom_det if change_inf_det[1] == change_inf_act[1]]
-
-
-def extract_log_ids(Col_act, Col_det):
     log_ids_det_act = {}
-    log_ids_det_act["actual logs"] = [DI_act[0].log_id for DI_act in Col_act.drifts]
-    log_ids_det_act["detected logs"] = [DI_det[0].log_id for DI_det in Col_det.drifts]
+    log_ids_det_act["actual logs"] = [DI_act[0].log_id for DI_act in col_act.drifts]
+    log_ids_det_act["detected logs"] = [DI_det[0].log_id for DI_det in col_det.drifts]
     return log_ids_det_act
 
-
-def calculate_FP_ts_method(Col_det, change_mom_det_to_del:list):
-    global FP
-
-    cm_all_det = list()
-    for cm in Col_det.drifts:
-        cm_all_det.extend(extract_change_moments(cm))
-    FP += sum([1 if cm not in change_mom_det_to_del else 0 for cm in cm_all_det])
-
-    return None
-
-
-
-def evaluate_using_timestamps(Col_act, Col_det):
-
-    global TP
-    global FP
-
-    log_ids_act = extract_log_ids(Col_act, Col_det)["actual logs"]
-    log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
-    log_ids_det_left = log_ids_det.copy()
-    change_mom_det_to_del = list()
-    for drift_pos in range(0,
-                           len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
-        change_mom_act = extract_change_moments(Col_act.drifts[drift_pos])
-
-        if log_ids_act[drift_pos] in log_ids_det:
-            pos_drift_to_match = log_ids_det.index(log_ids_act[drift_pos])
-            change_mom_det = extract_change_moments(Col_det.drifts[pos_drift_to_match])
-            log_ids_det_left.remove(log_ids_act[drift_pos])
-            for change_inf_act in change_mom_act:
-                change_mom_det_to_del.extend(matching(change_inf_act, change_mom_det))
-        #elif drift_ids_act[drift_pos] not in drift_ids_det:
-        #    Col_act.FN += len(Col_act.extract_change_moments(Col_act.drifts[
-        #                                                   drift_pos]))  # if there is no log in the detected drift with the same ID as in the actual drift then increase the FN by the number of drifts in the actual drift
-    # FP represent the sum of all reamining change moments in the detected drifts that are not available in the actual drift
-    calculate_FP_ts_method(Col_det, change_mom_det_to_del)
-    return {"TP":TP,"FP":FP}
-
-###### LP Method Functions #####
 def extract_change_trace_index(drifts_in_log: list()):  # takes a list of drift instances
+    """Returns a list of tuples storing information about all the drift changepoints in a single log
+
+    Args:
+        drifts_in_log (List[DriftInfo]): list of drift instances in a log
+    Returns:
+        List[Tuple[int,str,List[int]]]: List of tuples, each tuple contains the id, drift type, and the change trace indexes for each changepoint
+        in the log
+    Examples:
+        >>> extract_change_trace_index([DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_1', process_perspective='control-flow', drift_type='gradual', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'gradual', 'change_trace_index': [2091, 2977], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2022, 8, 16, 19, 23, 34, 675168), 'change_end': datetime.datetime(2023, 10, 18, 22, 5, 57, 264767)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_2', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [5685], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1, Random activity 2]', 'activities_moved': '[]', 'change_start': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904), 'change_end': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_3', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [7086], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320), 'change_end': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320)}}))])
+        >>> [(1, 'recurring', [2832]), (2, 'recurring', [4390, 5206]), (3, 'recurring', [7064]), (1, 'gradual', [8469, 9116])]
+    """
     drift_change_index = list()
     for drift_instance in drifts_in_log:  # is a list containing all the drift instances of a single log
         change_id = 1
@@ -115,14 +51,41 @@ def extract_change_trace_index(drifts_in_log: list()):  # takes a list of drift 
             change_id+=1
     return drift_change_index
 
+
+
+
 def list_of_change_indexes (drift_change_index:list[tuple]):
+    """Returns a list containing all the change trace indexes of a log
+    Args:
+        drift_change_index (List[Tuple[int,str,List[int]]]): List of tuples, each tuple contains the id, drift type, and the change trace indexes for each changepoint
+        in the log
+    Returns:
+        List[int]: List of change trace indexes
+
+    Examples:
+        >>> [(1, 'recurring', [2832]), (2, 'recurring', [4390, 5206]), (3, 'recurring', [7064]), (1, 'gradual', [8469, 9116])]
+        >>> [2832, 4390, 5206, 7064]
+    """
+
     list_of_change_indexes = list()
     for change_index_info in drift_change_index:
         list_of_change_indexes.extend(change_index_info[2])
     return list_of_change_indexes
 
 
-def filter_list_change_indexes(change_index_infos : list(), drift_type):
+def filter_list_change_indexes(change_index_infos : list(), drift_type:str):
+    """Returns a list containing all the change moments that match a specific drift type
+    Args:
+        drift_change_index_infos (List[Tuple[int,str,List[int]]]): List of tuples, each tuple contains the id, drift type, and the change trace indexes for each change moment
+        in the log
+        drift_type (str): The drift_type that will be used to filter the drift_change_index_infos list
+    Returns:
+        List[int]: List of change trace indexes sharing the same drift type
+
+    Examples:
+        >>> change_index_det [(1, 'gradual', [2091, 2977]), (1, 'sudden', [5685]), (1, 'sudden', [7086])]
+        >>> change_index_det_filtered [(1, 'gradual', [2091, 2977])]
+    """
     return [ci for ci in change_index_infos if ci[1]==drift_type]
 
 
@@ -176,14 +139,50 @@ def create_evaluation_report_file():
 
 
 def get_precision(TP, FP):
+    """Returns the precision
+    Args:
+       TP(int): True positive value
+       FP(int): False positive value
+    Returns:
+        Float: Return the precision or np.nan if division by 0
+
+    Examples:
+        >>> get_precision(2,0)
+        >>> 1.0
+    """
+
     precision = np.where((TP + FP) > 0, np.divide(TP, TP + FP), np.nan)
     return precision
 
 def get_recall(TP, FN_TP):
+    """Returns the recall
+    Args:
+       TP(int): True positive value
+       FN_TP(int): False negative value
+    Returns:
+        Float: Return the recall or np.nan if division by 0
+
+    Examples:
+        >>> get_recall(4,0)
+        >>> 1.0
+    """
     recall = np.where(FN_TP > 0, np.divide(TP , FN_TP), np.nan)
     return recall
 
 def get_f1_score(precision, recall):
+
+    """Returns the F1 score
+    Args:
+       precision(float): Precision
+       recall(float): Recall
+    Returns:
+        Float: Return the f1 score or np.nan if division by 0
+
+    Examples:
+        >>> get_recall(1.0,1.0)
+        >>> 1.0
+    """
+
     try:
         f1_score = (2*precision*recall)/(precision+recall)
         return f1_score
@@ -193,7 +192,16 @@ def get_f1_score(precision, recall):
 
     return str(f1_score)
 
-def get_total_evaluation_results(evaluation_report):
+def get_total_evaluation_results(evaluation_report: pd.DataFrame):
+
+    """Returns an aggregated version of the evaluation report
+    Args:
+       pd.DataFrame: A dataframe storing the log_name, drift_type, detected_cp,actual_cp,lag,TP,FP,FN_TP,Precision,Recall,F1_score
+
+    Returns:
+        pd.DataFrame: An aggregate version of the input dataframe with rows grouped by lag value and the drift_type
+    """
+
     aggregations = {
         'TP': 'sum',
         'FP': 'sum',
@@ -204,37 +212,47 @@ def get_total_evaluation_results(evaluation_report):
     evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
     evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
 
-    print(evaluation_report_agg)
-
     return evaluation_report_agg
 
 
 
-def evaluate_lp_method(Col_act,Col_det,lag):
+def evaluate_lp_method(col_act,col_det,lag):
+    """Returns data (TP,FP,FN,Precision,Recall, and F1 score) resulting of the matching process between the two collection of logs provided
+    Args:
+        col_act(List[DriftInfo]): A list storing all the actual drift instances
+        col_det(List[DriftInfo]): A list storing all the detected drift instances
+        lag (int): The maximal distance a detected change point can have to an actual change point, whilst still counting as a true positive.
+        TODO: Should be changed later when we specify how the lag will be defined for now it's an int
+    Returns:
+        Tuple[Dict[str,Dict[str,int]],Dict[str,float]]: A tuple storing two dictionaries. The first dictionary stores the TP, FP and FN for each log id and for each drift type.
+                                                        The second dictionary stores the precision, recall and f1score for each drift type.
+        DataFrame[log_name,drift_type,detected_cp,actual_cp,lag,TP, FP, precision, recall, and F1]: A data frame storing the metrics resulting from the matching process between two collection of logs
+
+
+    Examples:
+        >>> evaluate_lp_method([DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_1', process_perspective='control-flow', drift_type='gradual', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'gradual', 'change_trace_index': [2091, 2977], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2022, 8, 16, 19, 23, 34, 675168), 'change_end': datetime.datetime(2023, 10, 18, 22, 5, 57, 264767)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_2', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [5685], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1, Random activity 2]', 'activities_moved': '[]', 'change_start': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904), 'change_end': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_3', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [7086], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320), 'change_end': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320)}}))],
+        >>> [DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_1', process_perspective='control-flow', drift_type='gradual', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'gradual', 'change_trace_index': [2091, 2977], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ), 'Random activity 1' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2022, 8, 16, 19, 23, 34, 675168), 'change_end': datetime.datetime(2023, 10, 18, 22, 5, 57, 264767)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_2', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [5685], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ), 'Random activity 2' )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1, Random activity 2]', 'activities_moved': '[]', 'change_start': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904), 'change_end': datetime.datetime(2027, 2, 3, 23, 40, 2, 11904)}})), DriftInfo(log_id='log_1_1687271372.xes', drift_id='drift_3', process_perspective='control-flow', drift_type='sudden', process_trees=defaultdict(<class 'dict'>, {'0': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )"}), change_info=defaultdict(<class 'dict'>, {'1': {'change_type': 'sudden', 'change_trace_index': [7086], 'process_tree_before': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e' ) ), 'c' ) )", 'process_tree_after': "->( 'a', X( ->( 'b', ->( ->( 'd', 'f' ), 'e', 'Random activity 1' ) ), 'c' ) )", 'activities_deleted': '[]', 'activities_added': '[Random activity 1]', 'activities_moved': '[]', 'change_start': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320), 'change_end': datetime.datetime(2028, 10, 21, 5, 18, 56, 285320)}}))],
+        >>> 100)
+
+        >>> ({'log_1_1687271372.xes': {'sudden': {'TP': 2, 'FP': 0, 'TP_FP': 2}, 'gradual': {'TP': 2, 'FP': 0, 'TP_FP': 1}}, 'log_2_1687271374.xes': {'recurring': {'TP': 4, 'FP': 0, 'TP_FP': 3}, 'gradual': {'TP': 2, 'FP': 0, 'TP_FP': 1}}}, {'log_1_1687271372.xes': {'sudden': {'Precision': 1.0, 'Recall': 1.0, 'F1 score': 1.0}, 'gradual': {'Precision': 1.0, 'Recall': 1.0, 'F1 score': 1.0}}, 'log_2_1687271374.xes': {'recurring': {'Precision': 1.0, 'Recall': 1.0, 'F1 score': 1.0}, 'gradual': {'Precision': 1.0, 'Recall': 1.0, 'F1 score': 1.0}}})
+
     """
 
-    :param Col_act:
-    :param Col_det:
-    :param lag:
-    :return:
-    """
-    #TODO
     evaluation_report = create_evaluation_report_file()
     TP_FP_dict = dict()
     Precision_Recall_f1score = dict()
 
-    log_ids_act = extract_log_ids(Col_act, Col_det)["actual logs"]
-    log_ids_det = extract_log_ids(Col_act, Col_det)["detected logs"]
+    log_ids_act = extract_log_ids(col_act, col_det)["actual logs"]
+    log_ids_det = extract_log_ids(col_act, col_det)["detected logs"]
     log_ids_det_left = log_ids_det.copy()
-    for drift_pos in range(0,len(Col_act.drifts)):  # Col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
-        change_index_act = extract_change_trace_index(Col_act.drifts[drift_pos])
+    for drift_pos in range(0,len(col_act.drifts)):  # col_act.drifts is a list of drifts each change moment in a log is stored in an instance and each instance belonging to the same log are saved in the same list
+        change_index_act = extract_change_trace_index(col_act.drifts[drift_pos])
         TP_FP_dict[log_ids_act[drift_pos]]={}
         Precision_Recall_f1score[log_ids_act[drift_pos]]={}
 
-
         if log_ids_act[drift_pos] in log_ids_det:
             pos_drift_to_match = log_ids_det.index(log_ids_act[drift_pos])
-            change_index_det = extract_change_trace_index(Col_det.drifts[pos_drift_to_match])
+            change_index_det = extract_change_trace_index(col_det.drifts[pos_drift_to_match])
             log_ids_det_left.remove(log_ids_act[drift_pos])
             act_drift_types = list(set([cindex_det[1] for cindex_det in change_index_act ]))
             for drift_type in act_drift_types:
@@ -242,45 +260,44 @@ def evaluate_lp_method(Col_act,Col_det,lag):
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
                 TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
                                                                   "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1],
-                                                                  "TP_FP":len(change_index_det_filtered)}
+                                                                  "TP_FP":len(list_of_change_indexes(change_index_det_filtered))}
                 Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type] = {"Precision": calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[0],
                                                                                 "Recall":calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[1],
                                                                                 "F1 score":F1_Score(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN)}
-                evaluation_row = fill_evaluation_row_dic(Col_act.drifts[drift_pos][0].log_id,
-                                                         Col_act.drifts[drift_pos][0].drift_type,
-                                                         change_index_det_filtered[0][2],
-                                                         change_index_act_filtered[0][2],
-                                                         lag,
-                                                         TP_FP_dict[log_ids_act[drift_pos]][drift_type]["TP"],
-                                                         TP_FP_dict[log_ids_act[drift_pos]][drift_type]["FP"],
-                                                         len(change_index_det_filtered),
-                                                         Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["Precision"],
-                                                         Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["Recall"],
-                                                         Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["F1 score"])
+
+                for change_moment in change_index_det_filtered:
+                    print("change_moment",change_moment)
+                    evaluation_row = fill_evaluation_row_dic(col_act.drifts[drift_pos][0].log_id,
+                                                             col_act.drifts[drift_pos][0].drift_type,
+                                                             change_moment[2],
+                                                             change_moment[2],
+                                                             lag,
+                                                             TP_FP_dict[log_ids_act[drift_pos]][drift_type]["TP"],
+                                                             TP_FP_dict[log_ids_act[drift_pos]][drift_type]["FP"],
+                                                             len(list_of_change_indexes(change_index_det_filtered)),
+                                                             Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["Precision"],
+                                                             Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["Recall"],
+                                                             Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["F1 score"])
 
 
 
-                fill_data_frame_row(evaluation_report,evaluation_row)
+                    fill_data_frame_row(evaluation_report,evaluation_row)
+
     evaluation_report.to_csv(output_path+"/evaluation_report.csv",sep = ";")
     evaluation_report_agg = get_total_evaluation_results(evaluation_report)
     evaluation_report_agg.to_csv(output_path+"/evaluation_report_agg.csv",sep = ",")
-
 
     return (TP_FP_dict, Precision_Recall_f1score)
 
 
 
-def Automated_evaluation (Col_act, Col_det, eval_type, lag): #Eval type returns what type of evaluation is needed (TS or TR)
+def Automated_evaluation (col_act, col_det, lag): #Eval type returns what type of evaluation is needed (TS or TR)
     global TP
     global FP
     global output_path
     output_path = "C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/Evaluation reports"
     # TODO: have a fixed path for the storage of evaluation report (output_path)
-
     TP = 0
     FP = 0
-    if eval_type == "time_based":
-        return evaluate_using_timestamps(Col_act, Col_det)
-    elif eval_type =="index_based":
-        return evaluate_lp_method(Col_act,Col_det,lag) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
+    return evaluate_lp_method(col_act,col_det,lag) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
 
