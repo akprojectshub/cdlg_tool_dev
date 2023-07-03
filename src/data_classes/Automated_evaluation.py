@@ -258,6 +258,7 @@ def evaluate_lp_method(col_act,col_det,lag):
             for drift_type in act_drift_types:
                 change_index_det_filtered = filter_list_change_indexes(change_index_det,drift_type)
                 change_index_act_filtered = filter_list_change_indexes(change_index_act,drift_type)
+
                 TP_FP_dict[log_ids_act[drift_pos]][drift_type] = {"TP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[0],
                                                                   "FP":getTP_FP(list_of_change_indexes(change_index_det_filtered),list_of_change_indexes(change_index_act_filtered),lag)[1],
                                                                   "TP_FP":len(list_of_change_indexes(change_index_det_filtered))}
@@ -265,12 +266,11 @@ def evaluate_lp_method(col_act,col_det,lag):
                                                                                 "Recall":calcPrecisionRecall(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN,count_duplicate_detections = True)[1],
                                                                                 "F1 score":F1_Score(list_of_change_indexes(change_index_det_filtered), list_of_change_indexes(change_index_act_filtered), lag, zero_division=np.NaN)}
 
-                for change_moment in change_index_det_filtered:
-                    print("change_moment",change_moment)
-                    evaluation_row = fill_evaluation_row_dic(col_act.drifts[drift_pos][0].log_id,
-                                                             col_act.drifts[drift_pos][0].drift_type,
-                                                             change_moment[2],
-                                                             change_moment[2],
+
+                evaluation_row = fill_evaluation_row_dic(col_act.drifts[drift_pos][0].log_id,
+                                                             drift_type,
+                                                             list_of_change_indexes(change_index_det_filtered),
+                                                             list_of_change_indexes(change_index_act_filtered),
                                                              lag,
                                                              TP_FP_dict[log_ids_act[drift_pos]][drift_type]["TP"],
                                                              TP_FP_dict[log_ids_act[drift_pos]][drift_type]["FP"],
@@ -280,8 +280,8 @@ def evaluate_lp_method(col_act,col_det,lag):
                                                              Precision_Recall_f1score[log_ids_act[drift_pos]][drift_type]["F1 score"])
 
 
+                fill_data_frame_row(evaluation_report,evaluation_row)
 
-                    fill_data_frame_row(evaluation_report,evaluation_row)
 
     evaluation_report.to_csv(output_path+"/evaluation_report.csv",sep = ";")
     evaluation_report_agg = get_total_evaluation_results(evaluation_report)

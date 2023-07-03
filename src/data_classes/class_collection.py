@@ -57,6 +57,11 @@ class Collection:
         param_drift = vars(DriftInfo)
 
     def extract_drift_info_from_log(self, log, log_name):
+        """generates a drift instance from a log file
+                  Args:
+                      log(<class 'pm4py.objects.log.obj.EventLog'>): stores a log
+                      log_name(str): The name of the log
+        """
         drift_info_list = []
         for k in list(log.attributes[Log_attr_params.drift_info][
                           Log_attr_params.children].keys()):  # parses through the drifts: k takes k, drift_2 ...
@@ -107,6 +112,10 @@ class Collection:
         # the variable drifts later on should return contain list of drifts class instances
 
     def extract_noise_info_from_log(self, log):
+        """generates a noise instance from a log file
+            Args:
+            log(<class 'pm4py.objects.log.obj.EventLog'>): stores a log
+        """
         NI = NoiseInfo()
         for attr, val in log.attributes["noise:info"]["children"].items():
             if attr == "log_id":
@@ -119,7 +128,16 @@ class Collection:
         return None
 
     @staticmethod
-    def load_log_names_and_paths(path):
+    def load_log_names_and_paths(path:str):
+        """Loads
+            Args:
+                path(str):
+            Returns:
+                Dict[str,str]
+            Example:
+            >>> Collection.load_log_names_and_paths('C:/Users/username/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 detected')
+            >>> {'log_1_1687271372.xes': 'C:/Users/username/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 detected', 'log_2_1687271374.xes': 'C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 detected'}
+        """
         loaded_event_logs = {}
         for dir_path, dir_names, filenames in os.walk(path):
             for index, filename in enumerate(filenames):
@@ -133,6 +151,10 @@ class Collection:
             self.extract_drift_info_from_log(log, log_name)
 
     def import_drift_and_noise_info_from_flat_file_csv(self, path):
+        """generate a collection of logs from a csv file storing log information
+            Args:
+                path(str): path to a csv file
+        """
         df = pd.read_csv(path, sep=";")
 
         # 1st: extract all distinct log names
@@ -147,6 +169,9 @@ class Collection:
                 if (id.split("_")[0] == "drift"):
                     change_info_id = remove_duplicates(
                         list(sub_df_id[sub_df_id['drift_attribute'].str.contains(r'change_')]["drift_attribute"]))
+
+                    DI = DriftInfo()
+                    NI = NoiseInfo()
 
                     for change_id in change_info_id:
                         try:  # Some logs do not contain change_start and change_end !!!!
@@ -165,8 +190,6 @@ class Collection:
                             change_start = None
                             change_end = None
 
-                        DI = DriftInfo()
-                        NI = NoiseInfo()
                         # TODO: change the parameters names
                         DI.set_log_id(log_name)
                         DI.set_drift_id(sub_df_id["drift_or_noise_id"].loc[
@@ -218,6 +241,7 @@ class Collection:
                                                     change_start,
                                                     change_end)
 
+
                     sub_DI.append(DI)
 
 
@@ -229,11 +253,15 @@ class Collection:
                         sub_df_log["value"].loc[sub_df_log["drift_sub_attribute"] == "noisy_event_prob"].values[0])
                     self.add_noise(NI)
 
-                self.add_drift_from_xes(sub_DI)
+            self.add_drift_from_xes(sub_DI)
 
         return None
 
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
+        """generate a csv file that stores the data of a set of logs
+            Args:
+                path(str): path to a location where the csv file should be stored
+        """
         dict_nested = dict()
         for drift in self.drifts:
             for attr_key, attr_value in vars(drift).items():
@@ -318,7 +346,7 @@ class Collection:
         return event_log
 
 
-def remove_duplicates(strings):
+def remove_duplicates(strings:list):
     seen = set()
     result = []
     for string in strings:
@@ -326,3 +354,6 @@ def remove_duplicates(strings):
             seen.add(string)
             result.append(string)
     return result
+
+
+
