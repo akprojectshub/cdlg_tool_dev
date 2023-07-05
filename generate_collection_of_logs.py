@@ -87,7 +87,7 @@ def generate_logs(par, file_path_to_own_models=None):
             xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
 
         except:
-            print(f"This was an error in {log_name}!!!")
+            print(f"There is an error in {log_name}!!!")
             continue
 
     collection.export_drift_and_noise_info_to_flat_file_csv(path=out_folder)
