@@ -6,6 +6,34 @@ import csv
 
 
 
+
+#TODO: pull again the latest version (join the main branch with my transporter to update the transporter with the main)
+#TODO: ADD Aknowledgment part
+
+
+#TODO: NAMING ALWAYS IN LOWER CASES
+#TODO: REmove the examples
+#TODO: provide documentation for everything in datacalss file, drifts, and input_parameters (noise_controllers_new, utilities) ---> found in a screenshot that he sent me
+#TODO: generate collection of logs should also be documented
+#TODO: move file with parameters names to the utilities file that alexander created
+#TODO: change drift type also randomly in the automated evaluation in the testing file
+#TODO: add if statement in the testing (if main ... )
+#TODO: resturcuture the testing so that the testing is a single block
+#TODO: Add more modification when testing(hear again minute 36)
+#TODO: add testing for the lag (hear minute 41)
+#TODO: add the accuracy (hear again minute 45)
+
+#TODO: testing that our tool works for generating collection of logs for different parameters. Our tool should work for all input parameters that can be providied when generating logs
+
+#### FOCUS ON THE PREVIOUS POINTS FOR NOW
+#TODO: write a readme file (This is more tehcnical)
+#TODO: write a word documentation file (look at the repository link he sent me on slack )
+#TODO: he wants to write an aggregated method
+
+
+
+
+
 #TODO: NAMING ALWAYS IN LOWER CASES
 
 
