@@ -5,7 +5,7 @@ from random import uniform, randint
 from datetime import timedelta, datetime
 import src.configurations as config
 import numpy
-
+from pm4py.util.xes_constants import DEFAULT_TRANSITION_KEY
 
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
@@ -58,7 +58,6 @@ def add_duration_to_log(log, par):
     trace_exp_arrival_sec = select_random(par.Trace_exp_arrival_sec, option='uniform_int')
     task_exp_duration_sec = select_random(par.Task_exp_duration_sec, option='uniform_int')
 
-
     # Main loop over all traces and events
     for index_trace, trace in enumerate(log):
         if len(trace) > 0:
@@ -91,6 +90,16 @@ def add_duration_to_log(log, par):
                         # print(f"Trace: {trace}, trace length: {len(trace)}")
                         # print(f"Index: {index_event}, and event: {event}")
                         # ValueError("Error")
+
+    add_event_lifecycle(log)
+
+    return None
+
+
+def add_event_lifecycle(log):
+    for trace in log:
+        for event in trace:
+            event[DEFAULT_TRANSITION_KEY] = 'complete'
     return None
 
 

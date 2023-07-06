@@ -17,12 +17,12 @@ def insert_noise(log: EventLog, noisy_trace_prob, noisy_event_prob, task_exp_dur
                 while insert_more_noise:
                     # randomly select which kind of noise to insert
                     noise_type = random.randint(0, 2)
-                    if noise_type == 0:
-                        _remove_event(trace_cpy)
-                    if noise_type == 1:
-                        _insert_event(trace_cpy, classes, task_exp_duration_sec)
-                    if noise_type == 2:
-                        _swap_events(trace_cpy)
+                    if noise_type == 0 and len(trace_cpy)>1:
+                        trace_cpy = _remove_event(trace_cpy)
+                    if noise_type == 1 and len(trace_cpy)>0:
+                        trace_cpy = _insert_event(trace_cpy, classes, task_exp_duration_sec)
+                    if noise_type == 2 and len(trace_cpy) > 1:
+                        trace_cpy = _swap_events(trace_cpy)
                     # flip coin to see if more noise will be inserted
                     insert_more_noise = (random.random() <= noisy_event_prob)
             log_new.append(trace_cpy)
@@ -44,7 +44,7 @@ def _insert_event(trace: Trace, tasks, task_exp_duration_sec):
     all_timestamps = [e["time:timestamp"] for e in trace]
     # Create a new timestamp and append it to all timestamps
     #task_exp_duration_sec = 500000
-    task_duration_sec = np.random.exponential(task_exp_duration_sec)
+    task_duration_sec = int(np.random.exponential(task_exp_duration_sec))
     new_timestamp = max(all_timestamps) + datetime.timedelta(seconds=task_duration_sec)
     all_timestamps.append(new_timestamp)
     all_timestamps.sort()

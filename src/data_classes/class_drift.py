@@ -66,6 +66,7 @@ class DriftInfo:
                                        'activities_moved': moved_acs}
         return None
 
+<<<<<<< HEAD
     def convert_change_trace_index_into_timestamp(self, event_log):
         change_info_new = deepcopy(self.change_info)
         for change_id, change_data in self.change_info.items():
@@ -81,6 +82,7 @@ class DriftInfo:
                         ValueError("Something is wrong!")
         self.change_info = change_info_new
         return None
+
 
     def get_previous_process_tree(self):
         max_process_tree_id = str(max([int(key) for key in self.process_trees.keys()]))

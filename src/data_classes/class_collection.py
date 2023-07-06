@@ -257,6 +257,7 @@ class Collection:
 
         return None
 
+
     def export_drift_and_noise_info_to_flat_file_csv(self, path):
         """generate a csv file that stores the data of a set of logs
             Args:
@@ -297,6 +298,7 @@ class Collection:
                           columns=['log_name', 'drift_or_noise_id', 'drift_attribute', 'drift_sub_attribute', 'value'])
         df.to_csv(f"{path}/drift_info.csv", index=False, sep=';')
         return None
+
 
     def convert_change_trace_index_into_timestamp(self, event_log, log_name):
         for drift in self.drifts:
