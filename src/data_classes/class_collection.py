@@ -17,6 +17,8 @@ from src.data_classes.util import extract_list_from_string
 from src.data_classes.param_names import Log_attr_params
 
 
+#TODO:start explanation always in a capital letter
+
 @dataclass
 class Collection:
     """
@@ -57,7 +59,7 @@ class Collection:
         param_drift = vars(DriftInfo)
 
     def extract_drift_info_from_log(self, log, log_name):
-        """generates a drift instance from a log file
+        """Generates a drift instance from a log file
                   Args:
                       log(<class 'pm4py.objects.log.obj.EventLog'>): stores a log
                       log_name(str): The name of the log

@@ -5,8 +5,8 @@ import numpy as np
 import csv
 
 
+#TODO: don't forget error with trace 53
 
-#TODO: NAMING ALWAYS IN LOWER CASES
 
 
 def extract_log_ids(col_act, col_det):
