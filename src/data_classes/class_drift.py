@@ -66,7 +66,6 @@ class DriftInfo:
                                        'activities_moved': moved_acs}
         return None
 
-<<<<<<< HEAD
     def convert_change_trace_index_into_timestamp(self, event_log):
         change_info_new = deepcopy(self.change_info)
         for change_id, change_data in self.change_info.items():
