@@ -20,6 +20,9 @@ import csv
 #TODO: add if statement in the testing (if main ... )
 #TODO: resturcuture the testing so that the testing is a single block
 #TODO: Add more modification when testing(hear again minute 36)
+    #+Remove a change Point
+    #+Add change point: add a random change id and random drift type and random trace id
+    #
 #TODO: add testing for the lag (hear minute 41)
 #TODO: add the accuracy (hear again minute 45)
 

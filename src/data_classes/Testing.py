@@ -89,10 +89,9 @@ import copy
 probability_of_changing_trace = 1
 percentage_of_change = 0.7
 
-Col_act = Collection()
-Col_act.Extract_collection_of_drifts(
-    "C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
-Col_act_modified = copy.copy(Col_act)
+#Col_act = Collection()
+#Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
+#Col_act_modified = copy.copy(Col_act)
 
 
 # print("Before Change",Col_act.drifts[0][0].change_info["1"]["change_trace_index"])
@@ -111,7 +110,7 @@ def modify_change_trace_index_values(col, probability_of_changing_value: float, 
     return col_modified
 
 
-print(Col_act.drifts[0][0].drift_type)
+#print(Col_act.drifts[0][0].drift_type)
 
 
 def modify_drift_type(col, probability_of_changing_type):
@@ -126,7 +125,7 @@ def modify_drift_type(col, probability_of_changing_type):
 
     return col_modified
 
-print(modify_drift_type(Col_act,1)[0][0])
+#print(modify_drift_type(Col_act,1).drifts[0][0])
 
 # print("After_change", Col_act_modified.drifts[0][0].change_info["1"]["change_trace_index"])
 
@@ -136,3 +135,47 @@ print(modify_drift_type(Col_act,1)[0][0])
 # Col_det = Collection()
 # Col_det.Extract_collection_of_drifts(path_detected_collection)
 # Automated_evaluation(Col_act_modified, Col_det, 100)
+
+
+Col_act = Collection()
+
+Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
+
+print(Col_act.drifts[0])
+print("#######################")
+#del Col_act.drifts[0]
+#del Col_act.drifts[0][0].change_info['1']
+#print(Col_act.drifts[0])
+
+
+def delete_change_points(col,probability_to_delete):
+    col_modified = copy.copy(col)
+
+    for drifts_pos in range(0, len(col.drifts)):
+        to_del_indexes = []
+        change_points_to_del = []
+        for drift_pos in range(0, len(col.drifts[drifts_pos])):
+            if col.drifts[drifts_pos][drift_pos].drift_type in ["sudden","gradual"]:
+                if random.random() < probability_to_delete:
+                    to_del_indexes.append(drift_pos) ## contains the position of Driftinfo glass which has a type sudden or gradual that should be deleted
+
+
+            elif col.drifts[drifts_pos][drift_pos].drift_type in ["incremental", "recurring"]:
+                for change_point_id in list(col.drifts[drifts_pos][drift_pos].change_info.keys()):
+                    if len(col.drifts[drifts_pos][drift_pos].change_info.keys()) <0:
+                        break
+
+                    if random.random() < probability_to_delete:
+                        del col_modified.drifts[drifts_pos][drift_pos].change_info[change_point_id]
+
+        col_modified.drifts[drifts_pos] = [j for i, j in enumerate(col_modified.drifts[drifts_pos]) if
+                                                   i not in to_del_indexes]
+    return col_modified
+                ## if the type if sudden or gradual than the probablity is to delete the whole drift because each drift has only one change point
+
+    ##if the type is recurring or incremental than the probability is the probablity of deleting a single change point. The drift is deleted only when all the change points are deleted
+
+
+col_modified = delete_change_points(Col_act,1)
+
+print(col_modified.drifts[0])
