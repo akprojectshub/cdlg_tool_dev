@@ -162,7 +162,7 @@ def delete_change_points(col,probability_to_delete):
 
             elif col.drifts[drifts_pos][drift_pos].drift_type in ["incremental", "recurring"]:
                 for change_point_id in list(col.drifts[drifts_pos][drift_pos].change_info.keys()):
-                    if len(col.drifts[drifts_pos][drift_pos].change_info.keys()) <0:
+                    if len(col.drifts[drifts_pos][drift_pos].change_info.keys()) <= 1:
                         break
 
                     if random.random() < probability_to_delete:
