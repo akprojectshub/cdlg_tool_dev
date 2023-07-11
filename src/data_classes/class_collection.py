@@ -15,6 +15,8 @@ import datetime
 import re
 import pandas as pd
 from src.utilities import extract_list_from_string
+from src.utilities import remove_duplicates
+
 from src.data_classes.param_names import Log_attr_params
 
 @dataclass
@@ -366,14 +368,6 @@ class Collection:
         return event_log
 
 
-def remove_duplicates(strings:list):
-    seen = set()
-    result = []
-    for string in strings:
-        if string not in seen:
-            seen.add(string)
-            result.append(string)
-    return result
 
 
 
