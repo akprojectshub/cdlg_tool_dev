@@ -14,7 +14,7 @@ from src.utilities import TraceAttributes
 import datetime
 import re
 import pandas as pd
-from src.data_classes.util import extract_list_from_string
+from src.utilities import extract_list_from_string
 from src.data_classes.param_names import Log_attr_params
 
 @dataclass

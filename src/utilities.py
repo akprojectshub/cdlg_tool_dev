@@ -6,6 +6,7 @@ from datetime import timedelta, datetime
 import src.configurations as config
 import numpy
 from pm4py.util.xes_constants import DEFAULT_TRANSITION_KEY
+import re
 
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
@@ -109,3 +110,7 @@ def add_unique_trace_ids(log):
         trace.attributes[TraceAttributes.concept_name.value] = str(trace_id)
         trace_id += 1
     return None
+
+
+def extract_list_from_string(string_of_list: str):
+    return [int(int_val_str) for int_val_str in re.findall(r'\d+', string_of_list)]
