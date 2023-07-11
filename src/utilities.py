@@ -124,3 +124,19 @@ def remove_duplicates(strings:list):
             seen.add(string)
             result.append(string)
     return result
+
+class Log_attr_params():
+    drift_info = "drift:info"
+    children = "children"
+    change_info = "change_info"
+    change_type = "change_type"
+    process_tree_before = "process_tree_before"
+    process_tree_after = "process_tree_after"
+    activities_deleted = "activities_deleted"
+    activities_added = "activities_added"
+    activities_moved = "activities_moved"
+    drift_type = "drift_type"
+    process_perspective = "process_perspective"
+    change_trace_index = "change_trace_index"
+
+
