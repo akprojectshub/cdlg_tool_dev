@@ -17,7 +17,7 @@ import pandas as pd
 from src.utilities import extract_list_from_string
 from src.utilities import remove_duplicates
 
-from src.data_classes.param_names import Log_attr_params
+from src.utilities import Log_attr_params
 
 @dataclass
 class Collection:
