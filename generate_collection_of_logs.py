@@ -17,16 +17,18 @@ from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
 from src.utilities import select_random, InfoTypes, DriftTypes, add_duration_to_log, add_unique_trace_ids
 
+from src.data_classes.class_input import InputParameters
 
-def generate_logs(par, file_path_to_own_models=None):
-    """ Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
-    :param file_path_to_own_models: file path to own process model, if desired to be used
+def generate_logs(par:InputParameters, file_path_to_own_models=None):
+    """
+    Generation of a set of event logs with different drifts, a corresponding CSV file and respective text files
+    :param par(InputParameters): is a class storing the parameter used to generate the logs
+    :param file_path_to_own_models(str): file path to own process model, if desired to be used
     :return: collection of event logs with drifts saved in out_folder
     """
 
     # CREATE DIR TO STORE GENERATED LOGS
     out_folder = creat_output_folder(config.DEFAULT_OUTPUT_DIR, par.Folder_name)
-
     # MAIN LOOP
     number_of_logs = select_random(par.Number_event_logs)
     print('Generating', number_of_logs, 'logs in', out_folder)
@@ -95,13 +97,24 @@ def generate_logs(par, file_path_to_own_models=None):
 
 
 
-def get_parameters(path: str = config.PARAMETER_NAME):
+def get_parameters(path: str = config.PARAMETER_NAME)->InputParameters:
+    """
+    Get the parameters to generate the logs
+    :param path(str): contains the name of the default parameter file to use
+    :return (InputParameters): A class instance that stores the input parameters
+    """
     parameters_dict = create_dict_with_input_parameters(path)
     parameters = InputParameters(**parameters_dict)
     return parameters
 
 
-def generate_initial_tree(complexity_options_list: list, file_path_to_own_models):
+def generate_initial_tree(complexity_options_list: list, file_path_to_own_models:str)->dict:
+    """
+    #TODO: write what this function does
+    :param complexity_options_list:
+    :param file_path_to_own_models:
+    :return:
+    """
     complexity = select_random(complexity_options_list, option='random')
     if file_path_to_own_models is None:
         generated_process_tree = generate_specific_trees(complexity)
@@ -117,11 +130,12 @@ def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR, folder_name: str 
     return out_folder
 
 
-def create_dict_with_input_parameters(par_file_name: str):
-    """ Getting parameters from the text file 'default' placed in the folder 'Data/parameters'
-    :return: parameters for the generation of a set of event logs
+def create_dict_with_input_parameters(par_file_name: str)->dict():
     """
-
+    Getting parameters from a specific text file placed in the folder 'Data/parameters'
+    :param(str) par_file_name: The name of the file that contains the desired parameters
+    :return(dict): parameters for the generation of a set of event logs
+    """
     parameter_doc = open(f'{config.DEFAULT_PARAMETER_DIR}/{par_file_name}', 'r')
     parameters_input = parameter_doc.read()
     parameter_doc.close()
@@ -155,6 +169,8 @@ def main(par):
         generate_logs(par, sys.argv[1])
 
 
+
+#TODO: I think the functions multiple_collection_generator and experiments_multiple_collection_generator should be deleted. They are not used anywhere
 def multiple_collection_generator(par, n_noise=None, n_drifts=None):
     # TODO: make sure the function works if n_noise and n_drifts are None
     if n_noise is None:
