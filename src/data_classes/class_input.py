@@ -3,7 +3,6 @@ from dataclasses import dataclass, fields
 
 @dataclass
 class InputParameters:
-
     Process_tree_complexity: list
     Process_tree_evolution_proportion: list
     Number_event_logs: list
