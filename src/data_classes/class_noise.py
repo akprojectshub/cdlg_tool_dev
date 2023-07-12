@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 
 import numpy as np
+from pm4py.objects.log.obj import EventLog
+
 
 
 @dataclass
@@ -35,19 +37,33 @@ class NoiseInfo:
         return d_final
 
     def set_log_id(self, log_name):
+        """
+            Add a log id to a noise instance
+        """
         self.log_id = log_name
         return None
 
     def set_noisy_trace_prob(self,noise_trace_prob):
+        """
+            Add noise trace probability to a noise instance
+        """
         self.noisy_trace_prob = noise_trace_prob
         return None
 
     def set_noisy_event_prob(self,noise_event_prob):
+        """
+            Add noise event probability to a noise instance
+        """
         self.noisy_event_prob = noise_event_prob
         return None
 
     @staticmethod
-    def extract_info_xes(log):
+    def extract_info_xes(log:EventLog)->dict:
+        """
+        Extract noise instances from log file in a dictionary
+        :param log(EventLog): Stores an event log
+        :return(dict): Stores the noise information in a dictionary
+        """
         d = dict()
         xes = log.attributes["noise:info"]["children"]
 
