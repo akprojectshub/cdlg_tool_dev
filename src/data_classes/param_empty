@@ -1,0 +1,16 @@
+Process_tree_complexity: simple
+Process_tree_evolution_proportion: 0.3
+Number_event_logs: 36
+Number_traces_per_process_model_version: 2876
+Number_traces_for_gradual_change: 354-391
+Change_type: gradual
+Drift_types: sudden, incremental, recurring
+Number_drifts_per_log: 
+Noise: True
+Noisy_trace_prob: 0.5
+Noisy_event_prob: 0.6
+Trace_exp_arrival_sec: 35837
+Task_exp_duration_sec: 156985
+Gradual_drift_type: exponential
+Incremental_drift_number: 6
+Recurring_drift_number: 3-4
