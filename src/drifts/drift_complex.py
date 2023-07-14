@@ -10,7 +10,7 @@ from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_input import InputParameters
 
 
-def add_recurring_drift(event_log: EventLog, drift_instance:DriftInfo, par:InputParameters)->tuple(EventLog,DriftInfo):
+def add_recurring_drift(event_log: EventLog, drift_instance:DriftInfo, par:InputParameters)->tuple:
     """
     Include a recurring drift in the log
     :param event_log(EventLog): Stores an event log
@@ -41,7 +41,7 @@ def add_recurring_drift(event_log: EventLog, drift_instance:DriftInfo, par:Input
 
 def add_incremental_drift(event_log, drift_instance, par):
     """
-    Include an in drift in the log
+    Include an incremental drift in the log
     :param event_log(EventLog): Stores an event log
     :param drift_instance(DriftInfo): A class object storing data about a drift
     :param par(InputParameters): A class object storing input parameters used to generate a gradual drift

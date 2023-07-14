@@ -9,7 +9,7 @@ from pm4py.objects.log.obj import EventLog
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_input import InputParameters
 
-def add_simple_drift(event_log:EventLog, drift_instance:DriftInfo, parameters, change_type: str)->tuple(EventLog,DriftInfo):
+def add_simple_drift(event_log:EventLog, drift_instance:DriftInfo, parameters, change_type: str)->tuple:
     """
     Include an additional sudden drift to an event log
     :param event_log(EventLog): stores an event log
@@ -79,7 +79,7 @@ def add_sudden_change(log:EventLog, drift_instance:dict(), paremeters:InputParam
 
 #TODO: add_gradual_change is not used in the project
 
-def add_gradual_change(event_log:EventLog, drift_instance:DriftInfo, paremeters:InputParameters)->tuple(EventLog,DriftInfo):
+def add_gradual_change(event_log:EventLog, drift_instance:DriftInfo, paremeters:InputParameters)->tuple:
     """
     Generation of an event log with a gradual drift
     :param event_log(EventLog): Stores an event log
@@ -166,7 +166,7 @@ def distribute_traces(tree_one:dict, tree_two:dict, distribute_type:str, nu_trac
     return result
 
 #TODO: the function additional_gradual_drift_in_log is not used in the project
-def additional_gradual_drift_in_log(log:EventLog, tree_one:dict, tree_two:dict)->tuple(EventLog,dict):
+def additional_gradual_drift_in_log(log:EventLog, tree_one:dict, tree_two:dict)->tuple:
     """ Including an additional gradual drift into an event log
     :param log(EventLog): event log including a drift
     :param tree_one(dict): predecessor version of the process tree version tree_two
