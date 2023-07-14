@@ -11,7 +11,7 @@ from src.data_classes.class_input import InputParameters
 
 def add_simple_drift(event_log:EventLog, drift_instance:DriftInfo, parameters, change_type: str)->tuple(EventLog,DriftInfo):
     """
-
+    Include an additional sudden drift to an event log
     :param event_log(EventLog): stores an event log
     :param drift_instance(DriftInfo): a class object storing information about a drift
     :param parameters(InputParameters): is a class storing the parameter used to generate the logs
