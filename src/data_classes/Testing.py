@@ -16,10 +16,12 @@ import re
 from src.data_classes.evaluation_LP import getTP_FP
 import src.data_classes.helpers_LP
 import copy
-from src.data_classes.Automated_evaluation import Automated_evaluation
 import random
-
+from src.data_classes.Fill_parm_file_randomly import fill_param_file
 from class_collection import *
+from generate_collection_of_logs import *
+from src.data_classes.class_input import InputParameters
+
 
 path_detected_collection = "C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/detected"
 path_actual_collection = "C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/actual"
@@ -105,7 +107,7 @@ def modify_change_trace_index_values(col, probability_of_changing_value: float, 
                         col.drifts[drifts_pos][drift_pos].change_info[change_info_key]["change_trace_index"])):
                     col_modified.drifts[drifts_pos][drift_pos].change_info[change_info_key]["change_trace_index"][
                         change_trace_index_pos] = insert_trace_index_noise(
-                        Col_act.drifts[drifts_pos][drift_pos].change_info[change_info_key]["change_trace_index"][
+                        col.drifts[drifts_pos][drift_pos].change_info[change_info_key]["change_trace_index"][
                             change_trace_index_pos], probability_of_changing_value, percentage_of_change)
     return col_modified
 
@@ -137,12 +139,12 @@ def modify_drift_type(col, probability_of_changing_type):
 # Automated_evaluation(Col_act_modified, Col_det, 100)
 
 
-Col_act = Collection()
+#Col_act = Collection()
 
-Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
+#Col_act.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
 
-print(Col_act.drifts[0])
-print("#######################")
+#print(Col_act.drifts[0])
+#print("#######################")
 #del Col_act.drifts[0]
 #del Col_act.drifts[0][0].change_info['1']
 #print(Col_act.drifts[0])
@@ -175,7 +177,102 @@ def delete_change_points(col,probability_to_delete):
 
     ##if the type is recurring or incremental than the probability is the probablity of deleting a single change point. The drift is deleted only when all the change points are deleted
 
+def create_dict_with_input_parameters_rand()->dict():
+    """
+    Getting parameters from a specific text file placed in the folder 'Data/parameters'
+    :param(str) par_file_name: The name of the file that contains the desired parameters
+    :return(dict): parameters for the generation of a set of event logs
+    """
+    parameter_doc = open("param_empty", 'r')
+    parameters_input = parameter_doc.read()
+    parameter_doc.close()
+    parameters_dict = {}
+    for line in parameters_input.split('\n'):
+        if line:
+            par = line.split(': ')[0]
+            value = line.split(': ')[1]
+            if '/' in value:
+                value = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in value.split(',')]
+            elif '-' in value:
+                value = value.split('-')
+            else:
+                value = value.split(', ')
 
-col_modified = delete_change_points(Col_act,1)
+            try:
+                value = [ast.literal_eval(v) for v in value]
+            except:
+                pass
+            parameters_dict[par] = value
 
-print(col_modified.drifts[0])
+    parameters_dict['Folder_name'] = "default_name"
+
+    return parameters_dict
+
+
+def get_parameters_rand()->InputParameters:
+    """
+    Get the parameters to generate the logs
+    :param path(str): contains the name of the default parameter file to use
+    :return (InputParameters): A class instance that stores the input parameters
+    """
+    parameters_dict = create_dict_with_input_parameters_rand()
+    #print(parameters_dict)
+    parameters = InputParameters(**parameters_dict)
+    return parameters
+
+def generate_random_col_logs():
+    #Fill the param_file with random values
+    fill_param_file()
+    #create an InputParameters class of the randomly generated parameters
+    rand_parameters = get_parameters_rand()
+    # Generate a collection of logs from the
+    generate_logs(rand_parameters)
+    return None
+
+
+
+def full_testing(col: Collection, probability_to_delete = 0.5, probability_of_changing_type = 0.5, probability_of_changing_value=0.5, percentage_of_change=0.50):
+    val = "Yes"
+    print("Do you want to modify the collection of logs ?")
+
+    while val=="Yes":
+        while val not in ["Yes","No"]:
+            print("Do you want to modify the collection of logs ?")
+            val = input("Error in entry print Yes or No")
+        if val == "Yes":
+            print("What kind of modification to the collection of logs do you want to implement ?")
+            print("Type 1 for deleting change moments")
+            print("Type 2 for modifying drift types")
+            print("Type 3 for modify change trace index values")
+
+            val = input("Write 1, 2 or 3")
+            while val not in ["1","2","3"]:
+                val = input("Error in entery Write 1, 2, or 3")
+                if val == "1":
+                    col = delete_change_points(col, probability_to_delete)
+                if val == "2":
+                    col = modify_drift_type(col, probability_of_changing_type)
+                if val == "3":
+                    col = modify_change_trace_index_values(col, probability_of_changing_value, percentage_of_change)
+        print("Do you want to add another modification ?")
+        val = input("Yes or No")
+        while val not in ["Yes", "No"]:
+            print("Error in entry do you want to add another modification ?")
+            val = input("Yes or No")
+        if val == "No":
+            break
+    return col
+
+
+Col = Collection()
+
+Col.Extract_collection_of_drifts("C:/Users/ziedk/OneDrive/Bureau/Process Mining Git/output/default_JK_1687271372 actual")
+
+print("before change")
+print(Col.drifts)
+print("++++++++++++++++++++++++")
+print("after change")
+print(full_testing(Col).drifts)
+
+
+
