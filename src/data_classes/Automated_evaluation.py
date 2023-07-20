@@ -8,37 +8,6 @@ from src.data_classes.class_drift import DriftInfo
 
 
 
-#TODO: pull again the latest version (join the main branch with my transporter to update the transporter with the main)
-#TODO: ADD Aknowledgment part
-
-
-#TODO: NAMING ALWAYS IN LOWER CASES
-#TODO: REmove the examples
-#TODO: provide documentation for everything in datacalss file, drifts, and input_parameters (noise_controllers_new, utilities) ---> found in a screenshot that he sent me
-#TODO: generate collection of logs should also be documented
-#TODO: move file with parameters names to the utilities file that alexander created
-#TODO: change drift type also randomly in the automated evaluation in the testing file
-#TODO: add if statement in the testing (if main ... )
-#TODO: resturcuture the testing so that the testing is a single block
-#TODO: Add more modification when testing(hear again minute 36)
-    #+Remove a change Point
-    #+Add change point: add a random change id and random drift type and random trace id
-    #
-#TODO: add testing for the lag (hear minute 41)
-#TODO: add the accuracy (hear again minute 45)
-
-#TODO: testing that our tool works for generating collection of logs for different parameters. Our tool should work for all input parameters that can be providied when generating logs
-
-#### FOCUS ON THE PREVIOUS POINTS FOR NOW
-#TODO: write a readme file (This is more tehcnical)
-#TODO: write a word documentation file (look at the repository link he sent me on slack )
-#TODO: he wants to write an aggregated method
-
-
-
-
-
-#TODO: NAMING ALWAYS IN LOWER CASES
 
 
 def extract_log_ids(col_act: list(DriftInfo), col_det: list(DriftInfo))->dict(str,list(str)):
@@ -170,6 +139,10 @@ def get_recall(TP:int, FN_TP:int)->float:
     recall = np.where(FN_TP > 0, np.divide(TP , FN_TP), np.nan)
     return recall
 
+
+
+
+
 def get_f1_score(precision:float, recall:float)->float:
 
 
@@ -204,7 +177,6 @@ def get_total_evaluation_results(evaluation_report: pd.DataFrame())->pd.dataFram
     evaluation_report_agg = evaluation_report_agg.assign(Precision=lambda x: get_precision(x['TP'], x['FP']))
     evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
     evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
-
     return evaluation_report_agg
 
 
