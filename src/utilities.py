@@ -6,6 +6,7 @@ from datetime import timedelta, datetime
 import src.configurations as config
 import numpy
 from pm4py.util.xes_constants import DEFAULT_TRANSITION_KEY
+from pm4py.objects.log.obj import EventLog
 
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
@@ -51,7 +52,20 @@ class TraceAttributes(Enum):
     model_version = "model_version:id"
 
 
+
+def remove_empty_traces(event_log):
+
+    log_new = EventLog()
+    for trace in event_log:
+        if len(trace) > 0:
+            log_new.append(trace)
+
+    return log_new
+
+
 def add_duration_to_log(log, par):
+
+    log = remove_empty_traces(log)
 
     log_start_timestamp_list = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in config.FIRST_TIMESTAMP.split(',')]
     log_start_timestamp = select_random(log_start_timestamp_list, option='random')
