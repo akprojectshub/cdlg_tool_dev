@@ -3,7 +3,7 @@ CDLG: Concept Drift Log Generator
 
 About
 ---
-This project is a second version 2.0 of the initial project CDLG tool that is described in the paper the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022. The new version includes new features like multiple drift generation per log, as well as an automated evaluation approach that allows to compare a collection of logs to gold standards, as well as an overall more structured approach of the tool.
+This project is a second version 2.0 of the initial project CDLG tool that is described in the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022. The new version includes new features like multiple drift generation per log, as well as an automated evaluation approach that allows to compare a collection of logs to gold standards, as well as an overall more structured approach of the tool.
 This submission comes with a corresponding [tutorial document](https://gitlab.uni-mannheim.de/processanalytics/cdlg_tool/-/blob/main/cdlg_tutorial.pdf) and [explanation video].
 The primary contact for questions or comments regarding CDLG is Alexander Kraus: alexander[dot]kraus[at]uni-mannheim[dot]de 
 
