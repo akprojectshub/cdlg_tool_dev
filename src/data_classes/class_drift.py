@@ -9,6 +9,7 @@ class DriftInfo:
     log_id: str = None
     drift_id: int = np.NAN
     process_perspective: str = None
+    process_complexity: str = None
     drift_type: str = None
     process_trees: dict = field(default_factory=lambda: defaultdict(dict))
     change_info: dict = field(default_factory=lambda: defaultdict(dict))

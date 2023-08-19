@@ -35,7 +35,7 @@ def generate_logs(par, file_path_to_own_models=None):
         try:
             # SELECT PARAMETERS FOR THE CURRENT LOG
             log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
-            tree_initial = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
+            tree_initial, tree_complexity = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
             num_traces = select_random(par.Number_traces_per_process_model_version, option='uniform_int')
             event_log = semantics.generate_log(tree_initial, num_traces)
             drift_n = select_random(par.Number_drifts_per_log, option='uniform_int')
@@ -45,6 +45,7 @@ def generate_logs(par, file_path_to_own_models=None):
                 drift_instance = DriftInfo()
                 drift_instance.set_log_id(log_name)
                 drift_instance.set_drift_id(drift_id)
+                drift_instance.process_complexity = tree_complexity
                 drift_instance.set_process_perspective('control-flow')
                 drift_type = select_random(par.Drift_types, option='random')
                 drift_instance.set_drift_type(drift_type)
@@ -107,7 +108,7 @@ def generate_initial_tree(complexity_options_list: list, file_path_to_own_models
         generated_process_tree = generate_specific_trees(complexity)
     else:
         generated_process_tree = generate_tree_from_file(file_path_to_own_models)
-    return generated_process_tree
+    return generated_process_tree, complexity
 
 
 def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR, folder_name: str = config.PARAMETER_NAME):
