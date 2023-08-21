@@ -7,8 +7,13 @@ from src.data_classes.class_drift import DriftInfo
 
 
 
-
-
+#Aknowledgment
+"""
+We would like to express our gratitude to Jan Niklas Adams, Tobias Brockhoff, Cameron Pitsch, and Wil M.P van der Aalst for their insightful work 
+presented in the paper titled "An Experimental Evaluation of Process Concept Drift Detection." 
+The codebase utilized in this project includes portions directly derived from their research. Their contributions have been invaluable in 
+guiding the development of our own implementation and enhancing the overall quality of our work.
+"""
 
 def extract_log_ids(col_act: list(DriftInfo), col_det: list(DriftInfo))->dict(str,list(str)):
     """
@@ -77,15 +82,9 @@ def fill_evaluation_row_dic(log_name,drift_type,detected_cp,actual_cp,lag,TP,FP,
     evaluation_row = {#'collection_name': collection_name,
                       'log_name': log_name,
                       'drift_type':drift_type,
-                      #'noise_level': noise_level,
-                      #'complexity': complexity,
-                      #'method': option,
-                      #'window_size': 'na',
                       'detected_cp': detected_cp,
                       'actual_cp': actual_cp,
-                      #'log_size': len(event_log),
                       'lag': lag,
-                      #'lag_indices': lag_indices,
                       'TP': TP,
                       'FP': FP,
                       'FN_TP': FN_TP,
@@ -99,14 +98,9 @@ def create_evaluation_report_file():
     columns = [#'collection_name',
                'log_name',
                'drift_type',
-               #'noise_level',
-               #'complexity',
-               #'method',
-               #'window_size',
                'detected_cp',
                'actual_cp',
                'lag',
-               #'lag_indices',
                'TP',
                'FP',
                'FN_TP',
@@ -139,7 +133,8 @@ def get_recall(TP:int, FN_TP:int)->float:
     recall = np.where(FN_TP > 0, np.divide(TP , FN_TP), np.nan)
     return recall
 
-
+def get_accuracy(TP:int, FP:int, FN_TP:int)->float:
+    return TP//(TP+FP+FN_TP)
 
 
 
@@ -177,6 +172,7 @@ def get_total_evaluation_results(evaluation_report: pd.DataFrame())->pd.dataFram
     evaluation_report_agg = evaluation_report_agg.assign(Precision=lambda x: get_precision(x['TP'], x['FP']))
     evaluation_report_agg = evaluation_report_agg.assign(Recall=lambda x: get_recall(x['TP'], x['FN_TP']))
     evaluation_report_agg = evaluation_report_agg.assign(F1_score=lambda x: get_f1_score(x['Precision'], x['Recall']))
+    evaluation_report_agg = evaluation_report_agg.assign(Accuracy= lambda x: get_accuracy(x['TP'], x['FP'], x['FN_TP']))
     return evaluation_report_agg
 
 
