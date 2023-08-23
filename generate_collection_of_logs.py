@@ -32,7 +32,7 @@ def generate_logs(par, file_path_to_own_models=None):
     print('Generating', number_of_logs, 'logs in', out_folder)
     collection = Collection()
     for log_id in range(1, number_of_logs + 1):
-        try:
+        #try:
             # SELECT PARAMETERS FOR THE CURRENT LOG
             log_name = "log_" + str(log_id) + '_' + str(int(time.time())) + ".xes"
             tree_initial, tree_complexity = generate_initial_tree(par.Process_tree_complexity, file_path_to_own_models)
@@ -47,7 +47,12 @@ def generate_logs(par, file_path_to_own_models=None):
                 drift_instance.set_drift_id(drift_id)
                 drift_instance.process_complexity = tree_complexity
                 drift_instance.set_process_perspective('control-flow')
-                drift_type = select_random(par.Drift_types, option='random')
+                if drift_n == 1:
+                    drift_types_adj = list(par.Drift_types)
+                    drift_types_adj.remove(DriftTypes.sudden.value)
+                    drift_type = select_random(drift_types_adj, option='random')
+                else:
+                    drift_type = select_random(par.Drift_types, option='random')
                 drift_instance.set_drift_type(drift_type)
                 drift_instance.add_process_tree(tree_initial)
                 # GENERATE LOG WITH A CERTAIN DRIFT TYPE
@@ -87,9 +92,9 @@ def generate_logs(par, file_path_to_own_models=None):
             # EXPORT GENERATED LOG
             xes_exporter.apply(event_log, os.path.join(out_folder, log_name))
 
-        except:
-            print(f"There is an error in {log_name}!!!")
-            continue
+        #except:
+        #    print(f"There is an error in {log_name}!!!")
+        #    continue
 
     collection.export_drift_and_noise_info_to_flat_file_csv(path=out_folder)
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
