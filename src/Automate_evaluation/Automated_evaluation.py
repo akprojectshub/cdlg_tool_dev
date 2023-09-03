@@ -3,6 +3,8 @@ from src.Automate_evaluation.evaluation_LP import calcPrecisionRecall,F1_Score
 import numpy as np
 from src.data_classes.class_drift import DriftInfo
 import os
+from class_collection import *
+
 
 
 #Aknowledgment
@@ -160,7 +162,7 @@ def get_total_evaluation_results(evaluation_report: pd.DataFrame())->pd.dataFram
     :param evaluation_report(pd.DataFrame): A dataframe storing the log_name, drift_type, detected_cp,actual_cp,lag,TP,FP,FN_TP,Precision,Recall,F1_score
     :return:pd.DataFrame: An aggregate version of the input dataframe with rows grouped by lag value and the drift_type
     """
-
+    #TODO: The aggregation function should be changed
     aggregations = {
         'TP': 'sum',
         'FP': 'sum',
@@ -247,12 +249,12 @@ def evaluate_lp_method(col_act:list(DriftInfo),col_det:list(DriftInfo),lag:int)-
 
 
 
+#TODO: The lag is not defined as a proportion but as an int because we don't have access to the number of traces in the log
 def Automated_evaluation (col_act, col_det, lag): #Eval type returns what type of evaluation is needed (TS or TR)
     global TP
     global FP
     global output_path
     output_path = "/output/Evaluation reports"
-    # TODO: have a fixed path for the storage of evaluation report (output_path)
     TP = 0
     FP = 0
     return evaluate_lp_method(col_act,col_det,lag) #lag should be in percentage and the difference should be in seconds when taking the diff of timestamps
