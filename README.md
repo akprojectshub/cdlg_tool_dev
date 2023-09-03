@@ -4,10 +4,10 @@ CDLG: Concept Drift Log Generator
 About
 ---
 This project is a second version 2.0 of the initial project CDLG tool that is described in the paper: _CDLG: A Tool for the Generation of Event Logs with Concept Drifts_ by Justus Grimm, Alexander Kraus, and Han van der Aa, submitted to the demo track of BPM 2022. The new version includes new features like multiple drift generation per log, as well as an automated evaluation approach that allows to compare a collection of logs to gold standards, as well as an overall more structured approach of the tool.
-This submission comes with a corresponding [tutorial document](https://gitlab.uni-mannheim.de/processanalytics/cdlg_tool/-/blob/main/cdlg_tutorial.pdf) and [explanation video].
+This submission comes with a corresponding [tutorial document](https://github.com/akprojectshub/cdlg_tool_dev/cdlg_tutorial.pdf).
 The primary contact for questions or comments regarding CDLG is Alexander Kraus: alexander[dot]kraus[at]uni-mannheim[dot]de 
 
-**If you want to use parts of the approach in your project we refer to our [python package](https://gitlab.uni-mannheim.de/processanalytics/cdlg-package).**
+**If you want to use parts of the approach in your project we refer to our [python package](https://github.com/akprojectshub/cdlg_tool_dev).**
 
 Scope
 ---
@@ -80,5 +80,4 @@ Each collection of logs in addition to the XES files accompained by a CSV file t
 Reference
 ---
 * [PM4Py](https://pm4py.fit.fraunhofer.de)
-
-
+* “An Experimental Evaluation of Process Concept Drift Detection” by Jan Niklas Adams, Cameron Pitsch, Tobias Brockhoff, Will M.P. van der Aalst
