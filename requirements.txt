@@ -1,4 +1,4 @@
-pm4py~=2.2.17.1
+pm4py~=2.2.13.1
 graphviz==0.17
 #wexpect~=4.0.0
 
@@ -6,16 +6,16 @@ wasserstein==1.0.1
 strsimpy==0.2.1
 ruptures==1.1.5
 hotelling==0.5.0
-pulp==2.6.0
+pulp~=2.1
 scikit-learn==1.1.2
-pandas==1.5.0
+pandas~=1.5.3
 plotly==5.9.0
 kaleido==0.0.3
 nbformat==5.5.0
 seaborn==0.12.0
 ipykernel==6.22.0
 pyyaml==6.0
-numpy~=1.24.3
-networkx~=3.1
-tqdm~=4.65.0
-matplotlib~=3.7.1
+numpy~=1.24.2
+networkx~=3.0
+tqdm~=4.64.1
+matplotlib~=3.6.3
