@@ -1,20 +1,19 @@
 from pm4py.objects.log.obj import EventLog
 from pm4py.objects.process_tree.obj import ProcessTree
 
-from concept_drifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
-from concept_drifts.incremental_drift import log_with_incremental_drift_one_model, additional_incremental_drift_in_log
-from concept_drifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
-from concept_drifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
+from src.concept_drifts.gradual_drift import additional_gradual_drift_in_log, gradual_drift
+from src.concept_drifts.incremental_drift import log_with_incremental_drift_one_model, additional_incremental_drift_in_log
+from src.concept_drifts.recurring_drift import additional_recurring_drift_in_log, recurring_drift
+from src.concept_drifts.sudden_drift import sudden_drift, additional_sudden_drift_in_log
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 
-from controllers.control_flow_controller import change_tree_on_control_flow
-from controllers.event_log_controller import get_num_trace, get_timestamp_log
-from controllers.input_controller import input_drift, input_int, input_date, input_percentage, \
-    input_typ_gradual, input_int_hun, input_yes_no, input_no_yes, input_tree, input_int_max, input_season, \
+from src.controllers.control_flow_controller import change_tree_on_control_flow
+from src.controllers.event_log_controller import get_num_trace, get_timestamp_log
+from src.controllers.input_controller import input_drift, input_int, input_percentage, \
+    input_typ_gradual, input_int_hun, input_yes_no, input_no_yes, input_tree, input_season, \
     input_percentage_end
-from controllers.noise_controller import add_noise_to_log
+from src.controllers.noise_controller import add_noise_to_log
 import datetime
-from collections import defaultdict
 
 
 def generate_logs_with_model(tree_one, out_file):

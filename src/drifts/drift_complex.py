@@ -1,10 +1,6 @@
-from controllers.event_log_controller import *
-from pm4py.objects.process_tree import semantics
-from controllers.control_flow_controller import evolve_tree_randomly
-from src.utilities import select_random, ChangeTypes
+from src.controllers.control_flow_controller import evolve_tree_randomly
+from src.utilities import select_random
 from src.drifts.change_type import combine_two_logs_with_certain_change_type
-from src.drifts.drift_simple import combine_two_logs
-import src.input_parameters as config
 from pm4py.objects.log.obj import EventLog
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_input import InputParameters

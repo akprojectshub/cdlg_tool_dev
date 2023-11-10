@@ -1,9 +1,8 @@
 from pm4py.objects.process_tree import semantics
 import math
 from src.utilities import select_random, ChangeTypes, DriftTypes
-from controllers.control_flow_controller import evolve_tree_randomly
-from controllers.input_controller import input_percentage, input_int, input_end
-from controllers.event_log_controller import *
+from src.controllers.control_flow_controller import evolve_tree_randomly
+from src.controllers.input_controller import input_percentage, input_int, input_end
 from src.drifts.change_type import combine_two_logs_sudden, combine_two_logs_gradual
 from pm4py.objects.log.obj import EventLog
 from src.data_classes.class_drift import DriftInfo

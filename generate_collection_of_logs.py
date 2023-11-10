@@ -6,7 +6,7 @@ from src.drifts.drift_simple import add_simple_drift
 from src.data_classes.class_drift import DriftInfo
 from src.data_classes.class_noise import NoiseInfo
 from src.data_classes.class_collection import Collection
-from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
+from src.controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
 from src.data_classes.class_input import get_parameters
 import time

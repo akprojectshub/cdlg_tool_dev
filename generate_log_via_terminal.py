@@ -2,9 +2,9 @@ import os
 
 from src.log_generators.event_logs_one_model import generate_logs_with_model
 #from src.log_generators import generate_logs_with_models
-from controllers.input_controller import input_start, input_parameters, generate_tree_out_of_file, input_comp, \
+from src.controllers.input_controller import input_start, input_parameters, generate_tree_out_of_file, input_comp, \
     input_start_second, input_no_yes
-from controllers.process_tree_controller import generate_tree, generate_specific_trees
+from src.controllers.process_tree_controller import generate_tree, generate_specific_trees
 import time
 from src import configurations as config
 
