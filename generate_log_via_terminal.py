@@ -1,18 +1,18 @@
 import os
 
-from log_generators.event_logs_one_model import generate_logs_with_model
-from log_generators.event_logs_two_models import generate_logs_with_models
+from src.log_generators.event_logs_one_model import generate_logs_with_model
+#from src.log_generators import generate_logs_with_models
 from controllers.input_controller import input_start, input_parameters, generate_tree_out_of_file, input_comp, \
     input_start_second, input_no_yes
 from controllers.process_tree_controller import generate_tree, generate_specific_trees
 import time
-
+from src import configurations as config
 
 def main():
-    out_folder = 'data/generated_logs'
+    out_folder = config.DEFAULT_OUTPUT_DIR + '/terminal_logs'
     if not os.path.exists(out_folder):
         os.makedirs(out_folder)
-    out_file = os.path.join(out_folder, 'terminal_log_' + str(int(time.time())) + '.xes')
+    out_file = os.path.join(out_folder, 'log_' + str(int(time.time())) + '.xes')
     print("--- GENERAL INPUT ---")
     print('The tool offers different paths to generate event logs with drifts.\n'
           '\t - import models: one or two own models can be imported,\n '

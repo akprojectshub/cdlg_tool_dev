@@ -7,6 +7,8 @@ import src.configurations as config
 import numpy
 from pm4py.util.xes_constants import DEFAULT_TRANSITION_KEY
 import re
+from src.data_classes.class_input import get_parameters
+
 
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
@@ -52,7 +54,10 @@ class TraceAttributes(Enum):
     model_version = "model_version:id"
 
 
-def add_duration_to_log(log, par):
+def add_duration_to_log(log, par=None):
+
+    if par is None:
+        par = get_parameters(config.PARAMETER_NAME)
 
     log_start_timestamp_list = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in config.FIRST_TIMESTAMP.split(',')]
     log_start_timestamp = select_random(log_start_timestamp_list, option='random')
