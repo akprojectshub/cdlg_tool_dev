@@ -1,5 +1,5 @@
-from src.Automate_evaluation.evaluation_LP import getTP_FP
-from src.Automate_evaluation.evaluation_LP import calcPrecisionRecall,F1_Score
+from src.automate_evaluation.evaluation_LP import getTP_FP
+from src.automate_evaluation.evaluation_LP import calcPrecisionRecall,F1_Score
 import numpy as np
 from src.data_classes.class_drift import DriftInfo
 import os

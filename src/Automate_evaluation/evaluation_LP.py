@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from pulp import LpProblem, LpMinimize, LpMaximize, LpVariable, LpBinary, lpSum, PULP_CBC_CMD
 
-from src.Automate_evaluation.helpers_LP import calcAvgDuration
+from src.automate_evaluation.helpers_LP import calcAvgDuration
 
 
 def getTP_FP(detected: List[int], known: List[int], lag: int, count_duplicate_detections: bool = True) -> Tuple[
