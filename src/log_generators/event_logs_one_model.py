@@ -151,7 +151,7 @@ def add_additional_drift_and_noise_in_log(log, tree_one, tree_two, datestamp, mi
         trees.append(tree_ev)
         drift_step = drift_step + 1
         addi_drift = input_yes_no("Do you want to add an additional drift to the event log [yes, no]? ")
-    result, noise_data = add_noise_to_log(log, tree_one, datestamp, min_duration, max_duration)
+    result, noise_data = add_noise_to_log(log, tree_one)
 
     result = add_change_moments_to_log(result)
 
