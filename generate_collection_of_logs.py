@@ -1,8 +1,5 @@
-import datetime
 import os
 import sys
-import ast
-from datetime import datetime
 from src import configurations as config
 from src.drifts.drift_complex import add_recurring_drift, add_incremental_drift
 from src.drifts.drift_simple import add_simple_drift
@@ -11,7 +8,7 @@ from src.data_classes.class_noise import NoiseInfo
 from src.data_classes.class_collection import Collection
 from controllers.process_tree_controller import generate_tree_from_file, generate_specific_trees
 from pm4py.objects.log.exporter.xes import exporter as xes_exporter
-from src.data_classes.class_input import InputParameters
+from src.data_classes.class_input import get_parameters
 import time
 from pm4py.objects.process_tree import semantics
 from src.noise_controller_new import insert_noise
@@ -96,18 +93,6 @@ def generate_logs(par:InputParameters, file_path_to_own_models=None):
     print('Finished generating collection of', number_of_logs, 'logs in', out_folder)
 
 
-
-def get_parameters(path: str = config.PARAMETER_NAME)->InputParameters:
-    """
-    Get the parameters to generate the logs
-    :param path(str): contains the name of the default parameter file to use
-    :return (InputParameters): A class instance that stores the input parameters
-    """
-    parameters_dict = create_dict_with_input_parameters(path)
-    parameters = InputParameters(**parameters_dict)
-    return parameters
-
-
 def generate_initial_tree(complexity_options_list: list, file_path_to_own_models:str)->dict:
     """
     #TODO: write what this function does
@@ -130,81 +115,12 @@ def creat_output_folder(path: str = config.DEFAULT_OUTPUT_DIR, folder_name: str 
     return out_folder
 
 
-def create_dict_with_input_parameters(par_file_name: str)->dict():
-    """
-    Getting parameters from a specific text file placed in the folder 'Data/parameters'
-    :param(str) par_file_name: The name of the file that contains the desired parameters
-    :return(dict): parameters for the generation of a set of event logs
-    """
-    parameter_doc = open(f'{config.DEFAULT_PARAMETER_DIR}/{par_file_name}', 'r')
-    parameters_input = parameter_doc.read()
-    parameter_doc.close()
-    parameters_dict = {}
-    for line in parameters_input.split('\n'):
-        if line:
-            par = line.split(': ')[0]
-            value = line.split(': ')[1]
-            if '/' in value:
-                value = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in value.split(',')]
-            elif '-' in value:
-                value = value.split('-')
-            else:
-                value = value.split(', ')
-
-            try:
-                value = [ast.literal_eval(v) for v in value]
-            except:
-                pass
-            parameters_dict[par] = value
-
-    parameters_dict['Folder_name'] = config.PARAMETER_NAME
-
-    return parameters_dict
-
-
 def main(par):
     if len(sys.argv) == 1:
         generate_logs(par)
     elif len(sys.argv) == 2:
         generate_logs(par, sys.argv[1])
 
-
-
-#TODO: I think the functions multiple_collection_generator and experiments_multiple_collection_generator should be deleted. They are not used anywhere
-def multiple_collection_generator(par, n_noise=None, n_drifts=None):
-    # TODO: make sure the function works if n_noise and n_drifts are None
-    if n_noise is None:
-        n_noise = [0.0]
-
-    if n_drifts is None:
-        label = str(par.Number_drifts_per_log[0]) +'-'+ str(par.Number_drifts_per_log[-1])
-        n_drifts = [label]
-
-    for n_drift in n_drifts:
-        for noise in n_noise:
-            suffix = '_drifts_' + str(n_drift) + '_noise_' + str(noise)
-            par.Folder_name = config.PARAMETER_NAME + suffix
-            par.Noisy_trace_prob = [noise]
-            par.Noisy_event_prob = [noise]
-            par.Number_drifts_per_log = [n_drift]
-            print(par.Folder_name)
-            main(par)
-
-    return None
-
-def experiments_multiple_collection_generator(par, complexities: list = []):
-
-    if not complexities:
-        complexities = ['simple']
-
-    for complexity in  complexities:
-        suffix = '_complexity_' + complexity
-        par.Folder_name = config.PARAMETER_NAME + suffix
-        par.Process_tree_complexity = [complexity]
-        print(par.Folder_name)
-        main(par)
-
-    return None
 
 
 if __name__ == '__main__':
