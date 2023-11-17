@@ -6,7 +6,9 @@ from datetime import timedelta, datetime
 import src.configurations as config
 import numpy
 from pm4py.util.xes_constants import DEFAULT_TRANSITION_KEY
-from pm4py.objects.log.obj import EventLog
+import re
+from src.data_classes.class_input import get_parameters
+
 
 def select_random(data: list, option: str = 'random') -> any:
     if len(data) == 1:
@@ -52,20 +54,10 @@ class TraceAttributes(Enum):
     model_version = "model_version:id"
 
 
+def add_duration_to_log(log, par=None):
 
-def remove_empty_traces(event_log):
-
-    log_new = EventLog()
-    for trace in event_log:
-        if len(trace) > 0:
-            log_new.append(trace)
-
-    return log_new
-
-
-def add_duration_to_log(log, par):
-
-    log = remove_empty_traces(log)
+    if par is None:
+        par = get_parameters(config.PARAMETER_NAME)
 
     log_start_timestamp_list = [datetime.strptime(v, '%Y/%m/%d %H:%M:%S') for v in config.FIRST_TIMESTAMP.split(',')]
     log_start_timestamp = select_random(log_start_timestamp_list, option='random')
@@ -123,3 +115,33 @@ def add_unique_trace_ids(log):
         trace.attributes[TraceAttributes.concept_name.value] = str(trace_id)
         trace_id += 1
     return None
+
+
+def extract_list_from_string(string_of_list: str):
+    return [int(int_val_str) for int_val_str in re.findall(r'\d+', string_of_list)]
+
+
+def remove_duplicates(strings:list):
+    seen = set()
+    result = []
+    for string in strings:
+        if string not in seen:
+            seen.add(string)
+            result.append(string)
+    return result
+
+class Log_attr_params():
+    drift_info = "drift:info"
+    children = "children"
+    change_info = "change_info"
+    change_type = "change_type"
+    process_tree_before = "process_tree_before"
+    process_tree_after = "process_tree_after"
+    activities_deleted = "activities_deleted"
+    activities_added = "activities_added"
+    activities_moved = "activities_moved"
+    drift_type = "drift_type"
+    process_perspective = "process_perspective"
+    change_trace_index = "change_trace_index"
+
+

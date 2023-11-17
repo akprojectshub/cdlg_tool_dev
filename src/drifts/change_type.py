@@ -5,7 +5,7 @@ import numpy
 from pm4py.objects.log.obj import EventLog
 from random import randint
 from copy import deepcopy
-from controllers.process_tree_controller import randomize_tree_one, randomize_tree_two,\
+from src.controllers.process_tree_controller import randomize_tree_one, randomize_tree_two,\
     randomize_tree_three, randomize_tree_more, count_real_acs
 import src.configurations as config
 
