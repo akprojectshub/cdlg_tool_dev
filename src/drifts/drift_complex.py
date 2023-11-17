@@ -1,13 +1,19 @@
-from controllers.event_log_controller import *
-from pm4py.objects.process_tree import semantics
-from controllers.control_flow_controller import evolve_tree_randomly
-from src.utilities import select_random, ChangeTypes
+from src.controllers.control_flow_controller import evolve_tree_randomly
+from src.utilities import select_random
 from src.drifts.change_type import combine_two_logs_with_certain_change_type
-from src.drifts.drift_simple import combine_two_logs
-import src.input_parameters as config
+from pm4py.objects.log.obj import EventLog
+from src.data_classes.class_drift import DriftInfo
+from src.data_classes.class_input import InputParameters
 
-def add_recurring_drift(event_log, drift_instance, par):
 
+def add_recurring_drift(event_log: EventLog, drift_instance:DriftInfo, par:InputParameters)->tuple:
+    """
+    Include a recurring drift in the log
+    :param event_log(EventLog): Stores an event log
+    :param drift_instance(DriftInfo): A class object storing data about a drift
+    :param par(InputParameters): A class object storing input parameters used to generate a gradual drift
+    :return(Tuple[EventLog,DriftInfo]):A tuple containing an event log with recurring drift and an instance of a drift
+    """
     tree_previous = drift_instance.get_previous_process_tree()
     ran_evolve = select_random(par.Process_tree_evolution_proportion, option='uniform')
     tree_new, deleted_acs, added_acs, moved_acs = evolve_tree_randomly(tree_previous, ran_evolve)
@@ -30,6 +36,13 @@ def add_recurring_drift(event_log, drift_instance, par):
 
 
 def add_incremental_drift(event_log, drift_instance, par):
+    """
+    Include an incremental drift in the log
+    :param event_log(EventLog): Stores an event log
+    :param drift_instance(DriftInfo): A class object storing data about a drift
+    :param par(InputParameters): A class object storing input parameters used to generate a gradual drift
+    :return(Tuple[EventLog,DriftInfo]):A tuple containing an event log with recurring drift and an instance of a drift
+    """
 
     num_models = select_random(par.Incremental_drift_number, option='random')
     for i in range(1, num_models+1):

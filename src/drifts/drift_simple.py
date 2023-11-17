@@ -1,12 +1,22 @@
 from pm4py.objects.process_tree import semantics
 import math
 from src.utilities import select_random, ChangeTypes, DriftTypes
-from controllers.control_flow_controller import evolve_tree_randomly
-from controllers.input_controller import input_percentage, input_int, input_end
-from controllers.event_log_controller import *
+from src.controllers.control_flow_controller import evolve_tree_randomly
+from src.controllers.input_controller import input_percentage, input_int, input_end
 from src.drifts.change_type import combine_two_logs_sudden, combine_two_logs_gradual
+from pm4py.objects.log.obj import EventLog
+from src.data_classes.class_drift import DriftInfo
+from src.data_classes.class_input import InputParameters
 
-def add_simple_drift(event_log, drift_instance, parameters, change_type: str):
+def add_simple_drift(event_log:EventLog, drift_instance:DriftInfo, parameters, change_type: str)->tuple:
+    """
+    Include an additional sudden drift to an event log
+    :param event_log(EventLog): stores an event log
+    :param drift_instance(DriftInfo): a class object storing information about a drift
+    :param parameters(InputParameters): is a class storing the parameter used to generate the logs
+    :param change_type(str): The type of a drift
+    :return(tuple[EventLog,DriftInfo]): return a tuple containing a modified version of an event log, containing an additional drift and a drift instance
+    """
 
     # TODO: check if the correct previous tree is extracted!
     tree_previous = drift_instance.get_previous_process_tree()
@@ -23,11 +33,11 @@ def add_simple_drift(event_log, drift_instance, parameters, change_type: str):
 
     return log_extended, drift_instance
 
-
-def add_sudden_change(log, drift_instance, paremeters):
+#TODO: add_sudden_change is not used in the project
+def add_sudden_change(log:EventLog, drift_instance:dict(), paremeters:InputParameters):
     """ Include an additional sudden drift to an event log
-    :param log: initial event log
-    :param process_tree: evolved tree version used to generate the next process model version
+    :param log(EventLog): initial event log
+    :param process_tree(dict): evolved tree version used to generate the next process model version
     :param num_traces: number of traces to added to the intial event log from the new process tree
     :return: event log with added additional sudden drift
     """
@@ -66,18 +76,16 @@ def add_sudden_change(log, drift_instance, paremeters):
     return log_extended, drift_instance
 
 
-def add_gradual_change(event_log, drift_instance, paremeters):
-    """ Generation of an event log with a gradual drift
+#TODO: add_gradual_change is not used in the project
 
-    :param tree_one: initial version of the process tree
-    :param tree_two: evolved version of the process tree
-    :param nu_traces: number of traces in the log
-    :param start_point: start change point of the drift in percentage
-    :param end_point: end change point of the drift in percentage
-    :param distribution_type: type of distribution of the traces during the drift (linear, exponential)
-    :return: event log with gradual drift
+def add_gradual_change(event_log:EventLog, drift_instance:DriftInfo, paremeters:InputParameters)->tuple:
     """
-
+    Generation of an event log with a gradual drift
+    :param event_log(EventLog): Stores an event log
+    :param drift_instance(DriftInfo): A class object storing data about a drift
+    :param paremeters(InputParameters): A class object storing input parameters used to generate a gradual drift
+    :return(Tuple[EventLog,DriftInfo]): A tuple containing an event log with gradual drift and an instance of a drift
+    """
 
     gradual_type = select_random(paremeters.Gradual_drift_type, option='random')
     ran_evolve = select_random(paremeters.Process_tree_evolution_proportion, option='uniform')
@@ -101,14 +109,14 @@ def add_gradual_change(event_log, drift_instance, paremeters):
     return log_extended, drift_instance
 
 
-def distribute_traces(tree_one, tree_two, distribute_type, nu_traces):
+def distribute_traces(tree_one:dict, tree_two:dict, distribute_type:str, nu_traces:int)->list:
     """Linear or exponential distribution of the traces during the gradual drift
 
-    :param tree_one: initial model
-    :param tree_two: evolved model
-    :param distribute_type: distribution type (linear, exponential)
-    :param nu_traces: number of occurring traces during drift
-    :return: An log only including the gradual drift part
+    :param tree_one(dict): initial model
+    :param tree_two(dict): evolved model
+    :param distribute_type(list): distribution type (linear, exponential)
+    :param nu_traces(int): number of occurring traces during drift
+    :return(list): An log only including the gradual drift part
     """
     result = EventLog()
     count = 0
@@ -156,14 +164,13 @@ def distribute_traces(tree_one, tree_two, distribute_type, nu_traces):
             x = x + 1
     return result
 
-
-def additional_gradual_drift_in_log(log, tree_one, tree_two):
+#TODO: the function additional_gradual_drift_in_log is not used in the project
+def additional_gradual_drift_in_log(log:EventLog, tree_one:dict, tree_two:dict)->tuple:
     """ Including an additional gradual drift into an event log
-
-    :param log: event log including a drift
-    :param tree_one: predecessor version of the process tree version tree_two
-    :param tree_two: evolved tree version
-    :return: event log with an additional gradual drift
+    :param log(EventLog): event log including a drift
+    :param tree_one(dict): predecessor version of the process tree version tree_two
+    :param tree_two(dict): evolved tree version
+    :return(Tuples[EventLog,dict]): event log with an additional gradual drift
     """
     add_end = input_end("Adding the additional gradual drift at the end of the log or into the log [end, into]? ")
     dr_s = "drift perspective: control-flow; drift type: gradual; drift specific information: "
@@ -282,11 +289,11 @@ def additional_gradual_drift_in_log(log, tree_one, tree_two):
     return result, drift_data
 
 
-def get_rest_parameter(nu_traces, distribute_type):
-    """ Calculation of the best parameters for the gradual drift.
-
-    :param nu_traces: number of traces to be distributed
-    :param distribute_type: mathematical type of distribution
+#Todo: complete the definition of get_rest_parameter
+def get_rest_parameter(nu_traces:int, distribute_type:str)->tuple:
+    """ Calculation of the best parameters for the gradual drift
+    :param nu_traces(int): number of traces to be distributed
+    :param distribute_type(str): mathematical type of distribution
     :return:
     """
     rests_one = []

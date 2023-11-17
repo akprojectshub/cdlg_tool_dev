@@ -5,6 +5,7 @@ from collections import defaultdict
 import pandas as pd
 import pm4py
 import copy
+from pm4py.objects.log.obj import EventLog
 
 from src.utilities import InfoTypes
 from src.data_classes.class_drift import DriftInfo
@@ -13,16 +14,17 @@ from src.utilities import TraceAttributes
 import datetime
 import re
 import pandas as pd
-from src.data_classes.util import extract_list_from_string
-from src.data_classes.param_names import Log_attr_params
+from src.utilities import extract_list_from_string
+from src.utilities import remove_duplicates
 
-
-#TODO:start explanation always in a capital letter
+from src.utilities import Log_attr_params
 
 @dataclass
 class Collection:
     """
-    Object for keeping information about added drift and noise instances for a generated event log collection
+    Object for keeping information about added drift and noise instances for a generated event log collection. This class
+    allows to parse through a collection of logs (set of log or csv file with log information) and to extract and store all
+    the drfit and noise instances from the logs in list and csv files
     """
 
     drifts: list = field(default_factory=list)
@@ -48,7 +50,7 @@ class Collection:
     def increase_drift_count(self):
         self.number_of_drifts += 1
 
-    def increase_drift_count_from_xes(self, list_drift_per_log):
+    def increase_drift_count_from_xes(self, list_drift_per_log:list):
         self.number_of_drifts += len(list_drift_per_log)
 
     def increase_noise_count(self):
@@ -58,11 +60,11 @@ class Collection:
         # This method is used to store the dictionary with log attribute levels in the log (xes file)
         param_drift = vars(DriftInfo)
 
-    def extract_drift_info_from_log(self, log, log_name):
-        """Generates a drift instance from a log file
-                  Args:
-                      log(<class 'pm4py.objects.log.obj.EventLog'>): stores a log
-                      log_name(str): The name of the log
+    def extract_drift_info_from_log(self, log:EventLog, log_name:str):
+        """
+        Generates a drift instance from a log file
+        :param log(EventLog): stores a log
+        :param log_name(str): contains the name of a log
         """
         drift_info_list = []
         for k in list(log.attributes[Log_attr_params.drift_info][
@@ -113,10 +115,10 @@ class Collection:
         # extract info xes should return an istance of the class drift_info
         # the variable drifts later on should return contain list of drifts class instances
 
-    def extract_noise_info_from_log(self, log):
-        """generates a noise instance from a log file
-            Args:
-            log(<class 'pm4py.objects.log.obj.EventLog'>): stores a log
+    def extract_noise_info_from_log(self, log:EventLog):
+        """
+        Generates a noise instance from a log file
+        :param log(EventLog): Stores a log
         """
         NI = NoiseInfo()
         for attr, val in log.attributes["noise:info"]["children"].items():
@@ -131,6 +133,10 @@ class Collection:
 
     @staticmethod
     def load_log_names_and_paths(path:str):
+        """
+        Loads all the log names and paths of the log files in a folder
+        :param path(str):contains the path of a folder that contains a collection of logs
+        """
         """Loads
             Args:
                 path(str):
@@ -152,10 +158,10 @@ class Collection:
             log = pm4py.read_xes(os.path.join(log_folder, log_name))
             self.extract_drift_info_from_log(log, log_name)
 
-    def import_drift_and_noise_info_from_flat_file_csv(self, path):
-        """generate a collection of logs from a csv file storing log information
-            Args:
-                path(str): path to a csv file
+    def import_drift_and_noise_info_from_flat_file_csv(self, path:str):
+        """
+        Generate a collection of logs from a csv file storing log information
+        :param path(str): a path to a csv file
         """
         df = pd.read_csv(path, sep=";")
 
@@ -259,11 +265,13 @@ class Collection:
 
         return None
 
-    def export_drift_and_noise_info_to_flat_file_csv(self, path):
-        """generate a csv file that stores the data of a set of logs
-            Args:
-                path(str): path to a location where the csv file should be stored
+
+    def export_drift_and_noise_info_to_flat_file_csv(self, path:str):
         """
+        Generate a csv file that stores the data of a set of logs
+        :param path(str): Path to a location where the resutling csv file should be stored
+        """
+
         dict_nested = dict()
         for drift in self.drifts:
             for attr_key, attr_value in vars(drift).items():
@@ -300,7 +308,13 @@ class Collection:
         df.to_csv(f"{path}/drift_info.csv", index=False, sep=';')
         return None
 
-    def convert_change_trace_index_into_timestamp(self, event_log, log_name):
+
+    def convert_change_trace_index_into_timestamp(self, event_log:EventLog, log_name:str):
+        """
+        Extract the change timestamps from a log
+        :param event_log(EventLog): Stores log data
+        :param log_name(str): Stores the log's name
+        """
         for drift in self.drifts:
             if drift.log_id == log_name:
                 change_info_new = deepcopy(drift.change_info)
@@ -321,7 +335,13 @@ class Collection:
                 drift.change_info = change_info_new
         return None
 
-    def add_drift_info_to_log(self, event_log, log_name):
+    def add_drift_info_to_log(self, event_log:EventLog, log_name:str)->EventLog:
+        """
+
+        :param event_log(EventLog): Initial event log without drift
+        :param log_name(str): Name of an event log
+        :return(EventLog): Return a modified version of the event log that contains drifts
+        """
         output_dict_all_drifts = {'value': 'temp', 'children': {}}
         for drift in self.drifts:
             if drift.log_id == log_name:
@@ -348,14 +368,6 @@ class Collection:
         return event_log
 
 
-def remove_duplicates(strings:list):
-    seen = set()
-    result = []
-    for string in strings:
-        if string not in seen:
-            seen.add(string)
-            result.append(string)
-    return result
 
 
 
