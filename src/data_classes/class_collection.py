@@ -269,7 +269,7 @@ class Collection:
     def export_drift_and_noise_info_to_flat_file_csv(self, path:str):
         """
         Generate a csv file that stores the data of a set of logs
-        :param path(str): Path to a location where the resutling csv file should be stored
+        :param path(str): Path to a location where the resulting csv file should be stored
         """
 
         dict_nested = dict()
